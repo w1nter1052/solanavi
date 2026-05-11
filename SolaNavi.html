@@ -454,6 +454,34 @@ body{font-family:'Pretendard',-apple-system,'Noto Sans KR',sans-serif;background
   .doc-grid{grid-template-columns:1fr}
   .card{padding:12px 12px}
   .ch{font-size:13px}
+
+  /* 워터마크 — 본문 안 겹치게 */
+  .watermark{bottom:8px;right:8px;font-size:9px;opacity:.6}
+
+  /* 회의록·서류작업 2단 → 1단 */
+  #sec-minutes .two,#sec-workdocs .two,#sec-law .two,#sec-chat .two{grid-template-columns:1fr !important}
+
+  /* 탭바 활성 탭 강조 */
+  .tab.active{background:rgba(245,166,35,.15) !important;font-weight:700 !important;color:var(--sun-d) !important;border-bottom:2.5px solid var(--sun) !important}
+
+  /* 챗 입력창 키보드 대응 */
+  .chat-input-row{position:sticky;bottom:0;z-index:100}
+
+  /* 터치 영역 최소 44px */
+  .check-box{width:24px !important;height:24px !important;min-width:24px !important}
+  .check-item{padding:8px 4px !important;cursor:pointer}
+
+  /* 버튼 텍스트 줄바꿈 방지 */
+  .btn{white-space:nowrap;font-size:12px !important}
+
+  /* API 키 상태 표시 크게 */
+  #hdr .btn{min-height:36px !important;font-size:12px !important}
+
+  /* 수익계산기 슬라이더 터치 최적화 */
+  .calc-input-wrap input[type=range]{height:36px}
+
+  /* 업무도우미 헤더 모바일 */
+  #hdr{flex-wrap:wrap;gap:4px;height:auto !important;padding:6px 10px !important}
 }
 
 /* ── CARD ── */
@@ -719,7 +747,7 @@ textarea{resize:vertical;line-height:1.7}
 .free-lock-msg h3{font-size:16px;font-weight:700;color:#fff}
 .free-lock-msg p{font-size:13px;color:#5A5A5A;line-height:1.7;max-width:280px}
 
-.watermark{position:fixed;bottom:14px;right:18px;font-size:11px;color:#ECEAE4;pointer-events:none;z-index:10000;user-select:none;letter-spacing:.08em}
+.watermark{position:fixed;bottom:14px;right:18px;font-size:11px;color:#ECEAE4;pointer-events:none;z-index:99;user-select:none;letter-spacing:.08em}
 
 #upgrade-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.08);z-index:5000;align-items:center;justify-content:center;padding:20px}
 #upgrade-modal.show{display:flex}
@@ -802,6 +830,111 @@ input,textarea,button,a,.btn,.ni,.nc,.step-card,.doc-btn,.wz{-webkit-user-select
 </style>
 </head>
 <body>
+<script>
+// ═══════════════════════════════════════════════════════
+// SolaNavi Cloud Sync — Supabase 연동 v1.0
+// 효상님: 아래 두 줄을 Supabase 콘솔 값으로 교체하세요
+// Supabase > Settings > API 에서 복사
+// ═══════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://bwrxwoqugryworgrzhut.supabase.co';      // 예: https://abcdef.supabase.co
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cnh3b3F1Z3J5d29yZ3J6aHV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NzYwNTgsImV4cCI6MjA5NDA1MjA1OH0.jjvcqy3_13obOTiId5UO1Nie9xLtEcCQaj2OqfJheCc'; // anon public key
+
+const CLOUD_ENABLED = SUPABASE_URL !== 'YOUR_SUPABASE_URL';
+
+const SB = {
+  async req(method, path, body) {
+    if (!CLOUD_ENABLED) return null;
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+        method,
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': method === 'POST' ? 'resolution=merge-duplicates' : '',
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      if (!r.ok) { console.warn('[SolaNavi Cloud]', await r.text()); return null; }
+      return method === 'GET' ? await r.json() : true;
+    } catch(e) { console.warn('[SolaNavi Cloud]', e.message); return null; }
+  },
+  get: (p) => SB.req('GET', p),
+  upsert: (t, d) => SB.req('POST', t, d),
+};
+
+const CloudSync = {
+  userId() {
+    return (typeof MH !== 'undefined' && MH.key)
+      ? 'u_' + MH.key.replace(/[^A-Z0-9]/g,'').toLowerCase()
+      : null;
+  },
+
+  async pushVillages(vList) {
+    const uid = this.userId();
+    if (!uid || !CLOUD_ENABLED) return;
+    await SB.upsert('villages', {
+      user_id: uid,
+      data: JSON.stringify(vList),
+      updated_at: new Date().toISOString(),
+    });
+  },
+
+  async pullVillages() {
+    const uid = this.userId();
+    if (!uid || !CLOUD_ENABLED) return null;
+    const rows = await SB.get('villages?user_id=eq.' + uid + '&select=data,updated_at');
+    if (!rows || !rows.length) return null;
+    try { return JSON.parse(rows[0].data); } catch(e) { return null; }
+  },
+
+  async syncOnLogin() {
+    if (!CLOUD_ENABLED) return;
+    try {
+      if (typeof showToast === 'function') showToast('🔄 클라우드 동기화 중...', 2000);
+      const remote = await this.pullVillages();
+      const local  = JSON.parse(localStorage.getItem('hsv_villages') || '[]');
+
+      if (!remote) {
+        if (local.length > 0) await this.pushVillages(local);
+        if (typeof showToast === 'function') showToast('☁ 클라우드에 저장 완료', 2000);
+        return;
+      }
+
+      // id 기준 병합 (양쪽 모두 보존)
+      const map = {};
+      [...remote, ...local].forEach(v => { if(v && v.id) map[v.id] = v; });
+      const merged = Object.values(map);
+
+      // 플랜 한도 적용
+      const limits = { free: 1, basic: 5, pro: Infinity };
+      const lim = (typeof MH !== 'undefined') ? (limits[MH.plan] || 1) : 1;
+      const final = lim === Infinity ? merged : merged.slice(0, lim);
+
+      localStorage.setItem('hsv_villages', JSON.stringify(final));
+      if (typeof villages !== 'undefined') villages = final;
+      await this.pushVillages(final);
+      if (typeof refreshAllVillageDependents === 'function') refreshAllVillageDependents();
+      if (typeof showToast === 'function') showToast('✅ 동기화 완료 — ' + final.length + '개 마을', 2500);
+    } catch(e) {
+      if (typeof showToast === 'function') showToast('⚠ 동기화 실패 · 로컬 데이터 사용 중', 3000);
+    }
+  },
+
+  async autoSave() {
+    if (!CLOUD_ENABLED) return;
+    const vList = JSON.parse(localStorage.getItem('hsv_villages') || '[]');
+    await this.pushVillages(vList);
+  },
+};
+
+// 마을 저장될 때마다 자동으로 클라우드에 올림
+const _origSet = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(k, v) {
+  _origSet(k, v);
+  if (k === 'hsv_villages') setTimeout(() => CloudSync.autoSave(), 400);
+};
+</script>
 
 <!-- ══ 로그인 화면 ══ -->
 <div id="login-screen">
@@ -1811,10 +1944,10 @@ input,textarea,button,a,.btn,.ni,.nc,.step-card,.doc-btn,.wz{-webkit-user-select
           <div class="info-row"><label class="info-label">마을명 (행정리)</label><input id="vi-name" class="info-input" placeholder="예: 해남군 북일면 OO리" oninput="saveVillageInfo()"></div>
           <div class="info-row"><label class="info-label">마을 소재지 (전체주소)</label><input id="vi-addr" class="info-input" placeholder="전라남도 OO군 OO면 OO리" oninput="saveVillageInfo()"></div>
           <div class="info-row"><label class="info-label">행정구역 코드</label><input id="vi-code" class="info-input" placeholder="예: 전남 해남군 북일면" oninput="saveVillageInfo()"></div>
-          <div class="info-row"><label class="info-label">총 가구수</label><input id="vi-households" class="info-input" type="number" placeholder="가구" oninput="saveVillageInfo()"></div>
-          <div class="info-row"><label class="info-label">총 주민수 (등록)</label><input id="vi-pop" class="info-input" type="number" placeholder="명" oninput="saveVillageInfo()"></div>
-          <div class="info-row"><label class="info-label">실거주 인원 (추정)</label><input id="vi-actual" class="info-input" type="number" placeholder="명" oninput="saveVillageInfo()"></div>
-          <div class="info-row"><label class="info-label">65세 이상 고령자수</label><input id="vi-elder" class="info-input" type="number" placeholder="명" oninput="saveVillageInfo()"></div>
+          <div class="info-row"><label class="info-label">총 가구수</label><input id="vi-households" class="info-input" type="number" inputmode="numeric" placeholder="가구" oninput="saveVillageInfo()"></div>
+          <div class="info-row"><label class="info-label">총 주민수 (등록)</label><input id="vi-pop" class="info-input" type="number" inputmode="numeric" placeholder="명" oninput="saveVillageInfo()"></div>
+          <div class="info-row"><label class="info-label">실거주 인원 (추정)</label><input id="vi-actual" class="info-input" type="number" inputmode="numeric" placeholder="명" oninput="saveVillageInfo()"></div>
+          <div class="info-row"><label class="info-label">65세 이상 고령자수</label><input id="vi-elder" class="info-input" type="number" inputmode="numeric" placeholder="명" oninput="saveVillageInfo()"></div>
           <div class="info-row"><label class="info-label">주요 소득원</label>
             <select id="vi-income" class="info-input" oninput="saveVillageInfo()">
               <option value="">-- 선택 --</option>
@@ -1995,7 +2128,7 @@ input,textarea,button,a,.btn,.ni,.nc,.step-card,.doc-btn,.wz{-webkit-user-select
             <tr style="background:var(--grn-l)"><th style="padding:5px 8px;text-align:left;border-bottom:1px solid var(--bdr)">확인 항목</th><th style="padding:5px 8px;text-align:center;border-bottom:1px solid var(--bdr);width:60px">결과</th></tr>
             <tr><td style="padding:6px 8px;border-bottom:1px solid var(--bdr)">주민등록 전입 기준일: 2026.3.31</td><td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--bdr)"><input type="text" id="sv-base-date" style="width:50px;border:1px solid var(--bdr);border-radius:4px;padding:2px 5px;font-size:11px;text-align:center" placeholder="확인" oninput="saveSurvey()"></td></tr>
             <tr><td style="padding:6px 8px;border-bottom:1px solid var(--bdr)">조합원 자격: 1년 이상 거주 18세 이상</td><td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--bdr)"><select style="width:54px;border:1px solid var(--bdr);border-radius:4px;padding:2px 3px;font-size:11px" id="sv-age-ok" onchange="saveSurvey()"><option>?</option><option>✅</option><option>⚠️</option></select></td></tr>
-            <tr><td style="padding:6px 8px;border-bottom:1px solid var(--bdr)">자격 주민 수 (추정)</td><td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--bdr)"><input type="number" id="sv-eligible" style="width:50px;border:1px solid var(--bdr);border-radius:4px;padding:2px 5px;font-size:11px;text-align:center" placeholder="명" oninput="saveSurvey()"></td></tr>
+            <tr><td style="padding:6px 8px;border-bottom:1px solid var(--bdr)">자격 주민 수 (추정)</td><td style="padding:6px 8px;text-align:center;border-bottom:1px solid var(--bdr)"><input type="number" inputmode="numeric" id="sv-eligible" style="width:50px;border:1px solid var(--bdr);border-radius:4px;padding:2px 5px;font-size:11px;text-align:center" placeholder="명" oninput="saveSurvey()"></td></tr>
             <tr><td style="padding:6px 8px">70% 동의 목표 인원</td><td style="padding:6px 8px;text-align:center"><span id="sv-target-70" style="font-size:12px;font-weight:700;color:var(--red)">계산 중</span></td></tr>
           </table>
         </div>
@@ -5343,9 +5476,9 @@ input,textarea,button,a,.btn,.ni,.nc,.step-card,.doc-btn,.wz{-webkit-user-select
           <div class="field"><label>마을명 (행정리)</label><input type="text" id="bp-name" placeholder="예: 해남군 북일면 OO리"></div>
           <div class="field"><label>협동조합명</label><input type="text" id="bp-coop" placeholder="OO마을 햇빛소득 협동조합"></div>
           <div class="field"><label>이사장 성명</label><input type="text" id="bp-chief" placeholder="홍길동"></div>
-          <div class="field"><label>총 주민수 (명)</label><input type="number" id="bp-pop" placeholder="68"></div>
-          <div class="field"><label>조합원 수 (명)</label><input type="number" id="bp-members" placeholder="23"></div>
-          <div class="field"><label>주민동의율 (%)</label><input type="number" id="bp-agree" placeholder="78"></div>
+          <div class="field"><label>총 주민수 (명)</label><input type="number" inputmode="numeric" id="bp-pop" placeholder="68"></div>
+          <div class="field"><label>조합원 수 (명)</label><input type="number" inputmode="numeric" id="bp-members" placeholder="23"></div>
+          <div class="field"><label>주민동의율 (%)</label><input type="number" inputmode="numeric" id="bp-agree" placeholder="78"></div>
           <div class="field"><label>설치 용량</label>
             <select id="bp-kw"><option value="300">300kW</option><option value="500" selected>500kW</option><option value="700">700kW</option><option value="1000">1,000kW</option></select>
           </div>
@@ -5355,7 +5488,7 @@ input,textarea,button,a,.btn,.ni,.nc,.step-card,.doc-btn,.wz{-webkit-user-select
           <div class="field"><label>계통연계</label>
             <select id="bp-grid"><option>계통연계 가능</option><option>ESS 설치 예정</option><option>확인 중</option></select>
           </div>
-          <div class="field"><label>총 설치비 (백만원)</label><input type="number" id="bp-cost" placeholder="900"></div>
+          <div class="field"><label>총 설치비 (백만원)</label><input type="number" inputmode="numeric" id="bp-cost" placeholder="900"></div>
           <div class="field"><label>자부담 확보 방법</label><input type="text" id="bp-selfpay" placeholder="예: 마을기금 1억원"></div>
           <div class="field"><label>모듈 (저탄소)</label><input type="text" id="bp-module" placeholder="예: 한화큐셀 QPeak"></div>
           <div class="field"><label>인버터 (KS인증)</label><input type="text" id="bp-inverter" placeholder="예: SMA STP50-40"></div>
@@ -5532,7 +5665,7 @@ input,textarea,button,a,.btn,.ni,.nc,.step-card,.doc-btn,.wz{-webkit-user-select
           </div>
           <div class="field"><label>회의 장소</label><input type="text" id="min-place" placeholder="예: OO리 마을회관"></div>
           <div class="f2">
-            <div class="field"><label>참석 인원</label><input type="number" id="min-count" placeholder="명"></div>
+            <div class="field"><label>참석 인원</label><input type="number" inputmode="numeric" id="min-count" placeholder="명"></div>
             <div class="field"><label>회의 유형</label>
               <select id="min-type">
                 <option>일반 회의록</option>
@@ -5637,18 +5770,18 @@ input,textarea,button,a,.btn,.ni,.nc,.step-card,.doc-btn,.wz{-webkit-user-select
           </div>
         </div>
         <div class="f2">
-          <div class="field"><label>SMP 단가 (원/kWh)</label><input type="number" id="rv-smp" value="109.8"></div>
-          <div class="field"><label>REC 단가 (원/MWh)</label><input type="number" id="rv-rec" value="70356"></div>
+          <div class="field"><label>SMP 단가 (원/kWh)</label><input type="number" inputmode="numeric" id="rv-smp" value="109.8"></div>
+          <div class="field"><label>REC 단가 (원/MWh)</label><input type="number" inputmode="numeric" id="rv-rec" value="70356"></div>
         </div>
         <div class="f2">
           <div class="field"><label>REC 가중치</label>
             <select id="rv-weight"><option value="1.0">1.0 (기본)</option><option value="1.2" selected>1.2 (+0.2 주민참여)</option><option value="1.5">1.5 (ESS 연계)</option></select>
           </div>
-          <div class="field"><label>융자 비율 (%)</label><input type="number" id="rv-loan" value="85"></div>
+          <div class="field"><label>융자 비율 (%)</label><input type="number" inputmode="numeric" id="rv-loan" value="85"></div>
         </div>
         <div class="f2">
-          <div class="field"><label>마을 가구수</label><input type="number" id="rv-house" placeholder="68"></div>
-          <div class="field"><label>마을귀속 비율 (%)</label><input type="number" id="rv-share" value="80"></div>
+          <div class="field"><label>마을 가구수</label><input type="number" inputmode="numeric" id="rv-house" placeholder="68"></div>
+          <div class="field"><label>마을귀속 비율 (%)</label><input type="number" inputmode="numeric" id="rv-share" value="80"></div>
         </div>
         <button class="btn b-sun" onclick="calcRevenue()" style="width:100%;justify-content:center">📊 수익 계산</button>
         <div id="rv-result" style="display:none;margin-top:14px">
@@ -6066,9 +6199,9 @@ input,textarea,button,a,.btn,.ni,.nc,.step-card,.doc-btn,.wz{-webkit-user-select
           <div class="field"><label>담당 컨설턴트</label><input type="text" id="vm-consultant"></div>
         </div>
         <div class="f3">
-          <div class="field"><label>총 주민수</label><input type="number" id="vm-pop" placeholder="명"></div>
-          <div class="field"><label>총 가구수</label><input type="number" id="vm-house" placeholder="가구"></div>
-          <div class="field"><label>설치 목표 kW</label><input type="number" id="vm-kw" placeholder="500"></div>
+          <div class="field"><label>총 주민수</label><input type="number" inputmode="numeric" id="vm-pop" placeholder="명"></div>
+          <div class="field"><label>총 가구수</label><input type="number" inputmode="numeric" id="vm-house" placeholder="가구"></div>
+          <div class="field"><label>설치 목표 kW</label><input type="number" inputmode="numeric" id="vm-kw" placeholder="500"></div>
         </div>
         <div class="f2">
           <div class="field"><label>이장 성명</label><input type="text" id="vm-chief"></div>
@@ -6374,6 +6507,8 @@ function onLoginOK() {
   setTimeout(function(){if(typeof initReadiness==="function")initReadiness();if(typeof updateVillageCountLabel==="function")updateVillageCountLabel();},200);
   // 백업 알림 체크 (3일마다)
   setTimeout(function(){ checkBackupReminder(); }, 1500);
+  // 클라우드 동기화
+  setTimeout(function(){ CloudSync.syncOnLogin(); }, 900);
 }
 
 function checkBackupReminder() {
@@ -7415,7 +7550,7 @@ function renderSites() {
       + '<div><div style="font-size:11px;color:var(--sft);margin-bottom:3px">부지 소유자</div>'
       + '<input value="'+s.owner+'" onchange="updateSite('+s.id+',\'owner\',this.value)" placeholder="예: 홍길동 / 마을공유" style="width:100%;border:1px solid var(--bdr);border-radius:5px;padding:5px 8px;font-size:12px;font-family:inherit"></div>'
       + '<div><div style="font-size:11px;color:var(--sft);margin-bottom:3px">용량 (kW)</div>'
-      + '<input type="number" value="'+s.kw+'" onchange="updateSite('+s.id+',\'kw\',this.value)" style="width:100%;border:1px solid var(--bdr);border-radius:5px;padding:5px 8px;font-size:12px;font-family:inherit"></div>'
+      + '<input type="number" inputmode="numeric" value="'+s.kw+'" onchange="updateSite('+s.id+',\'kw\',this.value)" style="width:100%;border:1px solid var(--bdr);border-radius:5px;padding:5px 8px;font-size:12px;font-family:inherit"></div>'
       + '</div>'
       + '<div style="display:flex;align-items:center;gap:16px">'
       + '<label style="font-size:12px;color:var(--mid);display:flex;align-items:center;gap:6px;cursor:pointer">'
@@ -9613,7 +9748,7 @@ const docTypes = {
     </div>
     <div class="f2"><div class="field"><label>마을명</label><input type="text" id="dc-village" placeholder="마을 선택 시 자동입력"></div><div class="field"><label>회의 일시</label><input type="date" id="dc-date"></div></div>
     <div class="field"><label>회의 장소</label><input type="text" id="dc-place" placeholder="예: OO리 마을회관"></div>
-    <div class="f2"><div class="field"><label>참석 인원 수</label><input type="number" id="dc-count" placeholder="명"></div><div class="field"><label>회의 주제</label><input type="text" id="dc-topic" placeholder="예: 햇빛소득마을 사업 추진 논의"></div></div>
+    <div class="f2"><div class="field"><label>참석 인원 수</label><input type="number" inputmode="numeric" id="dc-count" placeholder="명"></div><div class="field"><label>회의 주제</label><input type="text" id="dc-topic" placeholder="예: 햇빛소득마을 사업 추진 논의"></div></div>
     <div class="field"><label>논의 내용 <span style="font-size:11px;color:var(--mu)">(파일 업로드 시 자동 채움)</span></label><textarea id="dc-content" rows="6" placeholder="회의 녹음본 텍스트를 직접 붙여넣거나 주요 발언·결정사항을 입력하세요"></textarea></div>
     <div class="brow"><button class="btn b-sun" onclick="genDoc('minutes')">📝 회의록 생성</button></div>`,
   },
@@ -9625,9 +9760,9 @@ const docTypes = {
       <div id="dc-file-status" style="font-size:11px;color:var(--mu);margin-top:4px"></div>
     </div>
     <div class="f2"><div class="field"><label>마을명</label><input type="text" id="dc-village" placeholder="마을 선택 시 자동입력"></div><div class="field"><label>총회 일시</label><input type="date" id="dc-date"></div></div>
-    <div class="f2"><div class="field"><label>총 주민수</label><input type="number" id="dc-total" placeholder="마을 선택 시 자동입력"></div><div class="field"><label>참석 주민수</label><input type="number" id="dc-attend" placeholder="명"></div></div>
+    <div class="f2"><div class="field"><label>총 주민수</label><input type="number" inputmode="numeric" id="dc-total" placeholder="마을 선택 시 자동입력"></div><div class="field"><label>참석 주민수</label><input type="number" inputmode="numeric" id="dc-attend" placeholder="명"></div></div>
     <div class="field"><label>안건 <span style="font-size:11px;color:var(--mu)">(파일 업로드 시 자동 채움)</span></label><textarea id="dc-content" rows="4" placeholder="예: 1. 햇빛소득마을 사업 참여 결의\n2. 협동조합 설립 동의\n3. 이사장 선출"></textarea></div>
-    <div class="f2"><div class="field"><label>찬성 수</label><input type="number" id="dc-yes" placeholder="명"></div><div class="field"><label>반대/기권</label><input type="number" id="dc-no" placeholder="명"></div></div>
+    <div class="f2"><div class="field"><label>찬성 수</label><input type="number" inputmode="numeric" id="dc-yes" placeholder="명"></div><div class="field"><label>반대/기권</label><input type="number" inputmode="numeric" id="dc-no" placeholder="명"></div></div>
     <div class="brow"><button class="btn b-sun" onclick="genDoc('assembly')">🏛 총회 의사록 생성</button></div>`,
   },
   founding: {
@@ -9638,9 +9773,9 @@ const docTypes = {
       <div id="dc-file-status" style="font-size:11px;color:var(--mu);margin-top:4px"></div>
     </div>
     <div class="f2"><div class="field"><label>협동조합명</label><input type="text" id="dc-coop" placeholder="마을 선택 시 자동입력"></div><div class="field"><label>개최 일시</label><input type="date" id="dc-date"></div></div>
-    <div class="f3"><div class="field"><label>발기인 총수</label><input type="number" id="dc-founders" placeholder="명"></div><div class="field"><label>출석 발기인</label><input type="number" id="dc-attend" placeholder="명"></div><div class="field"><label>이사장 성명</label><input type="text" id="dc-chief" placeholder="마을 선택 시 자동입력"></div></div>
+    <div class="f3"><div class="field"><label>발기인 총수</label><input type="number" inputmode="numeric" id="dc-founders" placeholder="명"></div><div class="field"><label>출석 발기인</label><input type="number" inputmode="numeric" id="dc-attend" placeholder="명"></div><div class="field"><label>이사장 성명</label><input type="text" id="dc-chief" placeholder="마을 선택 시 자동입력"></div></div>
     <div class="field"><label>의결 안건</label><textarea id="dc-content" rows="4" placeholder="1. 정관 채택\n2. 임원 선출 (이사장·이사·감사)\n3. 사업계획·예산 승인\n4. 출자금 납입 결의"></textarea></div>
-    <div class="f2"><div class="field"><label>1좌 금액 (원)</label><input type="number" id="dc-share" placeholder="100000"></div><div class="field"><label>출자 납입기한</label><input type="date" id="dc-paydate"></div></div>
+    <div class="f2"><div class="field"><label>1좌 금액 (원)</label><input type="number" inputmode="numeric" id="dc-share" placeholder="100000"></div><div class="field"><label>출자 납입기한</label><input type="date" id="dc-paydate"></div></div>
     <div class="brow"><button class="btn b-sun" onclick="genDoc('founding')">🤝 창립총회 의사록 생성</button></div>`,
   },
   report: {
@@ -9690,11 +9825,11 @@ const docTypes = {
     fields: `<div class="ib grn" style="margin-bottom:10px"><span>📋</span><div><strong>협동조합기본법 시행규칙 별지 제4호서식</strong> — 설립신고 시 시·도지사에게 제출하는 사업계획서입니다. 서식3(햇빛소득마을 공모용)과 <strong>다른 문서</strong>입니다.</div></div>
     <div class="f2"><div class="field"><label>협동조합명</label><input type="text" id="dc-coop" placeholder="마을 선택 시 자동입력"></div><div class="field"><label>업종</label><input type="text" id="cbp-industry" placeholder="예: 태양광 발전업, 재생에너지 사업"></div></div>
     <div class="field"><label>주된 사무소 소재지</label><input type="text" id="cbp-address" placeholder="예: 전라남도 해남군 북일면 OO리 123"></div>
-    <div class="f2"><div class="field"><label>이사장 성명</label><input type="text" id="dc-chief" placeholder="마을 선택 시 자동입력"></div><div class="field"><label>조합원 수 (명)</label><input type="number" id="cbp-members" placeholder="예: 23"></div></div>
-    <div class="f2"><div class="field"><label>출자 1좌 금액 (원)</label><input type="number" id="cbp-share" placeholder="예: 100000"></div><div class="field"><label>1인당 출자 좌수</label><input type="number" id="cbp-lot" placeholder="예: 10"></div></div>
+    <div class="f2"><div class="field"><label>이사장 성명</label><input type="text" id="dc-chief" placeholder="마을 선택 시 자동입력"></div><div class="field"><label>조합원 수 (명)</label><input type="number" inputmode="numeric" id="cbp-members" placeholder="예: 23"></div></div>
+    <div class="f2"><div class="field"><label>출자 1좌 금액 (원)</label><input type="number" inputmode="numeric" id="cbp-share" placeholder="예: 100000"></div><div class="field"><label>1인당 출자 좌수</label><input type="number" inputmode="numeric" id="cbp-lot" placeholder="예: 10"></div></div>
     <div class="field"><label>주요 사업 내용</label><textarea id="cbp-biz" rows="2" placeholder="예: 태양광 발전설비 설치·운영 및 전력판매, 재생에너지 관련 교육·컨설팅, 마을기금 운용 및 주민 복지 사업"></textarea></div>
     <div class="f2"><div class="field"><label>사업 개시 예정일</label><input type="date" id="cbp-startdate"></div><div class="field"><label>회계연도</label><input type="text" id="cbp-fiscal" value="1월 1일 ~ 12월 31일"></div></div>
-    <div class="field"><label>1차년도 수입 예산 (백만원, 추정)</label><input type="number" id="cbp-income" placeholder="예: 50 (발전 수익 추정치)"></div>
+    <div class="field"><label>1차년도 수입 예산 (백만원, 추정)</label><input type="number" inputmode="numeric" id="cbp-income" placeholder="예: 50 (발전 수익 추정치)"></div>
     <div class="field"><label>1차년도 지출 예산 주요 항목</label><textarea id="cbp-expense" rows="2" placeholder="예: 운영비 5백만원, 인건비 10백만원, 설비 유지관리비 3백만원, 법정적립금 5백만원"></textarea></div>
     <div class="brow"><button class="btn b-grn" style="flex:1;justify-content:center;font-size:13px" onclick="genDoc('coop_bizplan')">📋 협동조합 설립 사업계획서 생성</button></div>`,
   },
@@ -10117,20 +10252,20 @@ const lawTypes = {
   },
   permit: {
     title: '🏗 발전사업허가 체크',
-    form: `<div class="f2"><div class="field"><label>설치 용량 (kW)</label><input type="number" id="lw-kw" placeholder="500"></div><div class="field"><label>설치 형태</label><select id="lw-type"><option>지상형</option><option>건물형</option><option>수상형</option></select></div></div>
+    form: `<div class="f2"><div class="field"><label>설치 용량 (kW)</label><input type="number" inputmode="numeric" id="lw-kw" placeholder="500"></div><div class="field"><label>설치 형태</label><select id="lw-type"><option>지상형</option><option>건물형</option><option>수상형</option></select></div></div>
     <div class="field"><label>현재 진행 상황</label><select id="lw-status"><option>허가 전 (계획 중)</option><option>허가 신청 예정</option><option>허가 신청 완료</option><option>허가 취득 완료</option></select></div>
     <div class="field"><label>선정일 (알 경우)</label><input type="date" id="lw-date"></div>
     <div class="field"><label>특이사항</label><textarea id="lw-detail" rows="2" placeholder="환경영향평가 대상 여부, 군사시설보호구역 여부 등"></textarea></div>`,
   },
   devact: {
     title: '🌿 개발행위허가 분석',
-    form: `<div class="f2"><div class="field"><label>부지 지목</label><select id="lw-jmok"><option>잡종지</option><option>답(논)</option><option>전(밭)</option><option>임야</option><option>대지</option><option>기타</option></select></div><div class="field"><label>부지 면적 (㎡)</label><input type="number" id="lw-area" placeholder="3000"></div></div>
+    form: `<div class="f2"><div class="field"><label>부지 지목</label><select id="lw-jmok"><option>잡종지</option><option>답(논)</option><option>전(밭)</option><option>임야</option><option>대지</option><option>기타</option></select></div><div class="field"><label>부지 면적 (㎡)</label><input type="number" inputmode="numeric" id="lw-area" placeholder="3000"></div></div>
     <div class="field"><label>농업진흥구역 여부</label><select id="lw-agri"><option>해당 없음</option><option>농업진흥구역 내</option><option>농업보호구역 내</option><option>확인 필요</option></select></div>
     <div class="field"><label>기타 제한구역</label><textarea id="lw-detail" rows="2" placeholder="군사시설보호구역, 문화재보호구역, 수계구역 등"></textarea></div>`,
   },
   agri: {
     title: '🌾 농지전용 분석',
-    form: `<div class="f2"><div class="field"><label>부지 면적 (㎡)</label><input type="number" id="lw-area" placeholder="3000"></div><div class="field"><label>지목</label><select id="lw-jmok"><option>답(논)</option><option>전(밭)</option><option>과수원</option><option>목장용지</option></select></div></div>
+    form: `<div class="f2"><div class="field"><label>부지 면적 (㎡)</label><input type="number" inputmode="numeric" id="lw-area" placeholder="3000"></div><div class="field"><label>지목</label><select id="lw-jmok"><option>답(논)</option><option>전(밭)</option><option>과수원</option><option>목장용지</option></select></div></div>
     <div class="field"><label>농업진흥구역 여부</label><select id="lw-agri"><option>진흥구역 외</option><option>농업진흥구역 내</option><option>농업보호구역 내</option></select></div>
     <div class="field"><label>추가 상황</label><textarea id="lw-detail" rows="2" placeholder="기존 농업 활용 현황, 공공기관 부지 여부 등"></textarea></div>`,
   },
@@ -10140,12 +10275,12 @@ const lawTypes = {
   },
   elec: {
     title: '⚡ 전기사업법 검토',
-    form: `<div class="f2"><div class="field"><label>설치 용량</label><input type="number" id="lw-kw" placeholder="500"></div><div class="field"><label>사업 단계</label><select id="lw-status"><option>발전사업허가 전</option><option>허가 신청 단계</option><option>공사계획인가 단계</option><option>사용전검사 단계</option></select></div></div>
+    form: `<div class="f2"><div class="field"><label>설치 용량</label><input type="number" inputmode="numeric" id="lw-kw" placeholder="500"></div><div class="field"><label>사업 단계</label><select id="lw-status"><option>발전사업허가 전</option><option>허가 신청 단계</option><option>공사계획인가 단계</option><option>사용전검사 단계</option></select></div></div>
     <div class="field"><label>질문 사항</label><textarea id="lw-detail" rows="3" placeholder="예: 발전사업허가 후 12개월 이내 고정가격계약 못하면 어떻게 되나요?"></textarea></div>`,
   },
   land: {
     title: '🗺 토지·지목 분석',
-    form: `<div class="f3"><div class="field"><label>지목</label><input type="text" id="lw-jmok" placeholder="예: 잡종지"></div><div class="field"><label>면적 (㎡)</label><input type="number" id="lw-area" placeholder="3000"></div><div class="field"><label>소유자</label><select id="lw-owner"><option>개인(마을주민)</option><option>마을공동</option><option>국공유지</option><option>농어촌공사</option></select></div></div>
+    form: `<div class="f3"><div class="field"><label>지목</label><input type="text" id="lw-jmok" placeholder="예: 잡종지"></div><div class="field"><label>면적 (㎡)</label><input type="number" inputmode="numeric" id="lw-area" placeholder="3000"></div><div class="field"><label>소유자</label><select id="lw-owner"><option>개인(마을주민)</option><option>마을공동</option><option>국공유지</option><option>농어촌공사</option></select></div></div>
     <div class="field"><label>추가 정보 (주소, 특이사항)</label><textarea id="lw-detail" rows="3" placeholder="예: 전남 해남군 북일면 OO리 123번지, 기존 창고 있음, 진입로 있음"></textarea></div>`,
   },
   resc: {
