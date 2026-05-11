@@ -1052,6 +1052,369 @@ localStorage.setItem = function(k, v) {
   if (k === 'hsv_villages') setTimeout(() => CloudSync.autoSave(), 400);
 };
 
+// ─────────────────────────────────────────────────────────────
+// 구독 결제 흐름 — 플랜 비교 + 신청 폼 + 구독 상태 페이지
+// ─────────────────────────────────────────────────────────────
+const SOLA_PLANS = {
+  free: { name: '무료 체험', price: 0, unit: '', limit: 1, color: '#7F8C8D', feats: ['STEP 1 매뉴얼 열람','마을 1개 관리','준비도 체크리스트','자가진단·부실 조기경보 (제한)'] },
+  basic: { name: '개인 컨설턴트', price: 49000, unit: '원/월', limit: 5, color: '#2980B9', feats: ['전체 STEP 1~7 매뉴얼','AI 기능 전체 (Claude 키 BYOK)','마을 5개 관리','감사 로그 + Excel 내보내기','이메일 지원'] },
+  pro: { name: '프로 컨설턴트', price: 99000, unit: '원/월', limit: '무제한', color: '#E67E22', feats: ['개인 플랜 전체 포함','무제한 마을 관리','PRO 워크스페이스 (대시보드/AI상담)','시각 PDF + 인계인수 패키지','커뮤니티 + 우선 지원','월 1회 컨설턴트 멘토링'] },
+  agency: { name: '컨설팅사', price: 290000, unit: '원/월', limit: '무제한 + 팀', color: '#1A3A6B', feats: ['5인 팀 라이선스','무제한 마을 관리','팀 공유 대시보드','전담 지원 매니저','맞춤 교육 (월 1회)','API 연동 (선택)'] },
+};
+
+function openPlanCenter() {
+  var curPlan = (typeof MH !== 'undefined' && MH.plan) ? MH.plan : 'free';
+  var sub = JSON.parse(localStorage.getItem('hsv_subscription') || '{}');
+  var planCards = Object.keys(SOLA_PLANS).map(function(key){
+    var p = SOLA_PLANS[key];
+    var isCurrent = curPlan === key;
+    return '<div style="border:2px solid '+(isCurrent?p.color:'#ddd')+';border-radius:12px;padding:18px;background:'+(isCurrent?p.color+'10':'#fff');+';position:relative">'
+      + (isCurrent ? '<div style="position:absolute;top:-12px;left:14px;background:'+p.color+';color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px">현재 플랜</div>' : '')
+      + '<div style="font-size:13px;color:'+p.color+';font-weight:700;margin-bottom:4px">'+p.name+'</div>'
+      + '<div style="margin-bottom:8px"><span style="font-size:24px;font-weight:900;color:'+p.color+'">'+(p.price?p.price.toLocaleString():'0')+'</span><span style="font-size:12px;color:#666"> '+p.unit+'</span></div>'
+      + '<div style="font-size:11px;color:#888;margin-bottom:8px">마을 한도: <b>'+p.limit+'</b></div>'
+      + '<ul style="margin:0 0 12px;padding-left:18px;font-size:12px;line-height:1.8;color:#444">'+p.feats.map(function(f){return '<li>'+f+'</li>';}).join('')+'</ul>'
+      + (isCurrent ? '<button disabled style="width:100%;background:#eee;color:#888;border:none;border-radius:6px;padding:9px;font-size:12px;font-weight:700;cursor:not-allowed">현재 사용 중</button>'
+                   : '<button onclick="openSubscribeForm(\''+key+'\')" style="width:100%;background:'+p.color+';color:#fff;border:none;border-radius:6px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">'+ (key==='free'?'무료 시작':'신청하기')+'</button>')
+      + '</div>';
+  }).join('');
+
+  var subStatus = '';
+  if (sub.plan && sub.plan !== 'free') {
+    var startD = sub.start ? new Date(sub.start) : null;
+    var nextD = sub.nextBill ? new Date(sub.nextBill) : null;
+    var daysLeft = nextD ? Math.ceil((nextD - new Date()) / 86400000) : null;
+    subStatus = '<div style="background:#FFFBF0;border:1px solid #F5D793;border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;line-height:1.8;color:#5D4037">'
+      + '<b>📋 현재 구독 상태</b><br>'
+      + '플랜: <b>' + (SOLA_PLANS[sub.plan]||{name:sub.plan}).name + '</b><br>'
+      + (startD ? '시작일: ' + startD.toLocaleDateString('ko-KR') + '<br>' : '')
+      + (nextD ? '다음 결제일: <b>' + nextD.toLocaleDateString('ko-KR') + '</b>' + (daysLeft != null ? ' (D-' + Math.max(0, daysLeft) + ')' : '') + '<br>' : '')
+      + (sub.contact ? '담당자: ' + sub.contact + '<br>' : '')
+      + (sub.org ? '소속: ' + sub.org : '')
+      + '</div>';
+  }
+
+  var html = '<div id="plan-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:1000px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">💳 구독 플랜 센터</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">전국 컨설턴트·지자체용 솔라나비 구독 플랜 비교</div></div>'
+    + '<button onclick="document.getElementById(\'plan-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + subStatus
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:14px">' + planCards + '</div>'
+    + '<div style="background:#F5F5F5;padding:12px 16px;border-radius:8px;font-size:11.5px;color:#666;line-height:1.7">'
+    + '💡 <b>결제 안내</b>: 현재는 이메일 신청 기반 운영 중입니다. 신청하기 클릭 → 신청 폼 → 세금계산서·계좌이체 안내 → 발급 후 활성화 (영업일 기준 1일 내).<br>'
+    + '🔒 BYOK(Bring Your Own Key) — AI 기능은 사용자 본인의 Anthropic·OpenAI API 키를 안전하게 브라우저에 저장하여 사용합니다. 키는 서버로 전송되지 않습니다.'
+    + '</div>'
+    + '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'
+    + '<button onclick="document.getElementById(\'plan-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function openSubscribeForm(planKey) {
+  var p = SOLA_PLANS[planKey];
+  if (!p) return;
+  if (planKey === 'free') {
+    alert('무료 체험은 별도 신청 없이 바로 사용 가능합니다.\n로그인 후 즉시 STEP 1 매뉴얼·자가진단 등 이용해 보세요.');
+    return;
+  }
+  var existing = document.getElementById('plan-modal');
+  if (existing) existing.remove();
+  var html = '<div id="subscribe-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9001;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+    + '<div><h2 style="margin:0;color:'+p.color+'">📝 '+p.name+' 신청</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">월 '+p.price.toLocaleString()+'원 · 마을 한도 '+p.limit+'</div></div>'
+    + '<button onclick="document.getElementById(\'subscribe-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<form id="subscribe-form" onsubmit="event.preventDefault();submitSubscribe(\''+planKey+'\')">'
+    + '<div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px">담당자 이름 *</label><input id="sub-name" required style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit"></div>'
+    + '<div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px">소속 (회사·지자체·마을명)</label><input id="sub-org" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit"></div>'
+    + '<div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px">이메일 *</label><input id="sub-email" type="email" required style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit"></div>'
+    + '<div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px">연락처</label><input id="sub-tel" placeholder="010-0000-0000" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit"></div>'
+    + '<div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px">관리 예정 마을 수 / 사업 단계</label><input id="sub-villages" placeholder="예: 3개 마을, STEP1~3 진행 중" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit"></div>'
+    + '<div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px">결제 방식</label><select id="sub-pay" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit"><option value="invoice">세금계산서 + 계좌이체</option><option value="card">카드 결제 (담당자 안내)</option><option value="bank">계좌이체 (개인)</option></select></div>'
+    + '<div style="margin-bottom:14px"><label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px">메모 / 요청사항</label><textarea id="sub-memo" rows="2" placeholder="시작 희망일·세금계산서 발행 정보 등" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;resize:vertical"></textarea></div>'
+    + '<div style="background:#FFFBF0;padding:10px 14px;border-radius:8px;font-size:11.5px;color:#5D4037;margin-bottom:14px;line-height:1.7">신청 제출 시 입력하신 내용으로 이메일 작성 화면이 열립니다. 영업일 1일 내 발급 안내(계좌·세금계산서)가 회신됩니다.</div>'
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button type="button" onclick="document.getElementById(\'subscribe-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">취소</button>'
+    + '<button type="submit" style="background:'+p.color+';color:#fff;border:none;border-radius:6px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📧 신청 제출</button>'
+    + '</div></form></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function submitSubscribe(planKey) {
+  var p = SOLA_PLANS[planKey];
+  var name = (document.getElementById('sub-name')||{}).value || '';
+  var org = (document.getElementById('sub-org')||{}).value || '';
+  var email = (document.getElementById('sub-email')||{}).value || '';
+  var tel = (document.getElementById('sub-tel')||{}).value || '';
+  var vCount = (document.getElementById('sub-villages')||{}).value || '';
+  var pay = (document.getElementById('sub-pay')||{}).value || '';
+  var memo = (document.getElementById('sub-memo')||{}).value || '';
+  if (!name || !email) { alert('담당자 이름과 이메일은 필수입니다'); return; }
+  // 자체 저장 (희망 신청일·갱신 알림용)
+  try {
+    var pending = JSON.parse(localStorage.getItem('hsv_subscription_pending') || '{}');
+    pending = { plan: planKey, name, org, email, tel, vCount, pay, memo, submittedAt: new Date().toISOString() };
+    localStorage.setItem('hsv_subscription_pending', JSON.stringify(pending));
+  } catch(e){}
+  try { window.SolaNaviAudit.log('구독 신청', '플랜:'+p.name, null, { name, email, plan: planKey, pay }); } catch(e){}
+  var subject = '[SolaNavi 구독 신청] ' + p.name + ' · ' + (org || name);
+  var body = '안녕하세요. 솔라나비 ' + p.name + ' 플랜 신청합니다.\n\n'
+    + '■ 담당자: ' + name + '\n'
+    + '■ 소속: ' + org + '\n'
+    + '■ 이메일: ' + email + '\n'
+    + '■ 연락처: ' + tel + '\n'
+    + '■ 관리 마을: ' + vCount + '\n'
+    + '■ 결제 방식: ' + pay + '\n'
+    + '■ 메모: ' + memo + '\n\n'
+    + '월 ' + p.price.toLocaleString() + '원 · 마을 한도 ' + p.limit + '\n';
+  var mailto = 'mailto:sadad1052@naver.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  window.location.href = mailto;
+  var sm = document.getElementById('subscribe-modal'); if (sm) sm.remove();
+  if (typeof showToast === 'function') showToast('📧 신청서 이메일 화면이 열렸습니다. 보내시면 1영업일 내 회신됩니다.', 5500);
+}
+
+// 사이드바에 현재 플랜 칩 + 구독 플랜 진입 버튼 (한 번만 추가)
+function injectPlanChip() {
+  if (document.getElementById('sb-plan-chip')) return;
+  var sb = document.getElementById('sb-hd') || document.getElementById('sb');
+  if (!sb) return;
+  var curPlan = (typeof MH !== 'undefined' && MH.plan) ? MH.plan : 'free';
+  var p = SOLA_PLANS[curPlan] || SOLA_PLANS.free;
+  var chip = document.createElement('div');
+  chip.id = 'sb-plan-chip';
+  chip.style.cssText = 'margin:8px 10px;padding:8px 12px;background:'+p.color+'15;border:1px solid '+p.color+'40;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit';
+  chip.innerHTML = '<div style="color:'+p.color+';font-weight:700;font-size:10px;margin-bottom:2px">💳 현재 플랜</div><div style="font-size:13px;font-weight:700;color:#1A1A1A">'+p.name+'</div><div style="font-size:10px;color:#666;margin-top:2px">탭하여 플랜 변경 ✎</div>';
+  chip.onclick = function(){ openPlanCenter(); };
+  sb.appendChild(chip);
+}
+setTimeout(injectPlanChip, 1500);
+
+// ─────────────────────────────────────────────────────────────
+// AI 진단 자동화 — 마을 변경 시 5초 디바운스로 자동 조기경보 + 추천 액션 카드
+// ─────────────────────────────────────────────────────────────
+window.SolaNaviAutoDiagnose = {
+  _timer: null,
+  _DELAY: 5000,
+  trigger: function(vid) {
+    var self = this;
+    clearTimeout(self._timer);
+    self._timer = setTimeout(function(){ self._run(vid); }, self._DELAY);
+  },
+  _run: function(vid) {
+    if (!vid && typeof selectedVid !== 'undefined') vid = selectedVid;
+    if (!vid || typeof villages === 'undefined') return;
+    var v = (villages||[]).find(function(x){return x.id===vid;});
+    if (!v) return;
+    if (typeof detectIntegrityIssues !== 'function') return;
+    var r = detectIntegrityIssues(v);
+    var prevScore = (v.autoDiag||{}).score;
+    v.autoDiag = { score: r.score, level: r.level, issueCount: r.issues.length, updatedAt: new Date().toISOString(), topIssues: r.issues.slice(0,3).map(function(i){return{cat:i.cat,sev:i.sev,fix:i.fix};}) };
+    try { localStorage.setItem('hsv_villages', JSON.stringify(villages)); } catch(e){}
+    // 점수 변화 시 토스트
+    if (typeof prevScore === 'number' && prevScore !== r.score && typeof showToast === 'function') {
+      var diff = r.score - prevScore;
+      var arrow = diff > 0 ? '⬆' : '⬇';
+      var color = diff > 0 ? '⚠' : '✅';
+      showToast(color + ' 부실 점수 ' + arrow + ' ' + Math.abs(diff) + '점 변경 → 현재 ' + r.score + '점 (' + r.level + ')', 4000);
+    }
+    // 대시보드 UI 자동 갱신
+    if (typeof renderDash === 'function') {
+      try { renderDash(); } catch(e){}
+    }
+    if (typeof renderRecommendCard === 'function') {
+      try { renderRecommendCard(); } catch(e){}
+    }
+  }
+};
+
+// 마을 정보 저장 함수에 자동 진단 hook 추가 (saveVillageInfo / saveVillages 등)
+(function hookAutoDiagnose() {
+  if (typeof saveVillageInfo === 'function') {
+    var _orig = saveVillageInfo;
+    window.saveVillageInfo = function() {
+      var ret = _orig.apply(this, arguments);
+      try { window.SolaNaviAutoDiagnose.trigger(); } catch(e){}
+      return ret;
+    };
+  }
+})();
+
+// 추천 액션 카드 — PRO 대시보드 진입 시 마을별 다음 액션 자동 제안
+function renderRecommendCard() {
+  var container = document.getElementById('dash-action-card');
+  var list = document.getElementById('dash-action-list');
+  if (!container || !list) return;
+  if (typeof villages === 'undefined' || villages.length === 0) { container.style.display = 'none'; return; }
+  // 위험도 높은 마을 우선
+  var sorted = villages.slice().sort(function(a,b){
+    var aR = (a.autoDiag && a.autoDiag.score) || 0;
+    var bR = (b.autoDiag && b.autoDiag.score) || 0;
+    return bR - aR;
+  });
+  var topActions = [];
+  sorted.slice(0, 3).forEach(function(v){
+    var diag = v.autoDiag || {};
+    if (!diag.score || diag.score < 12) return;
+    var topIssue = (diag.topIssues || [])[0];
+    if (topIssue) {
+      var sevIcon = topIssue.sev === 'high' ? '🚨' : topIssue.sev === 'mid' ? '⚠' : '🟡';
+      topActions.push(sevIcon + ' <b>'+v.name+'</b> · ' + topIssue.cat + ' — <span style="color:#1A5276">'+topIssue.fix+'</span>');
+    }
+  });
+  if (topActions.length === 0) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  list.innerHTML = topActions.join('<br>');
+}
+
+// renderDash 후 추천 카드 자동 호출
+(function hookRecommend() {
+  if (typeof renderDash === 'function') {
+    var _origRD = renderDash;
+    window.renderDash = function() {
+      var ret = _origRD.apply(this, arguments);
+      try { renderRecommendCard(); } catch(e){}
+      return ret;
+    };
+  }
+})();
+
+// 페이지 로드 후 모든 마을 자동 진단 1회 실행 (background)
+(function bootAutoDiagnose() {
+  setTimeout(function(){
+    if (typeof villages === 'undefined' || !window.SolaNaviAutoDiagnose) return;
+    villages.forEach(function(v){
+      try {
+        var r = detectIntegrityIssues(v);
+        v.autoDiag = { score: r.score, level: r.level, issueCount: r.issues.length, updatedAt: new Date().toISOString(), topIssues: r.issues.slice(0,3).map(function(i){return{cat:i.cat,sev:i.sev,fix:i.fix};}) };
+      } catch(e){}
+    });
+    try { localStorage.setItem('hsv_villages', JSON.stringify(villages)); } catch(e){}
+    try { if (typeof renderDash === 'function') renderDash(); } catch(e){}
+  }, 4000);
+})();
+
+// ─────────────────────────────────────────────────────────────
+// 감사 추적 — 누가·언제·무엇을 변경했는지 자동 기록 (최근 500건 보관)
+// ─────────────────────────────────────────────────────────────
+window.SolaNaviAudit = {
+  _KEY: 'hsv_audit_log',
+  _MAX: 500,
+  log: function(action, target, before, after) {
+    try {
+      var arr = JSON.parse(localStorage.getItem(this._KEY) || '[]');
+      var user = (typeof MH !== 'undefined' && MH.key) ? MH.key : 'unknown';
+      arr.push({
+        ts: Date.now(),
+        action: action,
+        target: target || '',
+        user: user,
+        beforeHash: this._hash(before),
+        afterHash: this._hash(after),
+        beforeSummary: this._summary(before),
+        afterSummary: this._summary(after),
+      });
+      if (arr.length > this._MAX) arr = arr.slice(-this._MAX);
+      localStorage.setItem(this._KEY, JSON.stringify(arr));
+    } catch(e) {}
+  },
+  _hash: function(o) {
+    if (o == null) return '';
+    var s = typeof o === 'string' ? o : JSON.stringify(o);
+    var h = 0; for (var i=0; i<s.length; i++) { h = ((h<<5)-h) + s.charCodeAt(i); h |= 0; }
+    return (h>>>0).toString(36);
+  },
+  _summary: function(o) {
+    if (o == null) return '';
+    if (typeof o === 'string') return o.length > 50 ? o.substring(0, 50) + '...' : o;
+    try { var s = JSON.stringify(o); return s.length > 80 ? s.substring(0, 80) + '...' : s; } catch(e) { return ''; }
+  },
+  list: function(filter) {
+    try {
+      var arr = JSON.parse(localStorage.getItem(this._KEY) || '[]');
+      if (filter && filter.target) arr = arr.filter(function(r){ return r.target.indexOf(filter.target) >= 0; });
+      if (filter && filter.action) arr = arr.filter(function(r){ return r.action === filter.action; });
+      return arr.reverse();
+    } catch(e) { return []; }
+  },
+  clear: function() {
+    if (!confirm('감사 로그를 모두 삭제할까요? 보안·분쟁 추적 자료가 영구 손실됩니다.')) return;
+    localStorage.removeItem(this._KEY);
+    if (typeof showToast === 'function') showToast('감사 로그가 삭제되었습니다', 3000);
+  }
+};
+
+function openAuditModal() {
+  var rows = window.SolaNaviAudit.list().slice(0, 200);
+  function fmtTs(ts){ var d=new Date(ts); return d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0'); }
+  var tableRows = rows.map(function(r){
+    return '<tr><td style="white-space:nowrap;padding:6px 8px;font-size:11px;color:#666">'+fmtTs(r.ts)+'</td>'
+      + '<td style="padding:6px 8px;font-size:12px"><b>'+r.action+'</b></td>'
+      + '<td style="padding:6px 8px;font-size:12px">'+(r.target||'-')+'</td>'
+      + '<td style="padding:6px 8px;font-size:11px;color:#666">'+(r.beforeSummary||'-')+'</td>'
+      + '<td style="padding:6px 8px;font-size:11px;color:#1A5276">'+(r.afterSummary||'-')+'</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="padding:30px;text-align:center;color:#888">감사 로그가 없습니다</td></tr>';
+  var html = '<div id="audit-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:1000px;width:100%;max-height:88vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">🔐 감사 로그 — 최근 변경 이력</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">' + rows.length + '건 / 최대 500건 보관 · 분쟁 발생 시 추적 자료로 활용</div></div>'
+    + '<button onclick="document.getElementById(\'audit-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:760px"><thead><tr style="background:#FFF4E0;border-bottom:2px solid #F39C12"><th style="padding:8px;text-align:left">시각</th><th style="padding:8px;text-align:left">행동</th><th style="padding:8px;text-align:left">대상</th><th style="padding:8px;text-align:left">변경 전</th><th style="padding:8px;text-align:left">변경 후</th></tr></thead><tbody>' + tableRows + '</tbody></table></div>'
+    + '<div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">'
+    + '<button onclick="dlAuditLog()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📄 로그 CSV 다운로드</button>'
+    + '<button onclick="window.SolaNaviAudit.clear();document.getElementById(\'audit-modal\').remove();" style="background:#C0392B;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑 로그 삭제</button>'
+    + '<button onclick="document.getElementById(\'audit-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function dlAuditLog() {
+  var rows = window.SolaNaviAudit.list();
+  var lines = ['시각,사용자,행동,대상,변경전요약,변경후요약'];
+  function esc(s){ s=String(s||''); return /[,"\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
+  rows.forEach(function(r){
+    var d = new Date(r.ts);
+    var ts = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+    lines.push([ts, r.user, r.action, r.target, r.beforeSummary, r.afterSummary].map(esc).join(','));
+  });
+  var blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '솔라나비_감사로그_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Idle 자동 로그아웃 — 30분 무활동 시 경고 + 로그아웃
+// ─────────────────────────────────────────────────────────────
+(function setupIdleLogout() {
+  var IDLE_MS = 30 * 60 * 1000;
+  var WARN_BEFORE = 60 * 1000;
+  var lastActivity = Date.now();
+  var warningShown = false;
+  function onActivity() { lastActivity = Date.now(); var w = document.getElementById('idle-warn-toast'); if (w) { w.remove(); warningShown = false; } }
+  ['click','keydown','scroll','mousemove','touchstart'].forEach(function(ev){ document.addEventListener(ev, onActivity, { passive: true }); });
+  setInterval(function() {
+    var elapsed = Date.now() - lastActivity;
+    if (elapsed >= IDLE_MS) {
+      window.SolaNaviAudit.log('자동 로그아웃', 'session', null, '30분 무활동');
+      try { if (typeof manualLogout === 'function') manualLogout(); else { localStorage.removeItem('mh_session'); location.reload(); } } catch(e) { location.reload(); }
+    } else if (elapsed >= IDLE_MS - WARN_BEFORE && !warningShown) {
+      warningShown = true;
+      var t = document.createElement('div');
+      t.id = 'idle-warn-toast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#C0392B;color:#fff;padding:14px 20px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.3);z-index:9999;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:12px';
+      t.innerHTML = '⏰ 1분 후 자동 로그아웃됩니다 (보안). 화면을 클릭하면 연장돼요.';
+      document.body.appendChild(t);
+      setTimeout(function(){ if (t.parentNode) t.remove(); }, WARN_BEFORE + 500);
+    }
+  }, 10000);
+})();
+
 // 공용 안전 저장 헬퍼 — quota/저장공간 부족·접근 차단 등 실패 시 사용자 안내
 window.safeSaveLocal = function(key, value) {
   try {
@@ -2911,7 +3274,7 @@ if (CLOUD_ENABLED) {
       <div class="wz">현장 메모...</div>
       <div class="nav-btns">
         <button class="prev-btn" onclick="manualGo('s3-charter')">← 정관 작성</button>
-        <button class="next-btn" onclick="manualGo('s3-social-coop')">다음 → 사업계획서 작성 가이드</button>
+        <button class="next-btn" onclick="manualGo('s5-bizplan')">다음 → 사업계획서 작성 가이드</button>
       </div>
     </div>
   </div>
@@ -3072,7 +3435,7 @@ if (CLOUD_ENABLED) {
       <div class="wz">현장 메모...</div>
       <div class="nav-btns">
         <button class="prev-btn" onclick="manualGo('s3-establish')">← 설립 절차로 돌아가기</button>
-        <button class="next-btn" onclick="manualGo('s4-site')">← 정관 작성으로 이동</button>
+        <button class="next-btn" onclick="manualGo('s3-charter')">📜 정관 작성으로 이동</button>
       </div>
     </div>
   </div>
@@ -11482,6 +11845,8 @@ function renderDash() {
       : '';
     var coopBtn = '<button onclick="openCoopCompare()" style="background:#2E86C1;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⚖ 조합 비교</button>';
     var permitBtn = '<button onclick="openPermitGantt()" style="background:#5B2C6F;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⏱ 인허가 타임라인</button>';
+    var auditBtn = '<button onclick="openAuditModal()" style="background:#7F8C8D;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔐 감사 로그</button>';
+    var planBtn = '<button onclick="openPlanCenter()" style="background:#B7950B;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">💳 구독 플랜</button>';
     var toolbarHtml = '<div id="dash-toolbar" style="display:flex;justify-content:flex-end;margin-bottom:8px;gap:6px;flex-wrap:wrap">'
       + '<button onclick="openScheduleModal()" style="background:#E67E22;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📅 일정 캘린더</button>'
       + permitBtn
@@ -11496,6 +11861,8 @@ function renderDash() {
       + '<button onclick="openSelfcheckModal()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📋 자가진단</button>'
       + '<button onclick="dlVillagesXlsx()" style="background:#27AE60;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📊 Excel 내보내기</button>'
       + '<button onclick="dlVillagesCsv()" style="background:transparent;color:#666;border:1px solid #ccc;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">CSV</button>'
+      + auditBtn
+      + planBtn
       + '</div>';
     container.insertAdjacentHTML('beforebegin', toolbarHtml);
   }
@@ -12011,10 +12378,14 @@ function saveVillage() {
   };
   if (editId) {
     const idx = villages.findIndex(v => v.id === editId);
-    if (idx >= 0) { villages[idx] = { ...villages[idx], ...data }; }
+    if (idx >= 0) {
+      try { window.SolaNaviAudit.log('마을 수정', '마을:'+(data.name||villages[idx].name), villages[idx], data); } catch(e){}
+      villages[idx] = { ...villages[idx], ...data };
+    }
   } else {
     data.id = 'v' + Date.now();
     villages.push(data);
+    try { window.SolaNaviAudit.log('마을 추가', '마을:'+data.name, null, data); } catch(e){}
   }
   (window.safeSaveLocal || function(k,v){localStorage.setItem(k,v);return true;})('hsv_villages', JSON.stringify(villages));
   closeModal();
@@ -12039,10 +12410,11 @@ function deleteVillage(id) {
              + '삭제 후 5초 안에 토스트의 "되돌리기" 버튼으로 복구할 수 있어요.\n'
              + '5초 후엔 영구 삭제됩니다.';
   if (!confirm(warn)) return;
-  // 백업
+  // 백업 + 감사 로그
   const idx = villages.findIndex(v => v.id === id);
   window._lastDeletedVillage = JSON.parse(JSON.stringify(target));
   window._lastDeletedVillageIdx = idx;
+  try { window.SolaNaviAudit.log('마을 삭제', '마을:'+target.name, target, null); } catch(e){}
   villages = villages.filter(v => v.id !== id);
   try { localStorage.setItem('hsv_villages', JSON.stringify(villages)); }
   catch(e) { if (typeof showToast === 'function') showToast('⚠ 저장 실패: 브라우저 저장공간이 가득찼을 수 있습니다', 4000); }
@@ -12074,6 +12446,7 @@ function undoDeleteVillage() {
   if (idx >= 0 && idx <= villages.length) villages.splice(idx, 0, v);
   else villages.push(v);
   try { localStorage.setItem('hsv_villages', JSON.stringify(villages)); } catch(e) {}
+  try { window.SolaNaviAudit.log('마을 삭제 취소', '마을:'+v.name, null, v); } catch(e){}
   window._lastDeletedVillage = null;
   window._lastDeletedVillageIdx = -1;
   const t = document.getElementById('undo-toast');
