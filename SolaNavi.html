@@ -809,6 +809,16 @@ textarea{resize:vertical;line-height:1.7}
     gap:12px !important;
   }
 
+  /* info-row 라벨을 입력 위로 옮김 (좁은 모바일 환경) */
+  .info-row { flex-direction:column !important; align-items:stretch !important; gap:4px !important; }
+  .info-label { min-width:0 !important; font-size:12px !important; font-weight:600; color:#444 !important; padding-left:2px }
+  .info-input { font-size:14px !important; padding:9px 11px !important; }
+
+  /* 터치 타겟 최소 48px (WCAG) */
+  button, .btn, .charter-btn, .doc-btn, .ni, .nc, [role="button"] { min-height:44px; }
+  .doc-btn.view, .doc-btn.dl, .doc-btn.hwp, .doc-btn.pdf { min-height:40px; padding:8px 12px; font-size:13px; }
+  input[type="checkbox"], input[type="radio"] { min-width:20px; min-height:20px; }
+
   /* 탭바 활성 탭 강조 */
   #tabbar .tab.active,#tabbar .tab.on{
     background:rgba(245,166,35,.15) !important;
@@ -1040,6 +1050,26 @@ const _origSet = localStorage.setItem.bind(localStorage);
 localStorage.setItem = function(k, v) {
   _origSet(k, v);
   if (k === 'hsv_villages') setTimeout(() => CloudSync.autoSave(), 400);
+};
+
+// 공용 안전 저장 헬퍼 — quota/저장공간 부족·접근 차단 등 실패 시 사용자 안내
+window.safeSaveLocal = function(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch(e) {
+    var msg = '⚠ 저장 실패: ';
+    if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message))) {
+      msg += '브라우저 저장공간(5MB)이 가득 찼습니다. 백업·내보내기 후 일부 마을을 삭제해주세요.';
+    } else if (e && /SecurityError|denied|disabled/i.test(e.message)) {
+      msg += '브라우저 저장이 차단됐어요. 시크릿/사파리 사적 모드를 끄거나 사이트 권한을 허용해주세요.';
+    } else {
+      msg += (e && e.message) || '알 수 없는 오류';
+    }
+    if (typeof showToast === 'function') showToast(msg, 5500);
+    else alert(msg);
+    return false;
+  }
 };
 
 // PostgREST 콜드 스타트 회피: 페이지 로드 즉시 가벼운 ping (응답 무시)
@@ -2249,6 +2279,14 @@ if (CLOUD_ENABLED) {
         </div>
       </div>
 
+      <!-- 마을 사진 갤러리 -->
+      <div class="bx" style="margin-top:14px">
+        <h3 style="display:flex;align-items:center;justify-content:space-between">🖼 마을 사진 갤러리 <span style="font-size:11px;font-weight:400;color:var(--sft)">(부지·현장·총회·설명회 등)</span>
+          <span><input type="file" id="village-photo-input" accept="image/*" multiple style="display:none" onchange="uploadVillagePhotos(this)"><button onclick="document.getElementById('village-photo-input').click()" style="background:var(--sun);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📸 사진 추가</button></span>
+        </h3>
+        <div id="village-photos"></div>
+      </div>
+
       <!-- 버튼 -->
       <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
         <button onclick="exportVillageInfo()" style="background:var(--grn);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🖨 마을정보 출력</button>
@@ -3311,6 +3349,11 @@ if (CLOUD_ENABLED) {
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E8F5E9">📄</div><div class="doc-meta"><div class="doc-num">서식 2</div><div class="doc-name">햇빛소득마을 지원 신청서</div><div class="doc-desc">마을 기본정보·태양광 계획·담당자 현황</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('apply2')">보기</button><button class="doc-btn dl" onclick="dlDocx('apply2')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('apply2')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('apply2')">🖨 PDF</button></div></div></div>
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#FFF3E0">🔒</div><div class="doc-meta"><div class="doc-num">붙임서식 4</div><div class="doc-name">조합원 개인정보 동의서</div><div class="doc-desc">조합원용 개인정보 수집·이용·제3자 제공 동의</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('privacy4')">보기</button><button class="doc-btn dl" onclick="dlDocx('privacy4')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('privacy4')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('privacy4')">🖨 PDF</button></div></div></div>
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E8F5E9">🏢</div><div class="doc-meta"><div class="doc-num">서식 4</div><div class="doc-name">사업지원계획서 (지자체용)</div><div class="doc-desc">기초 지방정부가 작성·공문 제출</div></div></div><div class="doc-card-foot"><span class="doc-tag ref">지자체 제출</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('gov4')">보기</button><button class="doc-btn dl" onclick="dlDocx('gov4')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('gov4')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('gov4')">🖨 PDF</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#FCEBD5">🌟</div><div class="doc-meta"><div class="doc-num">가점 보강</div><div class="doc-name">인구감소지역 가점 신청서</div><div class="doc-desc">89개 시·군·구 대상 가점 +5점</div></div></div><div class="doc-card-foot"><span class="doc-tag" style="background:#FCEBD5;color:#A04000">가점</span><div class="doc-actions"><button class="doc-btn dl" onclick="dlExtraForm('depop_bonus')">⬇ Word</button><button class="doc-btn hwp" onclick="dlExtraForm('depop_bonus')">🇰🇷 한글</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#D5F5E3">🌳</div><div class="doc-meta"><div class="doc-num">보강</div><div class="doc-name">환경영향 조사·동의서</div><div class="doc-desc">경관·빛반사·소음·생태계 검토</div></div></div><div class="doc-card-foot"><span class="doc-tag" style="background:#D5F5E3;color:#117864">권장</span><div class="doc-actions"><button class="doc-btn dl" onclick="dlExtraForm('env_consent')">⬇ Word</button><button class="doc-btn hwp" onclick="dlExtraForm('env_consent')">🇰🇷 한글</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#FADBD8">🛡</div><div class="doc-meta"><div class="doc-num">착공 전</div><div class="doc-name">이행보증보험 가입 확인서</div><div class="doc-desc">선정 후 협약·착공 전 필수</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn dl" onclick="dlExtraForm('perf_bond')">⬇ Word</button><button class="doc-btn hwp" onclick="dlExtraForm('perf_bond')">🇰🇷 한글</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#D6EAF8">📊</div><div class="doc-meta"><div class="doc-num">STEP7</div><div class="doc-name">연간 정산보고서</div><div class="doc-desc">발전 실적·비용·배분 정산</div></div></div><div class="doc-card-foot"><span class="doc-tag" style="background:#D6EAF8;color:#1A5276">운영</span><div class="doc-actions"><button class="doc-btn dl" onclick="dlExtraForm('settlement_report')">⬇ Word</button><button class="doc-btn hwp" onclick="dlExtraForm('settlement_report')">🇰🇷 한글</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E8DAEF">🔄</div><div class="doc-meta"><div class="doc-num">변경 시</div><div class="doc-name">사업 변경·사후관리 보고서</div><div class="doc-desc">계획·시공사·용량·이사장 변경</div></div></div><div class="doc-card-foot"><span class="doc-tag" style="background:#E8DAEF;color:#6C3483">변경</span><div class="doc-actions"><button class="doc-btn dl" onclick="dlExtraForm('change_report')">⬇ Word</button><button class="doc-btn hwp" onclick="dlExtraForm('change_report')">🇰🇷 한글</button></div></div></div>
         </div>
         <div class="st">기타 증빙서류 체크리스트</div>
         <div class="bx"><ul class="chklist">
@@ -4175,15 +4218,18 @@ if (CLOUD_ENABLED) {
         </div>
 
         <!-- 권고 배분 비율 -->
-        <div class="st">📋 마을 귀속분 세부 배분 (강의자료 권고 기준)</div>
+        <div class="st" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <span>📋 마을 귀속분 세부 배분 (강의자료 권고 기준)</span>
+          <button onclick="applyCalcToDistTable()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🪄 수익성 계산기 값 적용</button>
+        </div>
         <div class="bx" style="margin-bottom:16px">
           <table class="tbl">
             <thead><tr><th>항목</th><th>권고 비율</th><th>내용</th><th>정관 조문</th></tr></thead>
             <tbody>
-              <tr><td><strong>운영비·제세공과금</strong></td><td>OO% (정관 결정)</td><td>전기요금, 통신비, 회계용역, 안전관리비</td><td>제27조의4 제1호</td></tr>
-              <tr><td><strong>유지보수 적립금</strong></td><td>OO%</td><td>설비 교체·점검·O&M 계약비, 철거비 적립</td><td>제27조의4 제2호</td></tr>
-              <tr><td><strong>마을공동기금</strong></td><td>OO%</td><td>공용시설, 노후주거 개선 등 공익 목적</td><td>제27조의4 제3호</td></tr>
-              <tr><td><strong>마을복지·장학</strong></td><td>OO%</td><td>문화·교육·의료·교통·아동복지</td><td>제27조의4 제4호</td></tr>
+              <tr><td><strong>운영비·제세공과금</strong></td><td><span id="dist-ops-pct">OO% (정관 결정)</span></td><td>전기요금, 통신비, 회계용역, 안전관리비</td><td>제27조의4 제1호</td></tr>
+              <tr><td><strong>유지보수 적립금</strong></td><td><span id="dist-maint-pct">OO%</span></td><td>설비 교체·점검·O&M 계약비, 철거비 적립</td><td>제27조의4 제2호</td></tr>
+              <tr><td><strong>마을공동기금</strong></td><td><span id="dist-fund-pct">OO%</span></td><td>공용시설, 노후주거 개선 등 공익 목적</td><td>제27조의4 제3호</td></tr>
+              <tr><td><strong>마을복지·장학(에너지취약계층)</strong></td><td><span id="dist-weak-pct">OO%</span></td><td>문화·교육·의료·교통·아동복지·취약계층 지원</td><td>제27조의4 제4호</td></tr>
               <tr><td><strong>마을발전기금</strong></td><td>약 15%</td><td>장기 적립. 마을기금운용위원회 위탁 가능</td><td>제27조의3 제3호</td></tr>
               <tr><td><strong>주민 직접 배분</strong></td><td>나머지</td><td><strong>지역화폐 원칙</strong> (공고문 명시) · 총회 결의</td><td>제27조의3 제3항·제72조</td></tr>
             </tbody>
@@ -6830,6 +6876,14 @@ function manualGo(id, tab) {
   if (typeof autoFillVillageDocs === 'function' && /^(s3-charter|docs-charter|docs-rules|s2-rules|s1-info)/.test(pageId)) {
     setTimeout(function(){ autoFillVillageDocs({ silent: true }); }, 100);
   }
+  // STEP6 배분계획 페이지 진입 시 계산기 값 자동 적용
+  if (pageId === 's6-dist' && typeof applyCalcToDistTable === 'function') {
+    setTimeout(function(){ applyCalcToDistTable({ silent: true }); }, 100);
+  }
+  // 마을 기초정보 페이지 진입 시 사진 갤러리 렌더
+  if (pageId === 's1-info' && typeof renderVillagePhotos === 'function') {
+    setTimeout(function(){ renderVillagePhotos(); }, 100);
+  }
   var _ov = document.getElementById('ov');
   if (_ov) { _ov.classList.remove('show'); _ov.style.display = 'none'; }
   if (window.innerWidth < 768) {
@@ -6877,15 +6931,30 @@ function autoFillVillageDocs(opts) {
   // 폴백: 마을명만 있고 주소 없으면 마을명 끝부분을 리로
   if (!ri && /리$/.test(villageName)) ri = villageName.split(/\s+/).pop();
 
-  // 토큰 치환 함수
+  // 토큰 치환 함수 — 정관/규약/AI prompt 본문의 OO 토큰을 마을 컨텍스트로
   function replaceTokens(text) {
     if (!text) return text;
-    return text
+    var out = text
       .replace(/OOO시[··]도/g, prov || 'OOO시·도')
       .replace(/OO시[··]군/g, city || 'OO시·군')
       .replace(/OO읍[··]면/g, town || 'OO읍·면')
       .replace(/OO리/g, ri || 'OO리')
-      .replace(/OO마을/g, villageName || 'OO마을');
+      .replace(/OO마을/g, villageName || 'OO마을')
+      // 조합명 패턴 (구체적 → 일반적 순서로)
+      .replace(/OO 햇빛소득마을 협동조합/g, coopName || 'OO 햇빛소득마을 협동조합')
+      .replace(/OO마을 햇빛소득 협동조합/g, coopName || 'OO마을 햇빛소득 협동조합')
+      .replace(/OO 햇빛에너지협동조합/g, coopName || 'OO 햇빛에너지협동조합')
+      .replace(/OO 협동조합/g, coopName || 'OO 협동조합');
+    // 이사장 OOO / 이장 OOO 패턴 — 공백 + 동그라미·O 연속
+    if (chief) {
+      out = out
+        .replace(/이사장\s+(?:OOO|OO|○○○|○○|◯◯◯|◯◯)/g, '이사장 ' + chief)
+        .replace(/조합장\s+(?:OOO|OO|○○○|○○|◯◯◯|◯◯)/g, '조합장 ' + chief);
+    }
+    if (president || chief) {
+      out = out.replace(/이장\s+(?:OOO|OO|○○○|○○|◯◯◯|◯◯)/g, '이장 ' + (president || chief));
+    }
+    return out;
   }
 
   // 정관/규약 본문에서 textNode만 치환 (input/textarea/style 제외)
@@ -6902,6 +6971,23 @@ function autoFillVillageDocs(opts) {
   if (charterBody) walk(charterBody);
   document.querySelectorAll('#page-docs-rules .charter-content, #page-docs-charter .ch-art-body, #page-s3-charter .ch-art-body, #page-s2-rules .ch-art-body').forEach(walk);
 
+  // 마을 자산 → 사업계획서 자부담·1차년도 수입 추정
+  var lc = v.lastCalc || null;
+  var fundTxt = info['vi-fund'] || '';
+  var compTxt = info['vi-comp'] || '';
+  var members = info['vi-members'] || v.members || (v.pop ? Math.round(v.pop * 0.35) : '');
+  var industryDefault = '태양광 발전업, 재생에너지 발전 및 전력판매업';
+  var bizDefault = '태양광 발전설비 설치·운영 및 전력판매, 재생에너지 관련 교육·주민 자립, 마을기금 운용 및 주민 복지 사업';
+  // 1차년도 수입 (백만원 단위) = 계산기의 연간 총수익(만원)/100
+  var income1y = (lc && lc.totalRevenue) ? Math.round(lc.totalRevenue / 100) : '';
+  // 자부담 조달 계획 안내문
+  var fundingNote = [];
+  if (lc && lc.selfPay) fundingNote.push('자부담 약 ' + lc.selfPay.toLocaleString() + '만원');
+  if (fundTxt) fundingNote.push('마을 공동기금 활용: ' + fundTxt);
+  if (compTxt) fundingNote.push('혐오시설 보상금 활용: ' + compTxt);
+  if (lc && lc.totalInvest) fundingNote.push('총 설치비 약 ' + lc.totalInvest.toLocaleString() + '만원 중 융자 85%');
+  var expenseDefault = lc ? ('운영비·전기요금·통신비, 유지보수 약 ' + (lc.dm||10) + '%, 법정적립금 10% 이상, 마을공동기금 ' + (lc.df||40) + '%, 취약계층지원 ' + (lc.dw||40) + '%') : '';
+
   // 입력 폼 자동 채움 (빈 값만, 사용자 입력 보호)
   var fields = {
     'bp-name': villageName,
@@ -6916,6 +7002,13 @@ function autoFillVillageDocs(opts) {
     'min-chair': chief,
     'cbp-address': address,
     'cbp-chief': chief,
+    'cbp-members': members,
+    'cbp-industry': industryDefault,
+    'cbp-biz': bizDefault,
+    'cbp-income': income1y,
+    'cbp-expense': expenseDefault,
+    'cbp-self-source': fundingNote.join(' · '),
+    'bp-self-source': fundingNote.join(' · '),
   };
   Object.keys(fields).forEach(function(id){
     var el = document.getElementById(id);
@@ -6924,6 +7017,510 @@ function autoFillVillageDocs(opts) {
 
   if (!opts.silent && typeof showToast === 'function') {
     showToast('✅ ' + (villageName || '마을') + ' 정보로 자동 채움 완료', 3000);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// 공식 양식 5종 markdown 템플릿 + 다운로드 (행정안전부 공모 부속 서류)
+// ─────────────────────────────────────────────────────────────────
+const EXTRA_FORM_TEMPLATES = {
+  depop_bonus: {
+    title: '인구감소지역 가점 신청서',
+    md: function(ctx){
+      return '# 인구감소지역 가점 신청서\n\n'
+        + '본 마을은 「인구감소지역 지원 특별법」 제2조에 따른 인구감소지역에 해당하므로, 2026 햇빛소득마을 공모사업의 가점 부여를 신청합니다.\n\n'
+        + '## 1. 마을 기본정보\n\n'
+        + '| 항목 | 내용 |\n|---|---|\n'
+        + '| 마을명 | ' + (ctx.villageName || '') + ' |\n'
+        + '| 소재지 | ' + (ctx.address || '') + ' |\n'
+        + '| 총 가구수 | ' + (ctx.households || '') + ' |\n'
+        + '| 총 주민수 | ' + (ctx.pop || '') + ' 명 |\n'
+        + '| 65세 이상 비율 | ' + (ctx.elderRatio || '') + ' % |\n'
+        + '| 인구 변동 (5년) | ' + (ctx.popChange || '') + ' |\n\n'
+        + '## 2. 인구감소지역 지정 근거\n\n'
+        + '- 행정안전부 고시 「인구감소지역 89개 시·군·구」 명단 포함\n'
+        + '- 해당 시·군·구: ' + (ctx.depopRegion || ctx.address || '') + '\n\n'
+        + '## 3. 가점 사항\n\n'
+        + '본 공모 평가항목 중 인구감소지역 가점 +5점에 해당함을 확인합니다.\n\n'
+        + '## 4. 첨부\n\n'
+        + '- 행정안전부 인구감소지역 고시문 사본\n'
+        + '- 마을 주민등록 통계 확인서\n';
+    },
+  },
+  env_consent: {
+    title: '환경영향 조사 및 주민 동의서',
+    md: function(ctx){
+      return '# 환경영향 조사 및 주민 동의서\n\n'
+        + '## 1. 사업 개요\n\n'
+        + '| 항목 | 내용 |\n|---|---|\n'
+        + '| 사업명 | ' + (ctx.villageName || 'OO마을') + ' 햇빛소득 태양광 발전사업 |\n'
+        + '| 부지 소재지 | ' + (ctx.address || '') + ' |\n'
+        + '| 설치 용량 | ' + (ctx.kw || '500') + ' kW |\n'
+        + '| 부지 면적 | ' + (ctx.landArea || '') + ' ㎡ |\n'
+        + '| 사업 기간 | 20년 (예정) |\n\n'
+        + '## 2. 환경영향 검토 항목\n\n'
+        + '| 검토 항목 | 영향도 | 저감 대책 |\n|---|---|---|\n'
+        + '| 경관 영향 | 보통 | 차폐림 식재, 패널 색상 조정 |\n'
+        + '| 빛 반사 영향 | 낮음 | 저반사 패널 적용 |\n'
+        + '| 소음 영향 | 매우 낮음 | 인버터 방음함 설치 |\n'
+        + '| 생태계 영향 | 낮음 | 부지 내 자생식물 보호 |\n'
+        + '| 토양 영향 | 매우 낮음 | 콘크리트 최소화, 친환경 기초 |\n\n'
+        + '## 3. 주민 동의\n\n'
+        + '본인은 위 환경영향 검토 내용을 확인하고, 본 사업 추진에 동의합니다.\n\n'
+        + '| 번호 | 성명 | 주소 | 서명 |\n|---|---|---|---|\n'
+        + '| 1 |  |  |  |\n| 2 |  |  |  |\n| 3 |  |  |  |\n| 4 |  |  |  |\n| 5 |  |  |  |\n';
+    },
+  },
+  perf_bond: {
+    title: '이행보증보험 가입 확인서',
+    md: function(ctx){
+      return '# 이행보증보험 가입 확인서\n\n'
+        + '본 협동조합은 「2026 햇빛소득마을 공모사업 협약」 이행을 위하여 다음과 같이 이행보증보험에 가입함을 확인합니다.\n\n'
+        + '## 1. 보험 가입 내역\n\n'
+        + '| 항목 | 내용 |\n|---|---|\n'
+        + '| 보험사 | ◯◯손해보험 |\n'
+        + '| 증권번호 |  |\n'
+        + '| 피보험자 | 행정안전부장관 |\n'
+        + '| 보험가입자 | ' + (ctx.coopName || '') + ' |\n'
+        + '| 보험금액 | ' + (ctx.bondAmount || '') + ' 원 |\n'
+        + '| 보험기간 | 착공일 ~ 준공일 + 1년 |\n'
+        + '| 보장 범위 | 사업계획서 미이행, 자부담 미납, 지연 손해 등 |\n\n'
+        + '## 2. 확인 사항\n\n'
+        + '- 사업계획서 변경 시 보험증권도 변경 처리\n'
+        + '- 보험금액은 자부담 + 정부 출연금의 10% 이상\n'
+        + '- 보험기간 만료 30일 전 갱신 의무\n\n'
+        + '## 3. 첨부\n\n'
+        + '- 보험증권 사본\n'
+        + '- 보험료 납부 확인서\n';
+    },
+  },
+  settlement_report: {
+    title: '연간 정산보고서 (STEP7 운영)',
+    md: function(ctx){
+      var lc = ctx.lastCalc || {};
+      return '# 연간 정산보고서\n\n'
+        + '## 1. 보고 기간\n\n'
+        + (new Date().getFullYear() - 1) + '년 1월 1일 ~ ' + (new Date().getFullYear() - 1) + '년 12월 31일\n\n'
+        + '## 2. 발전 실적\n\n'
+        + '| 항목 | 계획 | 실적 | 달성률 |\n|---|---|---|---|\n'
+        + '| 발전량 (MWh) | ' + (lc.annualGenMWh || '') + ' |  |  % |\n'
+        + '| 가동률 | 95% |  % |  |\n'
+        + '| SMP 수익 (만원) |  |  |  % |\n'
+        + '| REC 수익 (만원) |  |  |  % |\n'
+        + '| 총 수익 (만원) | ' + (lc.totalRevenue || '') + ' |  |  % |\n\n'
+        + '## 3. 비용 정산\n\n'
+        + '| 항목 | 금액(만원) | 비고 |\n|---|---|---|\n'
+        + '| 융자 원리금 상환 |  |  |\n'
+        + '| 유지보수비 |  |  |\n'
+        + '| 보험료 |  |  |\n'
+        + '| 운영비 |  |  |\n'
+        + '| 법정적립금 |  | 잉여금 10% |\n'
+        + '| 합계 |  |  |\n\n'
+        + '## 4. 마을 귀속분 배분\n\n'
+        + '| 항목 | 비율 | 금액(만원) | 사용처 |\n|---|---|---|---|\n'
+        + '| 마을공동기금 | ' + (lc.df || 40) + '% |  |  |\n'
+        + '| 에너지취약계층 | ' + (lc.dw || 40) + '% |  |  |\n'
+        + '| 유지보수 적립 | ' + (lc.dm || 10) + '% |  |  |\n'
+        + '| 운영비 | ' + (lc.dops || 10) + '% |  |  |\n\n'
+        + '## 5. 익년도 계획\n\n'
+        + '- 발전량 목표: \n'
+        + '- 주요 사업: \n'
+        + '- 마을 환원 사업: \n';
+    },
+  },
+  change_report: {
+    title: '사업 변경 및 사후관리 보고서',
+    md: function(ctx){
+      return '# 사업 변경 및 사후관리 보고서\n\n'
+        + '## 1. 변경 사항\n\n'
+        + '| 항목 | 기존 | 변경 후 | 변경 사유 |\n|---|---|---|---|\n'
+        + '| 사업계획 |  |  |  |\n'
+        + '| 시공업체 |  |  |  |\n'
+        + '| 설치 용량 |  |  |  |\n'
+        + '| 사업 기간 |  |  |  |\n'
+        + '| 이사장 |  |  |  |\n\n'
+        + '## 2. 변경의 근거\n\n'
+        + '- 협동조합 총회 의결: ___년 __월 __일\n'
+        + '- 행정안전부 사전 협의: ___년 __월 __일\n\n'
+        + '## 3. 변경의 영향\n\n'
+        + '- 수익성 변동: \n'
+        + '- 일정 변동: \n'
+        + '- 주민 동의 재확보 여부: \n\n'
+        + '## 4. 사후관리 계획\n\n'
+        + '- 모니터링 주기: 분기 / 반기 / 연간\n'
+        + '- REMS 데이터 보고 의무 (한국에너지공단)\n'
+        + '- 정관 변경 시 시·도지사 신고\n\n'
+        + '## 5. 첨부\n\n'
+        + '- 총회 의사록\n'
+        + '- 변경 사항 비교표\n'
+        + '- 사전 협의 회신문\n';
+    },
+  },
+};
+
+async function dlExtraForm(key) {
+  var tpl = EXTRA_FORM_TEMPLATES[key];
+  if (!tpl) { alert('알 수 없는 양식: ' + key); return; }
+  var v = (typeof selectedVid !== 'undefined' && selectedVid && typeof villages !== 'undefined')
+    ? (villages||[]).find(function(x){return x.id===selectedVid;}) : null;
+  var info = (v && v.info) || {};
+  var ctx = {
+    villageName: (v && v.name) || info['vi-name'] || '',
+    address: info['vi-addr'] || '',
+    households: info['vi-households'] || '',
+    pop: info['vi-pop'] || (v && v.pop) || '',
+    elderRatio: info['vi-elder'] && info['vi-pop'] ? Math.round((+info['vi-elder']) / (+info['vi-pop']) * 100) : '',
+    coopName: info['vi-coop-name'] || (v && v.name ? v.name + ' 햇빛에너지협동조합' : ''),
+    chief: info['vi-chief'] || '',
+    kw: (v && v.kw) || 500,
+    landArea: info['vi-vacant'] || '',
+    bondAmount: '',
+    lastCalc: v && v.lastCalc || null,
+    depopRegion: info['vi-region'] || '',
+  };
+  var md = tpl.md(ctx);
+  var date = new Date().toISOString().split('T')[0];
+  var filename = (ctx.villageName ? ctx.villageName + '_' : '') + tpl.title.replace(/[\s()·]/g,'_') + '_' + date;
+  var sigLines = ctx.coopName ? [ctx.coopName + '　이사장 ' + (ctx.chief || '　　　　') + '　　(인)'] :
+                  (ctx.villageName && ctx.chief ? [ctx.villageName + ' 이장 ' + ctx.chief + '　　(인)'] : []);
+  await downloadAsWordDoc(filename, md, tpl.title, {
+    subtitle: ctx.villageName + (ctx.coopName && ctx.coopName !== ctx.villageName ? '　·　' + ctx.coopName : ''),
+    signatureLines: sigLines,
+  });
+}
+
+// 월간 진행률 리포트 — CSV·XLSX 양쪽 내보내기 (전 마을 한눈에)
+function _exportVillagesData() {
+  var stageLabels = ['STEP1 첫방문','STEP2 주민조직','STEP3 협동조합','STEP4 발전소','STEP5 공모신청','STEP6 발전소건설','STEP7 협동조합운영'];
+  var headers = ['마을명','현재단계','주민수','가구수','이장','담당컨설턴트','동의률(%)','목표용량(kW)','연간발전량(MWh)','연간순수익(만원)','자부담(만원)','회수년수','사진수','첫방문일','다음방문','메모','위험도'];
+  var rows = (typeof villages !== 'undefined' ? villages : []).slice()
+    .sort(function(a,b){ return (a.stage||0) - (b.stage||0); })
+    .map(function(v){
+      var info = v.info || {};
+      var lc = v.lastCalc || {};
+      return [
+        v.name || '',
+        stageLabels[v.stage||0],
+        v.pop || info['vi-pop'] || '',
+        v.house || info['vi-households'] || '',
+        info['vi-chief'] || '',
+        v.consultant || info['vi-consultant'] || '',
+        info['vi-agree-pct'] || '',
+        lc.kw || v.kw || '',
+        lc.annualGenMWh || '',
+        lc.netRevenue || '',
+        lc.selfPay || '',
+        lc.payback || '',
+        (v.photos||[]).length,
+        info['vi-visit-date'] || '',
+        info['vi-next-visit'] || '',
+        (v.memo || info['vi-memo'] || '').replace(/\s+/g,' '),
+        v._risk || ''
+      ];
+    });
+  return { headers: headers, rows: rows };
+}
+
+function dlVillagesCsv() {
+  var data = _exportVillagesData();
+  function esc(s){ s = String(s == null ? '' : s); if (/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"'; return s; }
+  var lines = [data.headers.map(esc).join(','), ...data.rows.map(function(r){ return r.map(esc).join(','); })];
+  // BOM for Excel 한글
+  var blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '솔라나비_마을현황_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  if (typeof showToast === 'function') showToast('📊 CSV 다운로드 완료 — Excel/Numbers에서 열 수 있습니다', 3000);
+}
+
+async function dlVillagesXlsx() {
+  if (!window.JSZip) { alert('JSZip 라이브러리가 필요합니다 (이미 페이지에 포함됨)'); return; }
+  var data = _exportVillagesData();
+  function escXml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function colLetter(n){ var s=''; while(n>0){ var r=(n-1)%26; s = String.fromCharCode(65+r) + s; n=Math.floor((n-1)/26); } return s; }
+  function cellRef(r, c){ return colLetter(c) + r; }
+  // 시트 XML
+  var headerRow = '<row r="1">' + data.headers.map(function(h, i){
+    return '<c r="' + cellRef(1, i+1) + '" s="1" t="inlineStr"><is><t>' + escXml(h) + '</t></is></c>';
+  }).join('') + '</row>';
+  var bodyRows = data.rows.map(function(row, ri){
+    return '<row r="' + (ri+2) + '">' + row.map(function(v, ci){
+      var isNum = (typeof v === 'number') || (v !== '' && !isNaN(+v) && /^-?\d+(\.\d+)?$/.test(String(v)));
+      if (isNum) return '<c r="' + cellRef(ri+2, ci+1) + '"><v>' + (+v) + '</v></c>';
+      return '<c r="' + cellRef(ri+2, ci+1) + '" t="inlineStr"><is><t>' + escXml(v) + '</t></is></c>';
+    }).join('') + '</row>';
+  }).join('');
+  var sheetXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    + '<sheetData>' + headerRow + bodyRows + '</sheetData>'
+    + '</worksheet>';
+  var workbookXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    + '<sheets><sheet name="마을현황" sheetId="1" r:id="rId1"/></sheets>'
+    + '</workbook>';
+  var workbookRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+    + '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+    + '</Relationships>';
+  var stylesXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    + '<fonts count="2"><font><sz val="11"/><name val="맑은 고딕"/></font><font><sz val="11"/><name val="맑은 고딕"/><b/><color rgb="FFFFFFFF"/></font></fonts>'
+    + '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1A3A6B"/></patternFill></fill></fills>'
+    + '<borders count="1"><border/></borders>'
+    + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+    + '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs>'
+    + '</styleSheet>';
+  var contentTypes = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    + '<Default Extension="xml" ContentType="application/xml"/>'
+    + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    + '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+    + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+    + '</Types>';
+  var rootRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+    + '</Relationships>';
+  var zip = new window.JSZip();
+  zip.file('[Content_Types].xml', contentTypes);
+  zip.file('_rels/.rels', rootRels);
+  zip.file('xl/workbook.xml', workbookXml);
+  zip.file('xl/styles.xml', stylesXml);
+  zip.file('xl/_rels/workbook.xml.rels', workbookRels);
+  zip.file('xl/worksheets/sheet1.xml', sheetXml);
+  var blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '솔라나비_마을현황_' + new Date().toISOString().split('T')[0] + '.xlsx';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  if (typeof showToast === 'function') showToast('📊 Excel 다운로드 완료', 3000);
+}
+
+// 마을 사진 첨부 — dataURL로 마을 객체에 저장 (단순 갤러리)
+function uploadVillagePhotos(input) {
+  if (!selectedVid) { alert('먼저 마을을 선택해주세요'); return; }
+  var v = (villages||[]).find(function(x){return x.id===selectedVid;});
+  if (!v) return;
+  v.photos = v.photos || [];
+  var files = Array.from(input.files || []);
+  if (!files.length) return;
+  var maxBytes = 1.5 * 1024 * 1024;
+  var processed = 0, skipped = 0;
+  files.forEach(function(file){
+    if (!/^image\//.test(file.type)) { skipped++; return; }
+    if (file.size > maxBytes) {
+      // 캔버스로 리사이즈 (긴 변 1200px)
+      var img = new Image();
+      var rdr = new FileReader();
+      rdr.onload = function(e){
+        img.onload = function(){
+          var maxDim = 1200;
+          var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          var cv = document.createElement('canvas');
+          cv.width = Math.round(img.width * scale);
+          cv.height = Math.round(img.height * scale);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          var dataUrl = cv.toDataURL('image/jpeg', 0.85);
+          v.photos.push({ name: file.name, ts: Date.now(), data: dataUrl, w: cv.width, h: cv.height });
+          processed++;
+          if (processed + skipped === files.length) finish();
+        };
+        img.src = e.target.result;
+      };
+      rdr.readAsDataURL(file);
+    } else {
+      var rdr2 = new FileReader();
+      rdr2.onload = function(e){
+        v.photos.push({ name: file.name, ts: Date.now(), data: e.target.result });
+        processed++;
+        if (processed + skipped === files.length) finish();
+      };
+      rdr2.readAsDataURL(file);
+    }
+  });
+  function finish() {
+    if ((window.safeSaveLocal||function(k,v){localStorage.setItem(k,v);return true;})('hsv_villages', JSON.stringify(villages))) {
+      if (typeof showToast === 'function') showToast('🖼 ' + processed + '장 추가 완료' + (skipped ? ' (' + skipped + '장 건너뜀)' : ''), 3000);
+      renderVillagePhotos();
+    }
+    input.value = '';
+  }
+}
+
+function renderVillagePhotos() {
+  var container = document.getElementById('village-photos');
+  if (!container) return;
+  if (!selectedVid) { container.innerHTML = ''; return; }
+  var v = (villages||[]).find(function(x){return x.id===selectedVid;});
+  if (!v || !v.photos || !v.photos.length) {
+    container.innerHTML = '<div style="font-size:12px;color:#888;padding:12px 0">아직 사진이 없습니다. 위 버튼으로 부지·현장·총회 사진을 첨부해보세요.</div>';
+    return;
+  }
+  container.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">'
+    + v.photos.map(function(p, i){
+      return '<div style="position:relative"><img src="' + p.data + '" style="width:100%;height:100px;object-fit:cover;border-radius:6px;border:1px solid #ddd;cursor:pointer" onclick="openVillagePhotoLightbox(' + i + ')"><button onclick="deleteVillagePhoto(' + i + ')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:14px;cursor:pointer">×</button></div>';
+    }).join('') + '</div>';
+}
+
+function deleteVillagePhoto(idx) {
+  if (!confirm('이 사진을 삭제할까요?')) return;
+  if (!selectedVid) return;
+  var v = (villages||[]).find(function(x){return x.id===selectedVid;});
+  if (!v || !v.photos) return;
+  v.photos.splice(idx, 1);
+  (window.safeSaveLocal||function(k,v){localStorage.setItem(k,v);return true;})('hsv_villages', JSON.stringify(villages));
+  renderVillagePhotos();
+}
+
+function openVillagePhotoLightbox(idx) {
+  if (!selectedVid) return;
+  var v = (villages||[]).find(function(x){return x.id===selectedVid;});
+  if (!v || !v.photos || !v.photos[idx]) return;
+  var p = v.photos[idx];
+  var html = '<div id="photo-lightbox" style="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out" onclick="this.remove()"><img src="' + p.data + '" style="max-width:95vw;max-height:95vh;border-radius:8px;box-shadow:0 8px 40px rgba(255,255,255,.1)"><button style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:50%;width:40px;height:40px;font-size:22px;cursor:pointer">×</button></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// 일정 캘린더 (PRO 대시보드) — 공모 일정 + 마을별 방문/총회 등
+function openScheduleModal() {
+  var existing = document.getElementById('schedule-modal');
+  if (existing) { existing.remove(); return; }
+  var today = new Date();
+  var events = [];
+  // 공모 핵심 일정
+  events.push({ date: new Date('2026-03-31'), label: '공고일·자격 기준일', type: 'milestone', icon: '📢' });
+  events.push({ date: new Date('2026-05-31'), label: '1차 공모 마감 (협동조합 등기 + 서식1~4 + 기타증빙 제출)', type: 'deadline', icon: '⏰' });
+  events.push({ date: new Date('2026-07-31'), label: '1차 선정 결과 발표 / 2차 공모 마감', type: 'milestone', icon: '📋' });
+  events.push({ date: new Date('2026-09-18'), label: '이격거리 예외조항 시행 (신재생에너지법 27조의3)', type: 'milestone', icon: '⚖️' });
+  events.push({ date: new Date('2026-09-30'), label: '2차 선정 결과 발표', type: 'milestone', icon: '📋' });
+  events.push({ date: new Date('2027-01-31'), label: '선정 후 6개월 — 발전사업허가 필수 (선정 통보 후 6개월 내)', type: 'milestone', icon: '⚡' });
+  // 마을별 방문/계획 일정
+  (typeof villages !== 'undefined' ? villages : []).forEach(function(v){
+    var info = v.info || {};
+    if (info['vi-visit-date']) {
+      events.push({ date: new Date(info['vi-visit-date']), label: v.name + ' — 첫 방문', village: v.id, type: 'village', icon: '🚗' });
+    }
+    if (info['vi-next-visit']) {
+      events.push({ date: new Date(info['vi-next-visit']), label: v.name + ' — 다음 방문 예정', village: v.id, type: 'village', icon: '📅' });
+    }
+    if (info['vi-assembly-date']) {
+      events.push({ date: new Date(info['vi-assembly-date']), label: v.name + ' — 마을총회 예정', village: v.id, type: 'village', icon: '🏛️' });
+    }
+  });
+  events = events.filter(function(e){ return !isNaN(e.date.getTime()); });
+  // 오늘 이후만 + 과거 14일 (놓친 일정)
+  var cutoff = new Date(today.getTime() - 14*86400000);
+  events = events.filter(function(e){ return e.date >= cutoff; });
+  events.sort(function(a,b){ return a.date - b.date; });
+  function ddayLabel(d) {
+    var diff = Math.ceil((d - today) / 86400000);
+    if (diff < 0) return '<span style="color:#999">' + Math.abs(diff) + '일 지남</span>';
+    if (diff === 0) return '<span style="color:#C0392B;font-weight:700">오늘</span>';
+    if (diff <= 7) return '<span style="color:#E67E22;font-weight:700">D-' + diff + '</span>';
+    if (diff <= 30) return '<span style="color:#F39C12">D-' + diff + '</span>';
+    return '<span style="color:#666">D-' + diff + '</span>';
+  }
+  var rows = events.map(function(e){
+    var dateStr = e.date.getFullYear() + '.' + (e.date.getMonth()+1) + '.' + e.date.getDate();
+    var clickAttr = e.village ? ' style="cursor:pointer" onclick="document.getElementById(\'schedule-modal\').remove();go(\'villages\');selectVillage(\''+e.village+'\')"' : '';
+    return '<tr' + clickAttr + '><td style="text-align:center;font-size:18px">' + e.icon + '</td>'
+      + '<td style="white-space:nowrap">' + dateStr + '</td>'
+      + '<td style="text-align:center">' + ddayLabel(e.date) + '</td>'
+      + '<td>' + e.label + '</td></tr>';
+  }).join('');
+  var modalHtml = '<div id="schedule-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:800px;width:100%;max-height:88vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0;color:#1A3A6B">📅 통합 일정 캘린더</h2><button onclick="document.getElementById(\'schedule-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="font-size:12px;color:#666;margin-bottom:10px">공모 핵심 일정 + 마을별 방문·총회 일정 통합 · 마을 일정 행 클릭 시 해당 마을로 이동</div>'
+    + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">'
+    + '<thead><tr style="background:#FFF4E0;border-bottom:2px solid #F39C12"><th style="padding:8px">유형</th><th style="padding:8px;text-align:left">날짜</th><th style="padding:8px">D-day</th><th style="padding:8px;text-align:left">이벤트</th></tr></thead>'
+    + '<tbody>' + (rows || '<tr><td colspan="4" style="padding:24px;text-align:center;color:#888">예정된 일정이 없습니다. 마을 기초정보에 다음 방문일·총회일을 입력해주세요.</td></tr>') + '</tbody></table></div>'
+    + '<div style="margin-top:14px;font-size:11px;color:#888">💡 마을 기초정보의 첫 방문일·다음 방문 예정일·마을총회일이 자동으로 표시됩니다.</div>'
+    + '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+// 마을 비교 표 토글 (PRO 대시보드)
+function toggleVillageCompare() {
+  var existing = document.getElementById('village-compare-modal');
+  if (existing) { existing.remove(); return; }
+  var stageLabels = ['STEP1 첫방문','STEP2 주민조직','STEP3 협동조합','STEP4 발전소','STEP5 공모신청','STEP6 발전소건설','STEP7 협동조합운영'];
+  var rows = (typeof villages !== 'undefined' && villages || []).slice()
+    .sort(function(a,b){ return (b._risk||0) - (a._risk||0) || (a.stage||0) - (b.stage||0); })
+    .map(function(v) {
+      var info = v.info || {};
+      var lc = v.lastCalc || {};
+      var agree = +info['vi-agree-pct'] || 0;
+      var dday = '—';
+      if (info['vi-next-visit']) {
+        var nd = new Date(info['vi-next-visit']);
+        dday = 'D' + (Math.ceil((nd - new Date()) / 86400000) >= 0 ? '-' : '+') + Math.abs(Math.ceil((nd - new Date()) / 86400000));
+      }
+      var stage = v.stage || 0;
+      var risk = v._risk || 0;
+      var riskBadge = risk >= 40 ? '🚨' : risk >= 20 ? '⚠' : risk >= 8 ? '🟡' : '✅';
+      var netRev = lc.netRevenue ? lc.netRevenue.toLocaleString() + '만' : '—';
+      var kw = lc.kw || v.kw || '—';
+      return '<tr style="cursor:pointer" onclick="document.getElementById(\'village-compare-modal\').remove();go(\'villages\');selectVillage(\''+v.id+'\')">'
+        + '<td style="text-align:center">' + riskBadge + '</td>'
+        + '<td><b>' + (v.name||'-') + '</b></td>'
+        + '<td>' + stageLabels[stage] + '</td>'
+        + '<td style="text-align:right">' + (v.pop || info['vi-pop'] || '-') + '명</td>'
+        + '<td style="text-align:right">' + (agree ? agree + '%' : '-') + '</td>'
+        + '<td style="text-align:right">' + (kw === '—' ? '—' : kw + 'kW') + '</td>'
+        + '<td style="text-align:right;color:#27AE60;font-weight:700">' + netRev + '</td>'
+        + '<td style="text-align:center">' + (v.consultant || '-') + '</td>'
+        + '<td style="text-align:center">' + dday + '</td>'
+        + '</tr>';
+    }).join('');
+  var modalHtml = '<div id="village-compare-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:1100px;width:100%;max-height:88vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0;color:#1A3A6B">📊 마을 비교 대시보드</h2><button onclick="document.getElementById(\'village-compare-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="font-size:12px;color:#666;margin-bottom:10px">위험도(🚨>⚠>🟡>✅) 내림차순 정렬 · 행 클릭 시 마을 상세로 이동</div>'
+    + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:900px">'
+    + '<thead><tr style="background:#FFF4E0;border-bottom:2px solid #F39C12">'
+    + '<th style="padding:10px">위험</th>'
+    + '<th style="padding:10px;text-align:left">마을명</th>'
+    + '<th style="padding:10px;text-align:left">현재 단계</th>'
+    + '<th style="padding:10px;text-align:right">주민수</th>'
+    + '<th style="padding:10px;text-align:right">동의률</th>'
+    + '<th style="padding:10px;text-align:right">목표용량</th>'
+    + '<th style="padding:10px;text-align:right">연 순수익</th>'
+    + '<th style="padding:10px">담당</th>'
+    + '<th style="padding:10px">다음일정</th>'
+    + '</tr></thead><tbody>' + (rows || '<tr><td colspan="9" style="padding:24px;text-align:center;color:#888">마을이 없습니다</td></tr>') + '</tbody></table></div>'
+    + '<div style="margin-top:14px;font-size:11px;color:#888">💡 행 클릭으로 마을 상세, 위험도는 D-day vs 단계 미스매치·동의률·담당 배정·정체 기간 기반</div>'
+    + '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+// STEP6 배분계획 표에 계산기 값 자동 적용
+function applyCalcToDistTable(opts) {
+  opts = opts || {};
+  var v = (typeof selectedVid !== 'undefined' && selectedVid && typeof villages !== 'undefined')
+    ? (villages||[]).find(function(x){return x.id===selectedVid;}) : null;
+  if (!v || !v.lastCalc) {
+    if (!opts.silent && typeof showToast === 'function') showToast('먼저 「STEP1 → 수익성 계산기」에서 값을 입력해주세요', 4000);
+    return;
+  }
+  var c = v.lastCalc;
+  var set = function(id, pct){
+    var el = document.getElementById(id);
+    if (!el) return;
+    var amt = c.netRevenue ? Math.round(c.netRevenue * pct / 100).toLocaleString() : '';
+    el.innerHTML = pct + '%' + (amt ? ' <span style="color:#888;font-size:11px">(약 '+amt+'만원/년)</span>' : '');
+  };
+  set('dist-fund-pct', c.df);
+  set('dist-weak-pct', c.dw);
+  set('dist-maint-pct', c.dm);
+  set('dist-ops-pct', c.dops);
+  if (!opts.silent && typeof showToast === 'function') {
+    showToast('✅ 수익성 계산기 값(연간 순수익 ' + (c.netRevenue||0).toLocaleString() + '만원) 적용', 3500);
   }
 }
 
@@ -7607,6 +8204,29 @@ function calcUpdate() {
   document.getElementById('r-revenue').textContent = totalRevenue.toLocaleString();
   document.getElementById('r-net').textContent = netRevenue.toLocaleString();
   document.getElementById('r-payback').textContent = payback;
+
+  // 마을 객체에 결과 스냅샷 저장 → STEP6 배분계획·사업계획서·정관 등에서 자동 참조
+  if (typeof selectedVid !== 'undefined' && selectedVid && typeof villages !== 'undefined') {
+    var _v = (villages||[]).find(function(x){return x.id===selectedVid;});
+    if (_v) {
+      var df0 = +(document.getElementById('d-fund')||{value:40}).value;
+      var dw0 = +(document.getElementById('d-weak')||{value:40}).value;
+      var dm0 = +(document.getElementById('d-maint')||{value:10}).value;
+      var dops0 = +(document.getElementById('d-ops')||{value:10}).value;
+      _v.lastCalc = {
+        kw: kw, sun: sun, smp: smp, rec: rec, wt: wt,
+        annualGenMWh: Math.round(annualGenMWh),
+        totalRevenue: totalRevenue, netRevenue: netRevenue,
+        selfPay: selfPay, payback: payback,
+        unitCost: unitCost, selfRatio: selfRatio,
+        totalInvest: Math.round(kw * unitCost),
+        df: df0, dw: dw0, dm: dm0, dops: dops0,
+        updatedAt: new Date().toISOString()
+      };
+      // 저장은 가벼우니 즉시 (실패해도 무음 — 슬라이더 끊김 방지)
+      try { localStorage.setItem('hsv_villages', JSON.stringify(villages)); } catch(e){}
+    }
+  }
 
   distUpdate(netRevenue);
 
@@ -9649,6 +10269,21 @@ function renderDash() {
   var sortedV = villages.slice().map(function(v){return Object.assign({}, v, {_risk: riskScore(v)});})
     .sort(function(a,b){ return b._risk - a._risk || (a.stage||0) - (b.stage||0); });
 
+  // 도구 버튼들 (다중 마을일 때만 비교, 일정은 항상 표시)
+  var existingToggle = document.getElementById('dash-toolbar');
+  if (!existingToggle) {
+    var compareBtn = (villages.length > 1)
+      ? '<button onclick="toggleVillageCompare()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📊 마을 비교 표</button>'
+      : '';
+    var toolbarHtml = '<div id="dash-toolbar" style="display:flex;justify-content:flex-end;margin-bottom:8px;gap:6px;flex-wrap:wrap">'
+      + '<button onclick="openScheduleModal()" style="background:#E67E22;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📅 일정 캘린더</button>'
+      + compareBtn
+      + '<button onclick="dlVillagesXlsx()" style="background:#27AE60;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📊 Excel 내보내기</button>'
+      + '<button onclick="dlVillagesCsv()" style="background:transparent;color:#666;border:1px solid #ccc;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">CSV</button>'
+      + '</div>';
+    container.insertAdjacentHTML('beforebegin', toolbarHtml);
+  }
+
   container.innerHTML = sortedV.map(function(v) {
     var info = v.info || {};
     var agree = +info['vi-agree-pct'] || 0;
@@ -10064,7 +10699,7 @@ function importVillages(input) {
         else { merged = data.villages; }
       } else { merged = data.villages; }
       villages = merged;
-      localStorage.setItem('hsv_villages', JSON.stringify(villages));
+      if (!(window.safeSaveLocal || function(k,v){localStorage.setItem(k,v);return true;})('hsv_villages', JSON.stringify(villages))) return;
       renderVillages(); renderDash(); updateVillageCountLabel();
       alert(data.villages.length+'개 마을을 가져왔습니다.');
     } catch(err) { alert('파일 오류: '+err.message); }
@@ -10165,21 +10800,72 @@ function saveVillage() {
     data.id = 'v' + Date.now();
     villages.push(data);
   }
-  localStorage.setItem('hsv_villages', JSON.stringify(villages));
+  (window.safeSaveLocal || function(k,v){localStorage.setItem(k,v);return true;})('hsv_villages', JSON.stringify(villages));
   closeModal();
   renderVillages();
   renderDash();
   if(typeof refreshAllVillageDependents==="function")refreshAllVillageDependents();
 }
 
+window._lastDeletedVillage = null;
+window._lastDeletedVillageIdx = -1;
+
 function deleteVillage(id) {
-  if (!confirm('이 마을을 삭제할까요?')) return;
+  const target = villages.find(v => v.id === id);
+  if (!target) return;
+  const name = target.name || '이 마을';
+  const stage = target.stage || 0;
+  const stageLabel = ['STEP1 첫방문','STEP2 주민조직','STEP3 협동조합','STEP4 발전소','STEP5 공모신청','STEP6 발전소건설','STEP7 협동조합운영'][stage] || '';
+  const docs = Object.keys(target.info||{}).length;
+  const warn = '⚠ 「' + name + '」 마을을 정말 삭제할까요?\n\n'
+             + '• 현재 단계: ' + stageLabel + '\n'
+             + '• 입력 정보 항목: ' + docs + '개\n\n'
+             + '삭제 후 5초 안에 토스트의 "되돌리기" 버튼으로 복구할 수 있어요.\n'
+             + '5초 후엔 영구 삭제됩니다.';
+  if (!confirm(warn)) return;
+  // 백업
+  const idx = villages.findIndex(v => v.id === id);
+  window._lastDeletedVillage = JSON.parse(JSON.stringify(target));
+  window._lastDeletedVillageIdx = idx;
   villages = villages.filter(v => v.id !== id);
-  localStorage.setItem('hsv_villages', JSON.stringify(villages));
+  try { localStorage.setItem('hsv_villages', JSON.stringify(villages)); }
+  catch(e) { if (typeof showToast === 'function') showToast('⚠ 저장 실패: 브라우저 저장공간이 가득찼을 수 있습니다', 4000); }
   selectedVid = null;
-  document.getElementById('village-detail').style.display = 'none';
+  const det = document.getElementById('village-detail'); if (det) det.style.display = 'none';
   renderVillages();
-  renderDash();
+  if (typeof renderDash === 'function') renderDash();
+  // 토스트에 Undo 버튼 (showToast가 HTML 지원 안 하면 일반 confirm 폴백)
+  const undoToast = document.getElementById('undo-toast') || (function(){
+    const t = document.createElement('div');
+    t.id = 'undo-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:12px 20px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.3);z-index:9999;font-size:13px;display:none;align-items:center;gap:12px;font-family:inherit';
+    document.body.appendChild(t);
+    return t;
+  })();
+  undoToast.innerHTML = '🗑 「' + name + '」 삭제됨 <button onclick="undoDeleteVillage()" style="background:#F39C12;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;margin-left:6px;font-family:inherit">↶ 되돌리기</button>';
+  undoToast.style.display = 'flex';
+  clearTimeout(window._undoToastTimer);
+  window._undoToastTimer = setTimeout(function(){
+    if (undoToast) undoToast.style.display = 'none';
+    window._lastDeletedVillage = null;
+  }, 5000);
+}
+
+function undoDeleteVillage() {
+  if (!window._lastDeletedVillage) return;
+  const v = window._lastDeletedVillage;
+  const idx = window._lastDeletedVillageIdx;
+  if (idx >= 0 && idx <= villages.length) villages.splice(idx, 0, v);
+  else villages.push(v);
+  try { localStorage.setItem('hsv_villages', JSON.stringify(villages)); } catch(e) {}
+  window._lastDeletedVillage = null;
+  window._lastDeletedVillageIdx = -1;
+  const t = document.getElementById('undo-toast');
+  if (t) t.style.display = 'none';
+  clearTimeout(window._undoToastTimer);
+  renderVillages();
+  if (typeof renderDash === 'function') renderDash();
+  if (typeof showToast === 'function') showToast('✅ 「' + (v.name||'마을') + '」 복구 완료', 2500);
 }
 
 function closeModal() {
@@ -10613,7 +11299,7 @@ async function genDoc(type) {
       v.docCount = (v.docCount || 0) + 1;
       v.lastDocAt = new Date().toISOString();
       v.lastDocType = docTypes[type].title;
-      localStorage.setItem('hsv_villages', JSON.stringify(villages));
+      (window.safeSaveLocal || function(k,v){localStorage.setItem(k,v);return true;})('hsv_villages', JSON.stringify(villages));
     }
   }
 }
@@ -11000,8 +11686,25 @@ const readinessItems = [
 
 function renderReadiness() {
   const container = document.getElementById('readiness-checks');
-  if (!container || container.children.length > 0) return;
-  const stepColors = {STEP2:'var(--gr)',STEP3:'var(--ac)',STEP4:'var(--org)',STEP5:'var(--pu)'};
+  if (!container) return;
+  // 마을 단계 기준 배지 (다시 호출 시 재렌더)
+  const v = (typeof selectedVid !== 'undefined' && selectedVid && typeof villages !== 'undefined')
+    ? (villages||[]).find(function(x){return x.id===selectedVid;}) : null;
+  const curStage = v ? (v.stage || 0) : -1;
+  // stage 매핑: 0→STEP1, 1→STEP2, 2→STEP3, 3→STEP4, 4→STEP5
+  function stageNumFromLabel(label) {
+    var m = (label||'').match(/STEP\s*(\d+)/);
+    return m ? +m[1] - 1 : -1;
+  }
+  function badgeFor(itemStep) {
+    var n = stageNumFromLabel(itemStep);
+    if (n < 0 || curStage < 0) return '';
+    if (n === curStage) return '<span style="background:#FFE4D0;color:#A04000;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">🔥 지금</span>';
+    if (n === curStage + 1) return '<span style="background:#FEF3D0;color:#7A5A00;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">📅 다음</span>';
+    if (n < curStage) return '<span style="background:#E8F8F5;color:#117864;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:6px">✅ 완료 단계</span>';
+    return '';
+  }
+  const stepColors = {STEP1:'var(--sun)',STEP2:'var(--gr)',STEP3:'var(--ac)',STEP4:'var(--org)',STEP5:'var(--pu)'};
   container.innerHTML = readinessItems.map(item => `
     <div class="chk-item" id="chki-${item.id}" onclick="toggleChk('${item.id}')">
       <div class="chk-box" id="chkb-${item.id}"></div>
@@ -11009,6 +11712,7 @@ function renderReadiness() {
         ${item.label}
         <span style="font-size:11px;color:${stepColors[item.step]||'var(--mu)'};margin-left:5px;font-weight:700">${item.step}</span>
         <span style="font-size:11px;color:var(--mu);margin-left:4px">${item.points}점 관련</span>
+        ${badgeFor(item.step)}
       </div>
     </div>`).join('');
 }
@@ -12087,7 +12791,32 @@ function dlMinTxt() {
   a.download = '회의록.txt'; a.click();
 }
 
+// 공용 필수 필드 검증: type별로 어떤 필드가 비어 있으면 안 되는지 정의
+function _validateBeforeGenDoc(type) {
+  var v = (typeof selectedVid !== 'undefined' && selectedVid && typeof villages !== 'undefined')
+    ? (villages||[]).find(function(x){return x.id===selectedVid;}) : null;
+  var info = (v && v.info) || {};
+  var missing = [];
+  var villageName = (v && v.name) || info['vi-name'] || '';
+  var chief = info['vi-chief'] || '';
+  var pop = info['vi-pop'] || (v && v.pop) || '';
+  // 공통: 마을명·이장은 거의 모든 서류에 필요
+  if (!villageName) missing.push('마을명');
+  if (['assembly','consent','founding','charter','official','notice','report','coop_bizplan'].indexOf(type) >= 0) {
+    if (!chief) missing.push('이장 성명');
+  }
+  if (['assembly','consent','coop_bizplan','founding'].indexOf(type) >= 0) {
+    if (!pop) missing.push('총 주민수');
+  }
+  if (missing.length) {
+    var msg = '⚠ 다음 정보를 먼저 입력해주세요:\n\n  • ' + missing.join('\n  • ') + '\n\n매뉴얼북 「STEP1 → 마을 기초정보 입력」에서 채울 수 있어요.\n\n그대로 빈 칸으로 생성할까요? (서식의 OO 부분이 그대로 남습니다)';
+    return confirm(msg);
+  }
+  return true;
+}
+
 async function genDocWd(step, type) {
+  if (!_validateBeforeGenDoc(type)) return;
   var resultEl = document.getElementById('wd-result-' + step);
   var editEl = document.getElementById('wd-edit-' + step);
   var actionsEl = document.getElementById('wd-actions-' + step);
@@ -12152,6 +12881,7 @@ async function genDocWd(step, type) {
 }
 
 async function genMinutes() {
+  if (!_validateBeforeGenDoc('assembly')) return;
   var resultEl = document.getElementById('min-result');
   var editEl = document.getElementById('min-edit');
   var actionsEl = document.getElementById('min-result-actions');
