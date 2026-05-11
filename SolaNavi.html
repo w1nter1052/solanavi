@@ -1810,40 +1810,65 @@ if (CLOUD_ENABLED) {
           <div class="calc-row" style="margin-bottom:13px">
             <label class="calc-label">📍 지역 선택</label>
             <select id="c-region" onchange="applyRegion()" style="flex:1;border:1px solid var(--bdr);border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;background:var(--grn-l);color:var(--grn);font-weight:700">
-              <option value="">-- 전남 시군 선택 --</option>
-              <optgroup label="🌟 일조 최상위 (3.8h↑)">
-                <option value="3.95">해남군 (3.95h — 전남 1위)</option>
-                <option value="3.90">진도군 (3.90h)</option>
-                <option value="3.88">완도군 (3.88h)</option>
-                <option value="3.85">신안군 (3.85h)</option>
-                <option value="3.82">고흥군 (3.82h)</option>
-                <option value="3.80">강진군 (3.80h)</option>
+              <option value="">-- 지역 선택 (전국 시도/시군) --</option>
+              <optgroup label="🌟 일조 최상위 시군 (3.8h↑)">
+                <option value="3.95">전남 해남군 (3.95h — 전남 1위)</option>
+                <option value="3.90">전남 진도군 (3.90h)</option>
+                <option value="3.88">전남 완도군 (3.88h)</option>
+                <option value="3.85">전남 신안군 (3.85h)</option>
+                <option value="3.82">전남 고흥군 (3.82h)</option>
+                <option value="3.80">전남 강진군 (3.80h)</option>
+                <option value="3.80">제주 서귀포 (3.80h)</option>
               </optgroup>
-              <optgroup label="✅ 일조 양호 (3.6~3.8h)">
-                <option value="3.75">영암군 (3.75h)</option>
-                <option value="3.72">장흥군 (3.72h)</option>
-                <option value="3.70">보성군 (3.70h)</option>
-                <option value="3.68">나주시 (3.68h)</option>
-                <option value="3.65">함평군 (3.65h)</option>
-                <option value="3.63">영광군 (3.63h)</option>
-                <option value="3.60">무안군 (3.60h)</option>
+              <optgroup label="✅ 일조 양호 시군 (3.6~3.8h)">
+                <option value="3.78">제주시 (3.78h)</option>
+                <option value="3.75">전남 영암군 (3.75h)</option>
+                <option value="3.72">전남 장흥군 (3.72h)</option>
+                <option value="3.70">전남 보성군 (3.70h)</option>
+                <option value="3.70">부산 (3.70h)</option>
+                <option value="3.70">대구 (3.70h)</option>
+                <option value="3.70">울산 (3.70h)</option>
+                <option value="3.70">경북 포항 (3.70h)</option>
+                <option value="3.68">전남 나주시 (3.68h)</option>
+                <option value="3.65">전남 함평군 (3.65h)</option>
+                <option value="3.65">경북 안동 (3.65h)</option>
+                <option value="3.63">전남 영광군 (3.63h)</option>
+                <option value="3.60">전남 무안군 (3.60h)</option>
+                <option value="3.60">광주 (3.60h)</option>
               </optgroup>
-              <optgroup label="📍 일조 보통 (3.4~3.6h)">
-                <option value="3.58">순천시 (3.58h)</option>
-                <option value="3.55">여수시 (3.55h)</option>
-                <option value="3.50">목포시 (3.50h)</option>
-                <option value="3.48">담양군 (3.48h)</option>
-                <option value="3.45">화순군 (3.45h)</option>
-                <option value="3.42">구례군 (3.42h)</option>
+              <optgroup label="📍 일조 보통 시군 (3.4~3.6h)">
+                <option value="3.58">전남 순천시 (3.58h)</option>
+                <option value="3.55">전남 여수시 (3.55h)</option>
+                <option value="3.55">충남 보령 (3.55h)</option>
+                <option value="3.55">강원 강릉 (3.55h)</option>
+                <option value="3.50">전남 목포시 (3.50h)</option>
+                <option value="3.50">충북 충주 (3.50h)</option>
+                <option value="3.50">대전 (3.50h)</option>
+                <option value="3.50">세종 (3.50h)</option>
+                <option value="3.48">전남 담양군 (3.48h)</option>
+                <option value="3.45">전남 화순군 (3.45h)</option>
+                <option value="3.45">전북 군산 (3.45h)</option>
+                <option value="3.42">전남 구례군 (3.42h)</option>
+                <option value="3.40">경기 (3.40h)</option>
+                <option value="3.40">인천 (3.40h)</option>
               </optgroup>
-              <optgroup label="🗺 기타">
+              <optgroup label="📊 광역 시도 평균">
+                <option value="3.80">제주도 평균 (3.80h)</option>
+                <option value="3.70">경북 평균 (3.70h)</option>
+                <option value="3.65">경남 평균 (3.65h)</option>
                 <option value="3.60">전남 평균 (3.60h)</option>
+                <option value="3.60">강원 평균 (3.60h)</option>
+                <option value="3.55">충남 평균 (3.55h)</option>
+                <option value="3.50">충북 평균 (3.50h)</option>
+                <option value="3.50">대전 평균 (3.50h)</option>
                 <option value="3.45">전북 평균 (3.45h)</option>
-                <option value="3.30">경남 평균 (3.30h)</option>
+                <option value="3.40">경기 평균 (3.40h)</option>
+                <option value="3.40">인천 평균 (3.40h)</option>
+                <option value="3.30">서울 평균 (3.30h)</option>
               </optgroup>
             </select>
           </div>
-          <div class="calc-row"><label class="calc-label">설치 용량 (kW)</label><div class="calc-input-wrap"><input type="range" id="c-kw" min="300" max="1000" value="500" step="50" oninput="calcUpdate()"><span class="calc-val" id="c-kw-v">500 kW</span></div></div>
+          <div class="calc-row"><label class="calc-label">설치 용량 (kW)</label><div class="calc-input-wrap"><input type="range" id="c-kw" min="100" max="5000" value="500" step="10" oninput="document.getElementById('c-kw-num').value=this.value;calcUpdate()"><input type="number" id="c-kw-num" min="50" max="20000" value="500" step="10" style="width:80px;border:1px solid var(--bdr);border-radius:6px;padding:3px 6px;font-size:12px;font-family:inherit;text-align:right" oninput="document.getElementById('c-kw').value=Math.min(5000,Math.max(100,this.value));calcUpdate()"><span class="calc-val" id="c-kw-v" style="min-width:60px">500 kW</span></div></div>
           <div class="calc-row"><label class="calc-label">일조시간</label><div class="calc-input-wrap"><input type="range" id="c-sun" min="2.8" max="4.2" value="3.6" step="0.05" oninput="calcUpdate()"><span class="calc-val" id="c-sun-v">3.60 h/일</span></div></div>
           <div style="background:#F8F7F3;border-radius:7px;padding:8px 12px;margin:8px 0 10px;font-size:11px;color:var(--sft)">💡 <strong>SMP</strong>: 전력 판매 단가(원/kWh). 유가 연동 월 변동. 최근 3년 평균 100~130원대</div>
           <div class="calc-row"><label class="calc-label">SMP 단가</label><div class="calc-input-wrap"><input type="range" id="c-smp" min="60" max="160" value="110" step="1" oninput="calcUpdate()"><span class="calc-val" id="c-smp-v">110 원</span></div></div>
@@ -1913,6 +1938,10 @@ if (CLOUD_ENABLED) {
       </div>
       <div style="margin:4px 0 14px;padding:12px 15px;background:#FFF8F0;border:1px solid #F0D8B0;border-radius:9px;font-size:11px;color:#7A6040;line-height:1.8">
         ⚠️ <strong>수익 시뮬레이션 면책 고지</strong> — 본 수치는 참고용 추정치입니다. 실제 수익은 지역 일사량·SMP/REC 시장가격·계통연계 조건·운영사 계약 조건 등에 따라 크게 달라질 수 있습니다. 정확한 수익 예측은 <strong>한국에너지공단 및 전문 발전사업자 검토</strong>를 받으시기 바랍니다.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px;justify-content:flex-end">
+        <button onclick="dlCalcReport()" style="background:#1A5276;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📝 수익성 리포트 Word 다운로드</button>
+        <button onclick="dlCalcReportHwp()" style="background:#00A86B;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🇰🇷 한글로 다운로드</button>
       </div>
       <div class="nav-btns">
         <button class="next-btn" onclick="manualGo('s1-info')">다음 → 📝 마을 기초정보 입력</button>
@@ -6865,8 +6894,7 @@ const DOCX = {
 };
 
 function dlBpDocx() { dlDocDocx(); }
-function dlDocx(key) {
-/* 공식 한글(HWP/HWPX) 서식 출처 URL 매핑 */
+/* 공식 한글(HWP/HWPX) 서식 출처 URL 매핑 — 최후 폴백용 */
 const HWP_URLS = {
   /* 공고문 붙임서식 — 행안부 공식 공고 첨부파일 다운로드 페이지 */
   checklist:  'https://www.mois.go.kr/frt/bbs/type010/commonSelectBoardArticle.do?bbsId=BBSMSTR_000000000008&nttId=124882',
@@ -6877,14 +6905,28 @@ const HWP_URLS = {
   apply2:     'https://www.mois.go.kr/frt/bbs/type010/commonSelectBoardArticle.do?bbsId=BBSMSTR_000000000008&nttId=124882',
   privacy4:   'https://www.mois.go.kr/frt/bbs/type010/commonSelectBoardArticle.do?bbsId=BBSMSTR_000000000008&nttId=124882',
   gov4:       'https://www.mois.go.kr/frt/bbs/type010/commonSelectBoardArticle.do?bbsId=BBSMSTR_000000000008&nttId=124882',
-  /* 협동조합 설립 법정서식 — 국가법령정보센터 별지서식 */
-  coop_setup:   'https://www.law.go.kr/lsInfoP.do?lsiSeq=233805#J3:0', /* 별지 제1호서식 설립신고서 */
-  coop_minutes: 'https://www.coop.go.kr/home/boardView.do?menu_no=2086&brd_mgrno=110&brd_no=13794', /* 창립총회의사록 */
-  coop_accept:  'https://www.coop.go.kr/home/boardView.do?menu_no=2086&brd_mgrno=110&brd_no=13794', /* 취임승낙서 */
-  coop_pay:     'https://www.coop.go.kr/home/boardView.do?menu_no=2086&brd_mgrno=110&brd_no=13794', /* 출자금납입확인서 */
-  coop_social:  'https://www.coop.go.kr/home/contentsInfo.do?menu_no=2017', /* 사회적협동조합 안내 */
+  /* 협동조합 설립 법정서식 */
+  coop_setup:   'https://www.law.go.kr/lsInfoP.do?lsiSeq=233805#J3:0',
+  coop_minutes: 'https://www.coop.go.kr/home/boardView.do?menu_no=2086&brd_mgrno=110&brd_no=13794',
+  coop_accept:  'https://www.coop.go.kr/home/boardView.do?menu_no=2086&brd_mgrno=110&brd_no=13794',
+  coop_pay:     'https://www.coop.go.kr/home/boardView.do?menu_no=2086&brd_mgrno=110&brd_no=13794',
+  coop_social:  'https://www.coop.go.kr/home/contentsInfo.do?menu_no=2017',
   charter:      'https://www.coop.go.kr/home/boardView.do?menu_no=2086&brd_mgrno=110&brd_no=13794',
 };
+
+function dlDocx(key) {
+  const d = (typeof DOCX !== 'undefined') ? DOCX[key] : null;
+  if (!d) { if (typeof dlDoc === 'function') dlDoc(key); return; }
+  const bin = atob(d.b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i=0; i<bin.length; i++) arr[i]=bin.charCodeAt(i);
+  const blob = new Blob([arr], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = d.name; a.click();
+  URL.revokeObjectURL(url);
+}
+
 function dlHwp(key) {
   // 1) 사전 등록 OOXML이 있으면 그것을 .docx로 제공 (한컴에서 .hwpx 1-클릭 변환 가능)
   if (typeof DOCX !== 'undefined' && DOCX[key]) {
@@ -6907,21 +6949,10 @@ function dlHwp(key) {
     if (typeof showToast === 'function') showToast('🇰🇷 한컴오피스에서 열어 「한글 문서(*.hwpx)」로 저장하면 변환됩니다', 5500);
     return;
   }
-  // 3) 최후 폴백: 행안부 공고 안내
-  const url = (typeof HWP_URLS !== 'undefined' && HWP_URLS[key]) || 'https://www.mois.go.kr';
+  // 3) 최후 폴백: 공식 공고 페이지
+  const url = HWP_URLS[key] || 'https://www.mois.go.kr';
   if (typeof showToast === 'function') showToast('해당 서식의 공식 한글 파일을 새 탭에서 엽니다', 3000);
   window.open(url,'_blank');
-}
-  const d = DOCX[key];
-  if (!d) { dlDoc(key); return; }
-  const bin = atob(d.b64);
-  const arr = new Uint8Array(bin.length);
-  for (let i=0; i<bin.length; i++) arr[i]=bin.charCodeAt(i);
-  const blob = new Blob([arr], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = d.name; a.click();
-  URL.revokeObjectURL(url);
 }
 function dlDoc(key){
   const d=docs[key];
@@ -7575,6 +7606,118 @@ function distUpdate(netRevenue) {
 
 // 초기 실행
 setTimeout(calcUpdate, 100);
+
+// ─────────────────────────────────────────────────────────────
+// 수익성 리포트 .docx 다운로드 — 슬라이더/결과/20년 시뮬을 markdown으로 종합
+// ─────────────────────────────────────────────────────────────
+function _calcReportMd() {
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const t = id => (document.getElementById(id) || {}).textContent || '';
+  const kw = +g('c-kw'), sun = +g('c-sun'), smp = +g('c-smp'), rec = +g('c-rec');
+  const wt = +g('c-wt'), maint = +g('c-maint'), loan = +g('c-loan');
+  const df = +g('d-fund'), dw = +g('d-weak'), dm = +g('d-maint'), dops = +g('d-ops');
+  const region = document.getElementById('c-region');
+  const regionTxt = region && region.selectedIndex >= 0 ? region.options[region.selectedIndex].text : '(미선택)';
+
+  const annualGenKWh = kw * sun * 365;
+  const annualGenMWh = annualGenKWh / 1000;
+  const smpRev = Math.round(annualGenKWh * smp / 10000);
+  const recRev = Math.round(annualGenMWh * rec * wt / 10000);
+  const totalRev = smpRev + recRev;
+  const netRev = totalRev - maint - loan;
+  const selfPay = Math.round(kw * 180 * 0.15);
+  const payback = netRev > 0 ? (selfPay / netRev).toFixed(1) + '년' : '—';
+  const villageRatio = df + dw;
+
+  // 마을 컨텍스트
+  let villageName = '', leader = '', coopName = '';
+  if (typeof selectedVid !== 'undefined' && selectedVid && typeof villages !== 'undefined') {
+    const v = (villages||[]).find(x => x.id === selectedVid);
+    if (v) {
+      villageName = v.name || '';
+      const info = v.info || {};
+      leader = info['vi-leader'] || info['vi-chief'] || '';
+      coopName = info['vi-coop'] || (villageName ? villageName + ' 햇빛소득협동조합' : '');
+    }
+  }
+
+  // 20년 시뮬 표 (markdown)
+  let simTable = '| 연도 | 발전량(MWh) | 총수익(만원) | 순수익(만원) | 마을공동기금 | 취약계층지원 | 누적순수익 |\n';
+  simTable +=    '|---|---|---|---|---|---|---|\n';
+  let cumNet = 0;
+  for (let y = 1; y <= 20; y++) {
+    const decay = Math.pow(0.995, y);
+    const genMWh = Math.round(annualGenMWh * decay);
+    const genKWh = genMWh * 1000;
+    const rev = Math.round(genKWh * smp / 10000 + genMWh * rec * wt / 10000);
+    const net = Math.round(rev - maint - loan);
+    cumNet += net;
+    const fund = Math.round(net * df / 100);
+    const weak = Math.round(net * dw / 100);
+    simTable += `| ${y}년차 | ${genMWh.toLocaleString()} | ${rev.toLocaleString()} | ${net.toLocaleString()} | ${fund.toLocaleString()} | ${weak.toLocaleString()} | ${cumNet.toLocaleString()} |\n`;
+  }
+
+  const md =
+'# 햇빛소득마을 수익성 분석 리포트\n\n' +
+(villageName ? '**대상 마을**: ' + villageName + (coopName ? '　·　**조합**: ' + coopName : '') + '\n\n' : '') +
+'**대상 지역**: ' + regionTxt + '\n\n' +
+'## 1. 발전소 설정\n\n' +
+'| 항목 | 값 |\n' +
+'|---|---|\n' +
+'| 설치 용량 | ' + kw.toLocaleString() + ' kW |\n' +
+'| 일조시간 | ' + sun.toFixed(2) + ' h/일 |\n' +
+'| SMP 단가 | ' + smp + ' 원/kWh |\n' +
+'| REC 가격 | ' + rec.toLocaleString() + ' 원/MWh |\n' +
+'| REC 가중치 | ' + wt + ' |\n' +
+'| 연간 유지보수비 | ' + maint.toLocaleString() + ' 만원 |\n' +
+'| 연간 융자이자 | ' + loan.toLocaleString() + ' 만원 |\n' +
+'| 자부담(15% 추정) | ' + selfPay.toLocaleString() + ' 만원 |\n\n' +
+'## 2. 1년차 수익 요약\n\n' +
+'| 항목 | 값 |\n' +
+'|---|---|\n' +
+'| 연간 발전량 | ' + Math.round(annualGenMWh).toLocaleString() + ' MWh |\n' +
+'| SMP 수익 | ' + smpRev.toLocaleString() + ' 만원 |\n' +
+'| REC 수익 | ' + recRev.toLocaleString() + ' 만원 |\n' +
+'| **연간 총수익** | **' + totalRev.toLocaleString() + ' 만원** |\n' +
+'| 비용 (유지보수+융자) | ' + (maint+loan).toLocaleString() + ' 만원 |\n' +
+'| **연간 순수익** | **' + netRev.toLocaleString() + ' 만원** |\n' +
+'| 자부담 회수기간 | ' + payback + ' |\n\n' +
+'## 3. 수익 배분 설계\n\n' +
+'| 배분 항목 | 비율 | 1년차 금액 |\n' +
+'|---|---|---|\n' +
+'| 마을공동기금 | ' + df + '% | ' + Math.round(netRev*df/100).toLocaleString() + ' 만원 |\n' +
+'| 에너지취약계층 지원 | ' + dw + '% | ' + Math.round(netRev*dw/100).toLocaleString() + ' 만원 |\n' +
+'| 유지보수 적립 | ' + dm + '% | ' + Math.round(netRev*dm/100).toLocaleString() + ' 만원 |\n' +
+'| 일상관리비 | ' + dops + '% | ' + Math.round(netRev*dops/100).toLocaleString() + ' 만원 |\n' +
+'| **마을 귀속(기금+취약계층)** | **' + villageRatio + '%** | — |\n\n' +
+(villageRatio >= 70 ? '✅ **마을 귀속 70% 이상 충족** → REC 가중치 +0.2 조건 OK\n\n' : '⚠ **마을 귀속 70% 미만** → REC 가중치 +0.2 조건 미충족. 배분 비율 재조정 필요\n\n') +
+'## 4. 20년 누적 수익 시뮬레이션\n\n' +
+'*패널 효율 연 0.5% 열화 반영*\n\n' +
+simTable + '\n' +
+'---\n\n' +
+'## 면책 고지\n\n' +
+'본 수치는 참고용 추정치입니다. 실제 수익은 지역 일사량·SMP/REC 시장가격·계통연계 조건·운영사 계약 조건 등에 따라 크게 달라질 수 있습니다. 정확한 수익 예측은 한국에너지공단 및 전문 발전사업자 검토를 받으시기 바랍니다.\n';
+
+  return { md, villageName, coopName, leader };
+}
+
+async function dlCalcReport() {
+  const { md, villageName, coopName, leader } = _calcReportMd();
+  const date = new Date().toISOString().split('T')[0];
+  const filename = (villageName ? villageName + '_' : '') + '수익성리포트_' + date;
+  const sigLines = [];
+  if (coopName) sigLines.push(coopName + '　이사장 ' + (leader || '　　　　') + '　　(인)');
+  else if (villageName && leader) sigLines.push(villageName + ' 이장 ' + leader + '　　(인)');
+  await downloadAsWordDoc(filename, md, '햇빛소득마을 수익성 분석 리포트', {
+    subtitle: villageName + (coopName && coopName !== villageName ? '　·　' + coopName : ''),
+    signatureLines: sigLines,
+  });
+}
+
+async function dlCalcReportHwp() {
+  await dlCalcReport();
+  if (typeof showToast === 'function') showToast('🇰🇷 한컴오피스에서 열어 「다른 이름으로 저장 → 한글 문서(*.hwpx)」 클릭 시 한글 파일로 변환됩니다', 6000);
+}
 
 
 setTimeout(renderVillages, 150);
