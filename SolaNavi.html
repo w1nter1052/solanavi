@@ -1025,8 +1025,17 @@ localStorage.setItem = function(k, v) {
         <input class="l-input" type="password" id="lic-inp" placeholder="MH-BASIC-XXXX 또는 MH-PRO-XXXX" onkeydown="if(event.key==='Enter')doLogin()">
         <button class="l-eye" onclick="toggleLEye()">👁</button>
       </div>
+      <div id="saved-key-hint" style="display:none;margin:6px 0 10px;padding:8px 12px;background:#F0FDF4;border:1px solid #A7F3D0;border-radius:8px;font-size:12px;color:#065F46;display:flex;align-items:center;gap:8px;cursor:pointer" onclick="useSavedKey()">
+        <span style="font-size:16px">🔑</span>
+        <div style="flex:1">
+          <div style="font-weight:700">저장된 키로 자동 입력</div>
+          <div id="saved-key-preview" style="font-size:11px;opacity:.7;margin-top:1px"></div>
+        </div>
+        <span style="font-size:11px;color:#065F46;font-weight:700">탭 ↵</span>
+      </div>
       <button class="l-btn" id="l-btn" onclick="doLogin()"><span id="l-btn-txt">🔓 입장하기</span></button>
       <div class="l-err" id="l-err">❌ 유효하지 않은 키입니다.</div>
+      <div style="font-size:11px;color:var(--sft);text-align:center;margin-top:8px">✅ 로그인 시 이 기기에 자동 저장 — 다음 방문 시 자동 로그인</div>
     </div>
 
     <div id="lt-free" style="display:none">
@@ -1069,7 +1078,7 @@ localStorage.setItem = function(k, v) {
       <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center">
   <button onclick="exportAllData()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--sft);cursor:pointer">⬇ 데이터 백업</button>
   <button onclick="importAllData()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--sft);cursor:pointer">⬆ 데이터 복원</button>
-  <button onclick="try{sessionStorage.clear();}catch(e){}location.reload();" style="background:none;border:1px solid #EEE;border-radius:6px;padding:3px 9px;font-size:11px;color:#AAA;cursor:pointer">🗑 세션</button>
+  <button onclick="try{localStorage.removeItem('mh_session');sessionStorage.clear();}catch(e){}location.reload();" style="background:none;border:1px solid #EEE;border-radius:6px;padding:3px 9px;font-size:11px;color:#AAA;cursor:pointer">🗑 세션</button>
 </div>
 <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="onImportFile(this)">
 
@@ -6390,16 +6399,15 @@ const MH = (function() {
       const save = (plan) => {
         _plan = plan; _key = clean;
         const t = Date.now();
-        try { sessionStorage.setItem('mh_session', btoa(JSON.stringify({k:clean,p:plan,t}))); } catch(e){}
+        // localStorage 저장 — 브라우저 닫아도 유지 (영구 자동 로그인)
+        try { localStorage.setItem('mh_session', btoa(JSON.stringify({k:clean,p:plan,t}))); } catch(e){}
         _startSessionTimer(t);
         return { ok: true, plan };
       };
-      // 해시 검증 (패턴 매칭 없음 — 정확한 키만 동작)
       try {
         const hash = await _h(clean);
         if (VALID_HASHES[hash]) return save(VALID_HASHES[hash]);
       } catch(e) {
-        // crypto.subtle 차단 환경(일부 file://) 폴백 — 없으면 실패
         console.warn('crypto.subtle 사용 불가. Chrome에서 파일을 열어주세요.');
       }
       return { ok: false };
@@ -6407,12 +6415,14 @@ const MH = (function() {
 
     restore() {
       try {
-        const s = sessionStorage.getItem('mh_session');
+        // localStorage에서 복원 (영구 저장)
+        const s = localStorage.getItem('mh_session');
         if (!s) return false;
         const d = JSON.parse(atob(s));
-        if (Date.now() - d.t > 86400000) { sessionStorage.removeItem('mh_session'); return false; }
+        // 유효기간 없음 — 로그아웃 전까지 영구 유지
         _plan = d.p; _key = d.k;
-        _startSessionTimer(d.t);
+        // 저장 시각 갱신 (마지막 접속 시각 업데이트)
+        try { localStorage.setItem('mh_session', btoa(JSON.stringify({k:d.k,p:d.p,t:Date.now()}))); } catch(e){}
         return true;
       } catch { return false; }
     },
@@ -6426,7 +6436,8 @@ const MH = (function() {
     logout() {
       _plan = null; _key = null;
       if (_sessionTimer) clearTimeout(_sessionTimer);
-      sessionStorage.removeItem('mh_session');
+      // localStorage에서 세션 삭제
+      localStorage.removeItem('mh_session');
     },
 
     getApiKey() {
@@ -10107,42 +10118,7 @@ function dlDocDocx() {
   var _ft = document.getElementById('doc-form-title');
   const title = _ft ? _ft.textContent.replace(/[^\w가-힣\s]/g,'').trim() : '문서';
   const date = new Date().toISOString().split('T')[0];
-  const content = ed.value;
-  // 마크다운 스타일 간단 HTML 변환
-  let html = content
-    .split('\n\n').map(p => {
-      if (p.startsWith('# ')) return `<h1>${p.substring(2)}</h1>`;
-      if (p.startsWith('## ')) return `<h2>${p.substring(3)}</h2>`;
-      if (p.startsWith('### ')) return `<h3>${p.substring(4)}</h3>`;
-      if (p.startsWith('- ') || p.startsWith('* ')) {
-        return '<ul>' + p.split('\n').map(l => `<li>${l.replace(/^[-*] /, '')}</li>`).join('') + '</ul>';
-      }
-      return `<p>${p.replace(/\n/g, '<br>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`;
-    }).join('');
-  // Word가 읽을 수 있는 MHT 형식 (간단한 .docx 대체)
-  const wordDoc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head><meta charset="utf-8"><title>${title}</title>
-<style>
-body { font-family: '맑은 고딕', 'Malgun Gothic', sans-serif; font-size: 11pt; line-height: 1.7; padding: 40pt; max-width: 800px; margin: 0 auto; }
-h1 { font-size: 18pt; text-align: center; margin: 20pt 0; font-weight: bold; }
-h2 { font-size: 14pt; color: #2D7A4F; border-bottom: 1pt solid #ccc; padding-bottom: 4pt; margin-top: 16pt; }
-h3 { font-size: 12pt; color: #333; margin-top: 12pt; }
-p { margin: 8pt 0; }
-ul { margin: 8pt 0 8pt 20pt; }
-table { border-collapse: collapse; width: 100%; margin: 10pt 0; }
-td, th { border: 1pt solid #999; padding: 6pt 8pt; }
-</style>
-</head><body>
-${html}
-<hr style="margin-top:40pt"><p style="font-size:9pt;color:#888;text-align:center">© 마을항해 · 2026 햇빛소득마을 컨설팅 플랫폼 · ${date} 작성</p>
-</body></html>`;
-  
-  const blob = new Blob(['\uFEFF' + wordDoc], {type:'application/msword'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `${title}_${date}.doc`;
-  a.click();
-  URL.revokeObjectURL(url);
+  downloadAsWordDoc(title + '_' + date, ed.value, title);
 }
 
 function printDocEdit() {
@@ -10915,7 +10891,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ══ 초기화 ══
 document.addEventListener('DOMContentLoaded', function() {
-  if (MH.restore()) { onLoginOK(); }
+  // 자동 로그인 시도 (localStorage에 세션 있으면 바로 입장)
+  if (MH.restore()) {
+    onLoginOK();
+  } else {
+    // 로그인 화면 — 저장된 키 힌트 표시
+    try {
+      var saved = localStorage.getItem('mh_session');
+      if (saved) {
+        var d = JSON.parse(atob(saved));
+        if (d && d.k) {
+          var hint = document.getElementById('saved-key-hint');
+          var preview = document.getElementById('saved-key-preview');
+          if (hint && preview) {
+            var masked = d.k.slice(0,8) + '****' + d.k.slice(-4);
+            preview.textContent = masked + ' (' + (d.p === 'pro' ? '프로' : d.p === 'basic' ? '베이직' : '무료') + ' 플랜)';
+            hint.style.display = 'flex';
+          }
+        }
+      }
+    } catch(e) {}
+  }
   document.addEventListener('contextmenu', e => {
     if (!e.target.closest('input,textarea,select')) { e.preventDefault(); return false; }
   });
@@ -10929,6 +10925,23 @@ document.addEventListener('DOMContentLoaded', function() {
   if (typeof selectLaw === 'function') selectLaw('setback');
   renderReadiness();
 });
+
+function useSavedKey() {
+  try {
+    var saved = localStorage.getItem('mh_session');
+    if (!saved) return;
+    var d = JSON.parse(atob(saved));
+    if (d && d.k) {
+      var inp = document.getElementById('lic-inp');
+      if (inp) {
+        inp.value = d.k;
+        inp.type = 'text';
+        setTimeout(function(){ inp.type = 'password'; }, 1000);
+      }
+      doLogin();
+    }
+  } catch(e) {}
+}
 
 // ═══ v6 추가 ═══
 function switchToTool(t){
@@ -11144,21 +11157,150 @@ function cpMinResult() {
   if (el) navigator.clipboard.writeText(el.value).then(function(){ alert('복사됐습니다.'); });
 }
 
-function dlDocDocxWd(step) { dlDocTxtWd(step); }
+// ── 마크다운 → Word HTML 변환 공통 함수 ──────────────
+function markdownToWordHtml(md, title) {
+  if (!md) return '';
+  const date = new Date().toLocaleDateString('ko-KR');
+
+  // 줄 단위 처리
+  const lines = md.split('\n');
+  let html = '';
+  let inUl = false, inOl = false, inTable = false;
+  let tableRows = [];
+
+  const flushList = () => {
+    if (inUl) { html += '</ul>'; inUl = false; }
+    if (inOl) { html += '</ol>'; inOl = false; }
+  };
+  const flushTable = () => {
+    if (!inTable) return;
+    // 헤더/구분선/행 분리
+    let thead = '', tbody = '';
+    let isHeader = true;
+    tableRows.forEach((row, i) => {
+      if (/^[\s|:-]+$/.test(row.replace(/\|/g,''))) { isHeader = false; return; }
+      const cells = row.split('|').filter((_,i2,a)=>i2>0&&i2<a.length-1).map(c=>`<td>${c.trim()}</td>`).join('');
+      if (isHeader && i===0) thead = `<thead><tr>${cells.replace(/td>/g,'th>')}</tr></thead>`;
+      else tbody += `<tr>${cells}</tr>`;
+    });
+    html += `<table><${thead}<tbody>${tbody}</tbody></table>`;
+    tableRows = []; inTable = false;
+  };
+
+  lines.forEach(line => {
+    // 테이블
+    if (line.trim().startsWith('|')) {
+      flushList(); inTable = true; tableRows.push(line); return;
+    } else { flushTable(); }
+
+    // 제목
+    if (line.startsWith('#### ')) { flushList(); html += `<h4>${fmt(line.slice(5))}</h4>`; return; }
+    if (line.startsWith('### ')) { flushList(); html += `<h3>${fmt(line.slice(4))}</h3>`; return; }
+    if (line.startsWith('## ')) { flushList(); html += `<h2>${fmt(line.slice(3))}</h2>`; return; }
+    if (line.startsWith('# ')) { flushList(); html += `<h1>${fmt(line.slice(2))}</h1>`; return; }
+
+    // 구분선
+    if (/^---+$/.test(line.trim())) { flushList(); html += '<hr>'; return; }
+
+    // 순서없는 목록
+    if (/^[-*•] /.test(line)) {
+      if (!inUl) { if (inOl){html+='</ol>';inOl=false;} html += '<ul>'; inUl = true; }
+      html += `<li>${fmt(line.replace(/^[-*•] /,''))}</li>`; return;
+    }
+    // 순서있는 목록
+    if (/^\d+\. /.test(line)) {
+      if (!inOl) { if (inUl){html+='</ul>';inUl=false;} html += '<ol>'; inOl = true; }
+      html += `<li>${fmt(line.replace(/^\d+\. /,''))}</li>`; return;
+    }
+
+    // 빈줄
+    if (!line.trim()) { flushList(); html += '<p>&nbsp;</p>'; return; }
+
+    // 일반 단락
+    flushList();
+    html += `<p>${fmt(line)}</p>`;
+  });
+  flushList(); flushTable();
+
+  function fmt(t) {
+    return t
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code>$1</code>')
+      .replace(/~~(.+?)~~/g, '<s>$1</s>');
+  }
+
+  return `<html xmlns:o='urn:schemas-microsoft-com:office:office'
+    xmlns:w='urn:schemas-microsoft-com:office:word'
+    xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset="utf-8"><title>${title}</title>
+<style>
+  body{font-family:'맑은 고딕','Malgun Gothic',sans-serif;font-size:11pt;line-height:1.8;padding:50pt 60pt;max-width:700px;margin:0 auto;color:#111}
+  h1{font-size:17pt;text-align:center;margin:0 0 18pt;font-weight:bold;color:#0F2B5B;border-bottom:2pt solid #0F2B5B;padding-bottom:8pt}
+  h2{font-size:13pt;color:#0F2B5B;border-bottom:1pt solid #CBD5E1;padding-bottom:4pt;margin:18pt 0 8pt}
+  h3{font-size:12pt;color:#1E4D8C;margin:14pt 0 6pt}
+  h4{font-size:11pt;color:#333;margin:10pt 0 4pt}
+  p{margin:4pt 0}
+  ul,ol{margin:6pt 0 6pt 20pt;padding:0}
+  li{margin:3pt 0}
+  table{border-collapse:collapse;width:100%;margin:10pt 0;font-size:10pt}
+  th{background:#E8F0FE;border:1pt solid #999;padding:5pt 7pt;font-weight:bold;text-align:center}
+  td{border:1pt solid #999;padding:5pt 7pt;vertical-align:top}
+  hr{border:none;border-top:1pt solid #ccc;margin:14pt 0}
+  strong{font-weight:bold}
+  em{font-style:italic}
+  code{font-family:monospace;background:#f5f5f5;padding:1pt 3pt}
+  .footer{font-size:8pt;color:#888;text-align:center;margin-top:40pt;border-top:0.5pt solid #ccc;padding-top:8pt}
+</style>
+</head><body>
+${html}
+<div class="footer">© 마을항해 · 2026 햇빛소득마을 컨설팅 플랫폼 · ${date} 작성 · 참고용 도구, 최종 제출 전 전문가 검토 필수</div>
+</body></html>`;
+}
+
+function downloadAsWordDoc(filename, md, title) {
+  const wordHtml = markdownToWordHtml(md, title || filename);
+  const blob = new Blob(['\uFEFF' + wordHtml], {type: 'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename + '.doc';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function dlDocDocxWd(step) {
+  var el = document.getElementById('wd-edit-' + step) || document.getElementById('wd-result-' + step);
+  if (!el) return;
+  var title = '문서_' + step;
+  var wdt = document.querySelector('#wdt-' + step);
+  if (wdt) title = wdt.textContent.trim().replace(/AI.*$/,'').trim();
+  downloadAsWordDoc(title + '_' + new Date().toISOString().split('T')[0], el.value || el.textContent, title);
+}
 
 function dlDocTxtWd(step) {
-  var el = document.getElementById('wd-edit-' + step);
+  var el = document.getElementById('wd-edit-' + step) || document.getElementById('wd-result-' + step);
   if (!el) return;
-  var a = document.createElement('a'); a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(el.value);
+  var a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(el.value || el.textContent);
   a.download = '문서_' + step + '.txt'; a.click();
 }
 
-function dlMinDocx() { dlMinTxt(); }
+function dlMinDocx() {
+  var el = document.getElementById('min-edit') || document.getElementById('min-result');
+  if (!el) return;
+  var md = el.value || el.textContent;
+  var date = new Date().toISOString().split('T')[0];
+  var typeEl = document.getElementById('min-type');
+  var typeName = typeEl ? typeEl.value : '회의록';
+  downloadAsWordDoc(typeName + '_' + date, md, typeName);
+}
 
 function dlMinTxt() {
-  var el = document.getElementById('min-edit'); if (!el) return;
+  var el = document.getElementById('min-edit') || document.getElementById('min-result');
+  if (!el) return;
   var a = document.createElement('a');
-  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(el.value);
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(el.value || el.textContent);
   a.download = '회의록.txt'; a.click();
 }
 
