@@ -9129,7 +9129,7 @@ function renderDash() {
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
         <div class="step-badge s${v.stage+1}" style="font-size:11px;white-space:nowrap">${stageLabels[v.stage]||''}</div>
-        <button onclick="event.stopPropagation();switchApp('manual');manualGo('${stagePages[v.stage]||'s1-what'}')'  style="font-size:11px;background:transparent;border:1px solid var(--bd);border-radius:5px;padding:2px 8px;cursor:pointer;color:var(--mu);font-family:inherit;white-space:nowrap">${stageActions[v.stage]||'매뉴얼'} →</button>
+        <button onclick="event.stopPropagation();switchApp('manual');manualGo(stagePages[v.stage]||'s1-what')"  style="font-size:11px;background:transparent;border:1px solid var(--bd);border-radius:5px;padding:2px 8px;cursor:pointer;color:var(--mu);font-family:inherit;white-space:nowrap">${stageActions[v.stage]||'매뉴얼'} →</button>
       </div>
     </div>`).join('');
 }
