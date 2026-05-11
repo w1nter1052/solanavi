@@ -1878,6 +1878,9 @@ if (CLOUD_ENABLED) {
           <div class="calc-row"><label class="calc-label">유지보수비</label><div class="calc-input-wrap"><input type="range" id="c-maint" min="50" max="500" value="150" step="10" oninput="calcUpdate()"><span class="calc-val" id="c-maint-v">150 만원</span></div></div>
           <div class="calc-row"><label class="calc-label">융자 이자</label><div class="calc-input-wrap"><input type="range" id="c-loan" min="0" max="2000" value="540" step="10" oninput="calcUpdate()"><span class="calc-val" id="c-loan-v">540 만원</span></div></div>
           <div style="font-size:11px;color:var(--sft);margin-top:-6px;padding-left:160px">※ 1.75% 저리 융자 85% 기준 500kW: 약 1,340만원/년</div>
+          <div style="background:#F8F7F3;border-radius:7px;padding:8px 12px;margin:10px 0 6px;font-size:11px;color:var(--sft)">💡 <strong>kW당 설치비</strong>: 일반적으로 130~220만원 (패널종류·구조물·계통연계 거리에 따라). <strong>자부담률</strong>: 행안부 공모는 15% 이상 권장 (지자체 매칭 시 5% 가능)</div>
+          <div class="calc-row"><label class="calc-label">kW당 설치비</label><div class="calc-input-wrap"><input type="range" id="c-unitcost" min="100" max="250" value="180" step="5" oninput="calcUpdate()"><span class="calc-val" id="c-unitcost-v">180 만원/kW</span></div></div>
+          <div class="calc-row"><label class="calc-label">자부담률</label><div class="calc-input-wrap"><input type="range" id="c-selfratio" min="5" max="50" value="15" step="1" oninput="calcUpdate()"><span class="calc-val" id="c-selfratio-v">15 %</span></div></div>
         </div>
 
         <!-- 오른쪽 배분 -->
@@ -1940,8 +1943,9 @@ if (CLOUD_ENABLED) {
         ⚠️ <strong>수익 시뮬레이션 면책 고지</strong> — 본 수치는 참고용 추정치입니다. 실제 수익은 지역 일사량·SMP/REC 시장가격·계통연계 조건·운영사 계약 조건 등에 따라 크게 달라질 수 있습니다. 정확한 수익 예측은 <strong>한국에너지공단 및 전문 발전사업자 검토</strong>를 받으시기 바랍니다.
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px;justify-content:flex-end">
-        <button onclick="dlCalcReport()" style="background:#1A5276;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📝 수익성 리포트 Word 다운로드</button>
+        <button onclick="dlCalcReport()" style="background:#1A5276;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📝 수익성 리포트 Word</button>
         <button onclick="dlCalcReportHwp()" style="background:#00A86B;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🇰🇷 한글로 다운로드</button>
+        <button onclick="printCalcVisualPdf()" style="background:#E67E22;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🖨 주민설명회용 시각 PDF</button>
       </div>
       <div class="nav-btns">
         <button class="next-btn" onclick="manualGo('s1-info')">다음 → 📝 마을 기초정보 입력</button>
@@ -2555,6 +2559,7 @@ if (CLOUD_ENABLED) {
           <div class="charter-bar">
             <div class="charter-bar-title">📜 OO 햇빛소득마을 협동조합 정관(안) — 행안부 공식 표준예시문</div>
             <div class="charter-bar-actions">
+              <button class="charter-btn" onclick="autoFillVillageDocs()" style="background:#FFE8B0;color:#7A5A00;border-color:#FFE8B0">🪄 마을 정보 채우기</button>
               <button class="charter-btn" onclick="toggleCharter()">전체 펼치기</button>
               <button class="charter-btn" onclick="manualPrintCharter()" style="background:#E53E3E;border-color:#E53E3E">🖨 PDF</button>
               <button class="charter-btn primary" onclick="dlDocx('charter')">⬇ Word</button>
@@ -5240,7 +5245,7 @@ if (CLOUD_ENABLED) {
       <div class="charter-wrap">
         <div class="charter-bar">
           <div class="charter-bar-title">📌 OO리 마을회 규약 개정(안)</div>
-          <div class="charter-bar-actions"><button class="charter-btn primary" onclick="dlDoc('rules')">⬇ 다운로드</button></div>
+          <div class="charter-bar-actions"><button class="charter-btn" onclick="autoFillVillageDocs()" style="background:#FFE8B0;color:#7A5A00;margin-right:6px">🪄 마을 정보로 채우기</button><button class="charter-btn primary" onclick="dlDoc('rules')">⬇ 다운로드</button></div>
         </div>
         <div class="charter-content">
           <div class="ch-title">OO리 마을회 규약 일부개정(안)</div>
@@ -6820,6 +6825,11 @@ function manualGo(id, tab) {
   } else if (pageId === 's4-site') {
     setTimeout(function(){ if(typeof showTab==='function') showTab('site'); }, 50);
   }
+
+  // 자동 치환: 정관/규약/문서 페이지 진입 시 마을 컨텍스트로 OO 토큰 자동 채움
+  if (typeof autoFillVillageDocs === 'function' && /^(s3-charter|docs-charter|docs-rules|s2-rules|s1-info)/.test(pageId)) {
+    setTimeout(function(){ autoFillVillageDocs({ silent: true }); }, 100);
+  }
   var _ov = document.getElementById('ov');
   if (_ov) { _ov.classList.remove('show'); _ov.style.display = 'none'; }
   if (window.innerWidth < 768) {
@@ -6831,6 +6841,92 @@ function manualGo(id, tab) {
   if (pageId === 's1-info') setTimeout(function(){if(typeof refreshViVillageSelect==='function')refreshViVillageSelect();},50);
   window.scrollTo(0, 0);
 }
+// ─────────────────────────────────────────────────────────────────────
+// 자동 치환: 마을 컨텍스트로 OO 토큰 → 실제 마을명/이장/조합명 채움
+// 호출: 정관/규약/문서 페이지 진입 시 자동, "🪄 마을 정보로 채우기" 버튼 클릭
+// ─────────────────────────────────────────────────────────────────────
+function autoFillVillageDocs(opts) {
+  opts = opts || {};
+  var v = null;
+  if (typeof selectedVid !== 'undefined' && selectedVid && typeof villages !== 'undefined') {
+    v = (villages||[]).find(function(x){return x.id===selectedVid;});
+  }
+  if (!v) {
+    if (!opts.silent && typeof showToast === 'function') showToast('먼저 컨설팅 마을을 선택해주세요', 3000);
+    return;
+  }
+  var info = v.info || {};
+  var villageName = v.name || info['vi-name'] || '';
+  var address = info['vi-addr'] || '';
+  var chief = info['vi-chief'] || '';
+  var president = info['vi-president'] || chief || '';
+  var coopName = info['vi-coop-name'] || info['vi-coop'] || (villageName ? villageName + ' 햇빛에너지협동조합' : '');
+  var bizName = info['vi-biz-name'] || '';
+
+  // 주소 또는 마을명에서 행정구역 4단계 파싱
+  var addrText = address || villageName || '';
+  var prov = '', city = '', town = '', ri = '';
+  var matchProv = addrText.match(/(전라남도|전라북도|경상남도|경상북도|충청남도|충청북도|강원(?:특별자치)?도|경기도|제주(?:특별자치)?도|서울특별시|부산광역시|대구광역시|인천광역시|광주광역시|대전광역시|울산광역시|세종특별자치시)/);
+  if (matchProv) prov = matchProv[1];
+  var matchCity = addrText.match(/(\S+?(?:시|군))(?:[\s·,]|$)/);
+  if (matchCity) city = matchCity[1];
+  var matchTown = addrText.match(/(\S+?(?:읍|면|동))(?:[\s·,]|$)/);
+  if (matchTown) town = matchTown[1];
+  var matchRi = addrText.match(/(\S+?리)(?:[\s·,]|$)/);
+  if (matchRi) ri = matchRi[1];
+  // 폴백: 마을명만 있고 주소 없으면 마을명 끝부분을 리로
+  if (!ri && /리$/.test(villageName)) ri = villageName.split(/\s+/).pop();
+
+  // 토큰 치환 함수
+  function replaceTokens(text) {
+    if (!text) return text;
+    return text
+      .replace(/OOO시[··]도/g, prov || 'OOO시·도')
+      .replace(/OO시[··]군/g, city || 'OO시·군')
+      .replace(/OO읍[··]면/g, town || 'OO읍·면')
+      .replace(/OO리/g, ri || 'OO리')
+      .replace(/OO마을/g, villageName || 'OO마을');
+  }
+
+  // 정관/규약 본문에서 textNode만 치환 (input/textarea/style 제외)
+  function walk(node) {
+    if (node.nodeType === 3) {
+      var nt = replaceTokens(node.nodeValue);
+      if (nt !== node.nodeValue) node.nodeValue = nt;
+    } else if (node.nodeType === 1 && !['SCRIPT','STYLE','INPUT','TEXTAREA','SELECT','BUTTON'].includes(node.tagName)) {
+      var i = 0; var children = node.childNodes; var len = children.length;
+      for (; i < len; i++) walk(children[i]);
+    }
+  }
+  var charterBody = document.getElementById('charter-body');
+  if (charterBody) walk(charterBody);
+  document.querySelectorAll('#page-docs-rules .charter-content, #page-docs-charter .ch-art-body, #page-s3-charter .ch-art-body, #page-s2-rules .ch-art-body').forEach(walk);
+
+  // 입력 폼 자동 채움 (빈 값만, 사용자 입력 보호)
+  var fields = {
+    'bp-name': villageName,
+    'bp-coop': coopName,
+    'bp-chief': chief,
+    'bp-address': address,
+    'dc-village': villageName,
+    'dc-coop': coopName,
+    'dc-chief': chief,
+    'dc-from': villageName ? villageName + ' 이장' + (chief ? ' ' + chief : '') : '',
+    'min-place': villageName ? villageName + ' 마을회관' : '',
+    'min-chair': chief,
+    'cbp-address': address,
+    'cbp-chief': chief,
+  };
+  Object.keys(fields).forEach(function(id){
+    var el = document.getElementById(id);
+    if (el && !el.value && fields[id]) el.value = fields[id];
+  });
+
+  if (!opts.silent && typeof showToast === 'function') {
+    showToast('✅ ' + (villageName || '마을') + ' 정보로 자동 채움 완료', 3000);
+  }
+}
+
 function manualTg(id){document.getElementById(id).classList.toggle('open')}
 function toggleSB(){
   var _sb=document.getElementById('sb');
@@ -7482,6 +7578,14 @@ function calcUpdate() {
   const maint = +document.getElementById('c-maint').value;
   const loan = +document.getElementById('c-loan').value;
 
+  // 새 슬라이더 값 (없으면 기본값)
+  const unitCost = +(document.getElementById('c-unitcost') || {value: 180}).value;
+  const selfRatio = +(document.getElementById('c-selfratio') || {value: 15}).value;
+  const ucEl = document.getElementById('c-unitcost-v');
+  const srEl = document.getElementById('c-selfratio-v');
+  if (ucEl) ucEl.textContent = unitCost + ' 만원/kW';
+  if (srEl) srEl.textContent = selfRatio + ' %';
+
   document.getElementById('c-kw-v').textContent = kw.toLocaleString() + ' kW';
   document.getElementById('c-sun-v').textContent = sun.toFixed(2) + ' h/일';
   document.getElementById('c-smp-v').textContent = smp + ' 원';
@@ -7495,7 +7599,8 @@ function calcUpdate() {
   const recRevenue = Math.round(annualGenMWh * rec * wt / 10000);
   const totalRevenue = smpRevenue + recRevenue;
   const netRevenue = totalRevenue - maint - loan;
-  const selfPay = Math.round(kw * 180 * 0.15); // 자부담 15%
+  const totalInvest = Math.round(kw * unitCost); // 총 설치비 (만원)
+  const selfPay = Math.round(totalInvest * selfRatio / 100); // 자부담 (만원)
   const payback = netRevenue > 0 ? (selfPay / netRevenue).toFixed(1) + '년' : '—';
 
   document.getElementById('r-gen').textContent = Math.round(annualGenMWh).toLocaleString();
@@ -7619,13 +7724,16 @@ function _calcReportMd() {
   const region = document.getElementById('c-region');
   const regionTxt = region && region.selectedIndex >= 0 ? region.options[region.selectedIndex].text : '(미선택)';
 
+  const unitCost = +g('c-unitcost') || 180;
+  const selfRatio = +g('c-selfratio') || 15;
   const annualGenKWh = kw * sun * 365;
   const annualGenMWh = annualGenKWh / 1000;
   const smpRev = Math.round(annualGenKWh * smp / 10000);
   const recRev = Math.round(annualGenMWh * rec * wt / 10000);
   const totalRev = smpRev + recRev;
   const netRev = totalRev - maint - loan;
-  const selfPay = Math.round(kw * 180 * 0.15);
+  const totalInvest = Math.round(kw * unitCost);
+  const selfPay = Math.round(totalInvest * selfRatio / 100);
   const payback = netRev > 0 ? (selfPay / netRev).toFixed(1) + '년' : '—';
   const villageRatio = df + dw;
 
@@ -7671,7 +7779,10 @@ function _calcReportMd() {
 '| REC 가중치 | ' + wt + ' |\n' +
 '| 연간 유지보수비 | ' + maint.toLocaleString() + ' 만원 |\n' +
 '| 연간 융자이자 | ' + loan.toLocaleString() + ' 만원 |\n' +
-'| 자부담(15% 추정) | ' + selfPay.toLocaleString() + ' 만원 |\n\n' +
+'| kW당 설치비 | ' + unitCost + ' 만원/kW |\n' +
+'| 총 설치비 (추정) | ' + totalInvest.toLocaleString() + ' 만원 |\n' +
+'| 자부담률 | ' + selfRatio + ' % |\n' +
+'| 자부담 금액 | ' + selfPay.toLocaleString() + ' 만원 |\n\n' +
 '## 2. 1년차 수익 요약\n\n' +
 '| 항목 | 값 |\n' +
 '|---|---|\n' +
@@ -7717,6 +7828,164 @@ async function dlCalcReport() {
 async function dlCalcReportHwp() {
   await dlCalcReport();
   if (typeof showToast === 'function') showToast('🇰🇷 한컴오피스에서 열어 「다른 이름으로 저장 → 한글 문서(*.hwpx)」 클릭 시 한글 파일로 변환됩니다', 6000);
+}
+
+// ──────────────────────────────────────────────────────────────
+// 주민설명회용 시각 PDF (SVG 차트 + 인쇄 다이얼로그)
+// ──────────────────────────────────────────────────────────────
+function printCalcVisualPdf() {
+  const g = id => +(document.getElementById(id) || {value: 0}).value;
+  const kw = g('c-kw'), sun = +(document.getElementById('c-sun')||{value:3.6}).value;
+  const smp = g('c-smp'), rec = g('c-rec'), wt = +(document.getElementById('c-wt')||{value:1.2}).value;
+  const maint = g('c-maint'), loan = g('c-loan');
+  const unitCost = g('c-unitcost') || 180;
+  const selfRatio = g('c-selfratio') || 15;
+  const df = g('d-fund'), dw = g('d-weak'), dm = g('d-maint'), dops = g('d-ops');
+
+  const regionEl = document.getElementById('c-region');
+  const regionTxt = regionEl && regionEl.selectedIndex >= 0 ? regionEl.options[regionEl.selectedIndex].text : '(미선택)';
+
+  const annualGenKWh = kw * sun * 365;
+  const annualGenMWh = annualGenKWh / 1000;
+  const smpRev = Math.round(annualGenKWh * smp / 10000);
+  const recRev = Math.round(annualGenMWh * rec * wt / 10000);
+  const totalRev = smpRev + recRev;
+  const netRev = totalRev - maint - loan;
+  const totalInvest = Math.round(kw * unitCost);
+  const selfPay = Math.round(totalInvest * selfRatio / 100);
+  const payback = netRev > 0 ? (selfPay / netRev).toFixed(1) + '년' : '—';
+
+  let villageName = '', leader = '';
+  if (typeof selectedVid !== 'undefined' && selectedVid && typeof villages !== 'undefined') {
+    const v = (villages||[]).find(x => x.id === selectedVid);
+    if (v) {
+      villageName = v.name || '';
+      const info = v.info || {};
+      leader = info['vi-leader'] || info['vi-chief'] || '';
+    }
+  }
+
+  // 20년 누적
+  let cum = 0;
+  const years = [];
+  for (let y = 1; y <= 20; y++) {
+    const decay = Math.pow(0.995, y);
+    const genMWh = annualGenMWh * decay;
+    const rev = Math.round(genMWh * 1000 * smp / 10000 + genMWh * rec * wt / 10000);
+    const net = Math.round(rev - maint - loan);
+    cum += net;
+    years.push({y, net, cum});
+  }
+  const maxCum = Math.max.apply(null, years.map(x => x.cum));
+
+  // SVG 누적 막대
+  const barW = 28, barGap = 4, chartH = 220, baseY = 250;
+  const barChart = years.map((row, i) => {
+    const h = Math.max(2, Math.round(row.cum / maxCum * chartH));
+    const x = 40 + i * (barW + barGap);
+    const color = row.y === 1 ? '#F39C12' : row.y === 5 ? '#27AE60' : row.y === 10 ? '#2980B9' : row.y === 20 ? '#8E44AD' : '#BDC3C7';
+    const label = (row.y === 1 || row.y === 5 || row.y === 10 || row.y === 20) ? '<text x="'+(x+barW/2)+'" y="'+(baseY-h-6)+'" text-anchor="middle" font-size="10" fill="'+color+'" font-weight="700">'+(row.cum/10000).toFixed(1)+'억</text>' : '';
+    const xLabel = (row.y === 1 || row.y === 5 || row.y === 10 || row.y === 20) ? '<text x="'+(x+barW/2)+'" y="'+(baseY+14)+'" text-anchor="middle" font-size="10" fill="#555">'+row.y+'년차</text>' : '';
+    return '<rect x="'+x+'" y="'+(baseY-h)+'" width="'+barW+'" height="'+h+'" fill="'+color+'" rx="2"/>'+label+xLabel;
+  }).join('');
+
+  // 파이차트 (배분 비율)
+  function arc(startDeg, endDeg, color) {
+    const cx = 150, cy = 150, r = 110;
+    const s = (startDeg-90) * Math.PI / 180;
+    const e = (endDeg-90) * Math.PI / 180;
+    const large = (endDeg - startDeg) > 180 ? 1 : 0;
+    const x1 = cx + r * Math.cos(s), y1 = cy + r * Math.sin(s);
+    const x2 = cx + r * Math.cos(e), y2 = cy + r * Math.sin(e);
+    return '<path d="M '+cx+' '+cy+' L '+x1+' '+y1+' A '+r+' '+r+' 0 '+large+' 1 '+x2+' '+y2+' Z" fill="'+color+'"/>';
+  }
+  const total = df+dw+dm+dops || 1;
+  let acc = 0;
+  const segs = [
+    {label: '마을공동기금', value: df, color: '#27AE60'},
+    {label: '취약계층지원', value: dw, color: '#2980B9'},
+    {label: '유지보수 적립', value: dm, color: '#E67E22'},
+    {label: '일상관리비', value: dops, color: '#7F8C8D'},
+  ];
+  const pieSvg = segs.map(seg => {
+    const start = acc / total * 360;
+    acc += seg.value;
+    const end = acc / total * 360;
+    return arc(start, end, seg.color);
+  }).join('');
+  const legend = segs.map(seg => '<div style="display:flex;align-items:center;gap:8px;font-size:13px;margin:6px 0"><span style="width:14px;height:14px;background:'+seg.color+';border-radius:3px"></span><span style="flex:1">'+seg.label+'</span><b>'+seg.value+'%</b><span style="color:#888;width:90px;text-align:right">'+Math.round(netRev*seg.value/100).toLocaleString()+'만원/년</span></div>').join('');
+
+  const today = new Date();
+  const dateStr = today.getFullYear()+'년 '+(today.getMonth()+1)+'월 '+today.getDate()+'일';
+
+  const html = '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>'+
+    (villageName||'마을')+' 햇빛소득 수익 설명회 자료</title>'+
+    '<style>'+
+    'body{font-family:"Malgun Gothic","Pretendard","맑은 고딕",sans-serif;color:#222;margin:0;padding:30px 50px;background:#FFFEF8}'+
+    'h1{font-size:26px;text-align:center;color:#1A3A6B;margin:0 0 8px;border-bottom:3px solid #F39C12;padding-bottom:10px}'+
+    '.sub{text-align:center;color:#555;font-size:14px;margin-bottom:24px}'+
+    '.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}'+
+    '.kpi{border:1px solid #ddd;border-radius:10px;padding:14px;text-align:center;background:#fff}'+
+    '.kpi-n{font-size:24px;font-weight:900;color:#1A3A6B}'+
+    '.kpi-l{font-size:11px;color:#666;margin-top:4px}'+
+    '.section{margin:30px 0 16px;font-size:18px;font-weight:700;color:#1A3A6B;border-left:5px solid #F39C12;padding-left:10px}'+
+    '.box{background:#fff;border:1px solid #e0d8c0;border-radius:10px;padding:18px;margin:12px 0}'+
+    '.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px}'+
+    'th,td{border:1px solid #ccc;padding:6px 10px;text-align:right}'+
+    'th{background:#FFF4E0;font-weight:700}'+
+    'td:first-child,th:first-child{text-align:center}'+
+    '.notice{background:#FFFBF0;border:1px solid #F0D8B0;border-radius:8px;padding:14px;font-size:11px;color:#7A6040;margin-top:20px;line-height:1.7}'+
+    '.sig{margin-top:60px;text-align:right;font-size:14px}'+
+    '@media print{body{padding:20mm;background:#fff}.no-print{display:none}@page{margin:15mm}}'+
+    '</style></head><body>'+
+    '<h1>☀ '+(villageName||'OO마을')+' 햇빛소득 수익 설명회 자료</h1>'+
+    '<div class="sub">'+regionTxt+' · 작성일 '+dateStr+'</div>'+
+    '<div class="kpi-grid">'+
+    '  <div class="kpi"><div class="kpi-n">'+Math.round(annualGenMWh).toLocaleString()+'</div><div class="kpi-l">연간 발전량 (MWh)</div></div>'+
+    '  <div class="kpi"><div class="kpi-n" style="color:#27AE60">'+totalRev.toLocaleString()+'</div><div class="kpi-l">연간 총수익 (만원)</div></div>'+
+    '  <div class="kpi"><div class="kpi-n" style="color:#2980B9">'+netRev.toLocaleString()+'</div><div class="kpi-l">연간 순수익 (만원)</div></div>'+
+    '  <div class="kpi"><div class="kpi-n" style="color:#E74C3C">'+payback+'</div><div class="kpi-l">자부담 회수</div></div>'+
+    '</div>'+
+    '<div class="section">📊 20년 누적 순수익 시뮬레이션</div>'+
+    '<div class="box" style="text-align:center"><svg width="780" height="280" viewBox="0 0 780 280" style="max-width:100%">'+
+    '<line x1="38" y1="250" x2="770" y2="250" stroke="#999" stroke-width="1"/>'+
+    barChart+
+    '<text x="40" y="20" font-size="12" fill="#666">단위: 만원</text>'+
+    '</svg><div style="font-size:11px;color:#888;margin-top:6px">패널 효율 연 0.5% 열화 반영. 1·5·10·20년차 누적 순수익 표시.</div></div>'+
+    '<div class="two">'+
+    '<div class="box"><div style="font-weight:700;margin-bottom:12px;color:#1A3A6B">💰 수익 배분 비율 (정부 권고)</div>'+
+    '<svg width="300" height="300" viewBox="0 0 300 300" style="display:block;margin:0 auto">'+pieSvg+
+    '<circle cx="150" cy="150" r="55" fill="#fff"/><text x="150" y="148" text-anchor="middle" font-size="14" fill="#666">마을 귀속</text>'+
+    '<text x="150" y="170" text-anchor="middle" font-size="22" font-weight="900" fill="#27AE60">'+(df+dw)+'%</text>'+
+    '</svg><div style="margin-top:12px">'+legend+'</div></div>'+
+    '<div class="box"><div style="font-weight:700;margin-bottom:12px;color:#1A3A6B">📋 설비 및 사업 개요</div>'+
+    '<table><tr><th>항목</th><th>내용</th></tr>'+
+    '<tr><td>설치 용량</td><td>'+kw.toLocaleString()+' kW</td></tr>'+
+    '<tr><td>일조시간</td><td>'+sun.toFixed(2)+' h/일</td></tr>'+
+    '<tr><td>총 설치비 (추정)</td><td>'+totalInvest.toLocaleString()+' 만원</td></tr>'+
+    '<tr><td>자부담률</td><td>'+selfRatio+' %</td></tr>'+
+    '<tr><td>자부담 금액</td><td>'+selfPay.toLocaleString()+' 만원</td></tr>'+
+    '<tr><td>융자 금액 (85%)</td><td>'+(totalInvest-selfPay).toLocaleString()+' 만원</td></tr>'+
+    '<tr><td>SMP 단가</td><td>'+smp+' 원/kWh</td></tr>'+
+    '<tr><td>REC 가격 · 가중치</td><td>'+rec.toLocaleString()+' 원 · '+wt+'</td></tr>'+
+    '<tr><td>연간 유지보수</td><td>'+maint.toLocaleString()+' 만원</td></tr>'+
+    '<tr><td>연간 융자이자</td><td>'+loan.toLocaleString()+' 만원</td></tr>'+
+    '</table></div>'+
+    '</div>'+
+    '<div class="notice">⚠ <b>안내</b> — 본 자료는 주민 설명회용 추정치입니다. 실제 수익은 SMP/REC 시장가격, 일사량, 계통연계 조건, 운영사 계약 등에 따라 달라질 수 있습니다. 정확한 수익 예측은 한국에너지공단 및 전문 발전사업자 검토를 받으시기 바랍니다.</div>'+
+    (villageName ? '<div class="sig">'+dateStr+'<br>'+villageName+(leader ? ' 이장 '+leader : ' 이장')+'　　(인)</div>' : '')+
+    '<div class="no-print" style="margin-top:30px;text-align:center"><button onclick="window.print()" style="background:#E67E22;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer">🖨 인쇄 / PDF로 저장</button></div>'+
+    '<script>setTimeout(function(){window.print();}, 600);</'+'script>'+
+    '</body></html>';
+
+  const w = window.open('', '_blank');
+  if (!w) {
+    if (typeof showToast === 'function') showToast('팝업이 차단됐어요. 주소창 우측 아이콘에서 허용해주세요.', 4500);
+    return;
+  }
+  w.document.write(html);
+  w.document.close();
 }
 
 
@@ -9340,18 +9609,71 @@ function renderDash() {
   const stageLabels = ['STEP1 첫방문','STEP2 주민조직','STEP3 협동조합','STEP4 발전소','STEP5 공모신청','STEP6 발전소건설','STEP7 협동조합운영'];
   const stagePages = ['s1-what','s2-survey','s3-charter','s4-site','s6-dist','s7-operate'];
   const stageActions = ['주민 설득 자료','마을총회 준비','정관·설립 진행','발전소 준비','공모 신청','운영 관리'];
-  container.innerHTML = villages.map(v => `
-    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd2);cursor:pointer" onclick="go('villages');selectVillage('${v.id}')">
-      <div style="width:8px;height:8px;border-radius:50%;background:${stageColors[v.stage]||'var(--mu)'};flex-shrink:0"></div>
-      <div style="flex:1">
-        <div style="font-size:13px;font-weight:700">${v.name}</div>
-        <div style="font-size:11px;color:var(--mu)">${stageLabels[v.stage]||''} · ${v.pop||'?'}명 · 담당: ${v.consultant||'-'}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <div class="step-badge s${v.stage+1}" style="font-size:11px;white-space:nowrap">${stageLabels[v.stage]||''}</div>
-        <button onclick="event.stopPropagation();switchApp('manual');manualGo(stagePages[v.stage]||'s1-what')"  style="font-size:11px;background:transparent;border:1px solid var(--bd);border-radius:5px;padding:2px 8px;cursor:pointer;color:var(--mu);font-family:inherit;white-space:nowrap">${stageActions[v.stage]||'매뉴얼'} →</button>
-      </div>
-    </div>`).join('');
+
+  // 위험도 점수 계산: 단계 대비 D-day 부족, 동의률 낮음, 컨설턴트 미배정, 첫방문 후 장기 정체
+  function riskScore(v) {
+    var s = 0;
+    var info = v.info || {};
+    // 1) D-day 절박: 단계가 낮은데 D-day 짧으면 위험
+    var stage = v.stage || 0;
+    // 1차 마감(5/31) 통과해야 할 최소 단계: STEP4 (발전소 준비) 이상
+    if (dday >= 0 && dday < 30 && stage < 4) s += 50;
+    else if (dday >= 0 && dday < 60 && stage < 3) s += 35;
+    else if (dday >= 0 && dday < 90 && stage < 2) s += 20;
+    // 2) 70% 동의률 미달
+    var agree = +info['vi-agree-pct'] || 0;
+    if (stage >= 1 && agree && agree < 50) s += 25;
+    else if (stage >= 1 && agree && agree < 70) s += 12;
+    // 3) 컨설턴트 미배정
+    if (!v.consultant) s += 8;
+    // 4) 마을 기초정보 미입력
+    if (!info['vi-pop'] && !v.pop) s += 5;
+    // 5) 장기 정체 (첫 방문일 60일 이상, 단계 1 이하)
+    if (info['vi-visit-date'] && stage <= 1) {
+      var vd = new Date(info['vi-visit-date']);
+      var idle = Math.ceil((today - vd) / 86400000);
+      if (idle > 60) s += 18;
+      else if (idle > 30) s += 8;
+    }
+    return s;
+  }
+
+  function riskBadge(score) {
+    if (score >= 40) return '<span style="background:#FEE;color:#C0392B;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid #F5B7B1">🚨 긴급</span>';
+    if (score >= 20) return '<span style="background:#FFF4E6;color:#A04000;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid #F8C471">⚠ 주의</span>';
+    if (score >= 8)  return '<span style="background:#FFF9E6;color:#7D6608;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid #F7DC6F">🟡 점검</span>';
+    return '<span style="background:#E8F8F5;color:#117864;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid #ABEBC6">✅ 정상</span>';
+  }
+
+  // 위험도 내림차순 정렬, 동률은 단계 낮은 순 (조치가 더 필요한 쪽)
+  var sortedV = villages.slice().map(function(v){return Object.assign({}, v, {_risk: riskScore(v)});})
+    .sort(function(a,b){ return b._risk - a._risk || (a.stage||0) - (b.stage||0); });
+
+  container.innerHTML = sortedV.map(function(v) {
+    var info = v.info || {};
+    var agree = +info['vi-agree-pct'] || 0;
+    var reasons = [];
+    if (dday >= 0 && dday < 30 && (v.stage||0) < 4) reasons.push('D-' + dday + '인데 STEP' + ((v.stage||0)+1));
+    if ((v.stage||0) >= 1 && agree && agree < 70) reasons.push('동의률 ' + agree + '%');
+    if (!v.consultant) reasons.push('담당 미배정');
+    if (info['vi-visit-date'] && (v.stage||0) <= 1) {
+      var idle = Math.ceil((today - new Date(info['vi-visit-date'])) / 86400000);
+      if (idle > 30) reasons.push('방문 후 ' + idle + '일 정체');
+    }
+    var reasonsTxt = reasons.length ? '<div style="font-size:10px;color:#C0392B;margin-top:2px">⚠ ' + reasons.join(' · ') + '</div>' : '';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd2);cursor:pointer" onclick="go(\'villages\');selectVillage(\''+v.id+'\')">' +
+      '<div style="width:8px;height:8px;border-radius:50%;background:'+(stageColors[v.stage]||'var(--mu)')+';flex-shrink:0"></div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px">' + (v.name||'') + ' ' + riskBadge(v._risk) + '</div>' +
+        '<div style="font-size:11px;color:var(--mu)">' + (stageLabels[v.stage]||'') + ' · ' + (v.pop||'?') + '명 · 담당: ' + (v.consultant||'-') + '</div>' +
+        reasonsTxt +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">' +
+        '<div class="step-badge s'+((v.stage||0)+1)+'" style="font-size:11px;white-space:nowrap">' + (stageLabels[v.stage]||'') + '</div>' +
+        '<button onclick="event.stopPropagation();switchApp(\'manual\');manualGo(\''+(stagePages[v.stage]||'s1-what')+'\')" style="font-size:11px;background:transparent;border:1px solid var(--bd);border-radius:5px;padding:2px 8px;cursor:pointer;color:var(--mu);font-family:inherit;white-space:nowrap">' + (stageActions[v.stage]||'매뉴얼') + ' →</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 // ══════════════════════════════════════
@@ -9458,6 +9780,8 @@ function selectVillage(id) {
   if (bpSel) bpSel.value = id;
   renderVillages();
   showVillageDetail(v);
+  // 매뉴얼북 정관/규약/문서 페이지에 마을 정보 자동 치환
+  if (typeof autoFillVillageDocs === 'function') setTimeout(function(){ autoFillVillageDocs({ silent: true }); }, 60);
 }
 
 function showVillageDetail(v) {
@@ -11903,6 +12227,70 @@ function goToWorkDoc(step, docKey) {
   }, 200);
 }
 
+// ─────────────────────────────────────────────────────────────
+// Whisper API STT — 사용자 BYOK (OpenAI API 키)
+// ─────────────────────────────────────────────────────────────
+async function transcribeWithWhisper(file, onProgress) {
+  var key = localStorage.getItem('mh_whisper_key') || '';
+  if (!key) {
+    var input = prompt('OpenAI API 키를 입력하세요 (sk-... 형식)\n• 한 번 입력하면 브라우저에 안전하게 저장됩니다.\n• Whisper API 1시간 약 500원 (BYOK)\n• 키 발급: https://platform.openai.com/api-keys');
+    if (!input || !input.trim()) return null;
+    key = input.trim();
+    localStorage.setItem('mh_whisper_key', key);
+  }
+  if (onProgress) onProgress('🔊 음성 파일을 OpenAI Whisper로 전송 중... (1분 음성 약 10초)');
+  var form = new FormData();
+  form.append('file', file);
+  form.append('model', 'whisper-1');
+  form.append('language', 'ko');
+  var r = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + key },
+    body: form,
+  });
+  if (r.status === 401) {
+    localStorage.removeItem('mh_whisper_key');
+    throw new Error('OpenAI API 키가 유효하지 않습니다. 다시 입력해주세요.');
+  }
+  if (r.status === 413) throw new Error('파일 크기가 25MB를 초과합니다. 짧게 나눠서 업로드해주세요.');
+  if (!r.ok) {
+    var e = await r.json().catch(function(){return{};});
+    throw new Error((e.error && e.error.message) || 'Whisper API 오류 ' + r.status);
+  }
+  var data = await r.json();
+  return data.text || '';
+}
+
+function clearWhisperKey() {
+  localStorage.removeItem('mh_whisper_key');
+  if (typeof showToast === 'function') showToast('Whisper API 키가 초기화되었습니다', 2500);
+}
+
+async function runWhisperOnRecFile() {
+  var input = document.getElementById('rec-file-input');
+  var status = document.getElementById('rec-file-status');
+  var textEl = document.getElementById('rec-text-input');
+  var file = (input && input._audioFile) || (input && input.files && input.files[0]);
+  if (!file) { alert('먼저 음성 파일을 선택하거나 녹음해주세요.'); return; }
+  if (!/\.(mp3|m4a|wav|webm|ogg)$/i.test(file.name)) { alert('음성 파일만 가능합니다 (mp3/m4a/wav/webm/ogg)'); return; }
+  if (file.size > 25 * 1024 * 1024) {
+    if (status) status.innerHTML = '<span style="color:var(--red)">⚠ 25MB 초과 — 더 짧게 녹음해주세요.</span>';
+    return;
+  }
+  try {
+    var txt = await transcribeWithWhisper(file, function(msg){
+      if (status) status.innerHTML = '<span style="color:var(--sun-d)">' + msg + '</span>';
+    });
+    if (txt === null) return; // 사용자가 키 입력 취소
+    if (textEl) {
+      textEl.value = (textEl.value ? textEl.value + '\n\n' : '') + txt;
+    }
+    if (status) status.innerHTML = '<span style="color:var(--gr)">✅ STT 완료 — ' + txt.length + '자 변환됨</span>';
+  } catch(e) {
+    if (status) status.innerHTML = '<span style="color:var(--red)">⚠ ' + e.message + '</span>';
+  }
+}
+
 function handleRecFile(input) {
   var file = input.files[0];
   if (!file) return;
@@ -11916,12 +12304,15 @@ function handleRecFile(input) {
       status.innerHTML = '<span style="color:var(--gr)">✅ ' + file.name + ' 불러오기 완료</span>';
     };
     reader.readAsText(file, 'utf-8');
-  } else if (file.name.match(/\.(mp3|m4a|wav)$/i)) {
-    status.innerHTML = '<span style="color:var(--sun-d)">🎵 ' + file.name + ' 선택됨 — AI 회의록 작성 버튼을 눌러주세요.</span>';
-    textEl.placeholder = '음성 파일은 AI가 직접 처리합니다. 추가 메모가 있으면 입력하세요.';
+  } else if (file.name.match(/\.(mp3|m4a|wav|webm|ogg)$/i)) {
+    status.innerHTML = '<span style="color:var(--sun-d)">🎵 ' + file.name + ' 선택됨 — <button onclick="runWhisperOnRecFile()" style="background:#1ABC9C;color:#fff;border:none;border-radius:5px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-left:8px">🪄 Whisper로 자동 STT</button></span>';
+    textEl.placeholder = '음성 파일은 위 버튼으로 자동 변환할 수 있습니다. 또는 직접 입력하세요.';
     input._audioFile = file;
+  } else if (file.name.match(/\.(docx)$/i)) {
+    status.innerHTML = '<span style="color:var(--sun-d)">📄 ' + file.name + ' 선택됨 — Word 문서</span>';
+    input._docFile = file;
   } else {
-    status.textContent = '⚠ txt, mp3, m4a, wav 파일만 지원됩니다.';
+    status.textContent = '⚠ txt, mp3, m4a, wav, webm, ogg, docx 파일만 지원됩니다.';
   }
 }
 
@@ -12105,13 +12496,19 @@ function toggleLiveRec() {
     mr.ondataavailable = function(e) { if (e.data.size > 0) chunks.push(e.data); };
     mr.onstop = function() {
       var blob = new Blob(chunks, { type: 'audio/webm' });
+      // 1) 파일 다운로드 (백업)
       var url  = URL.createObjectURL(blob);
       var a    = document.createElement('a');
-      a.href = url; a.download = '회의록_녹음_' + new Date().toLocaleDateString('ko-KR').replace(/\. /g,'-').replace('.','') + '.webm';
-      a.click();
-      statusText.textContent = '녹음 파일이 다운로드됐습니다. 텍스트로 변환 후 아래에 붙여넣으세요.';
+      var fname = '회의록_녹음_' + new Date().toLocaleDateString('ko-KR').replace(/\. /g,'-').replace('.','') + '.webm';
+      a.href = url; a.download = fname; a.click();
+      // 2) Whisper STT 자동 변환 옵션 — rec-file-input에 파일 주입
+      try {
+        var recInput = document.getElementById('rec-file-input');
+        if (recInput) recInput._audioFile = new File([blob], fname, { type: 'audio/webm' });
+      } catch(e) {}
+      statusText.innerHTML = '✅ 녹음 완료 — <button onclick="runWhisperOnRecFile()" style="background:#1ABC9C;color:#fff;border:none;border-radius:5px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;margin-left:6px">🪄 Whisper로 자동 STT</button>';
       statusText.style.color = 'var(--gr)';
-      interim.textContent = '💡 네이버 클로바노트, 카카오 음성메모 앱으로 변환하거나 아래 텍스트 입력란에 직접 입력하세요.';
+      interim.innerHTML = '💡 위 버튼으로 OpenAI Whisper(BYOK)에 자동 변환하거나, 클로바노트·카카오 음성메모로 변환해 아래 입력란에 붙여넣으세요.';
     };
     mr.start();
     btn.classList.add('recording');
