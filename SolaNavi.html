@@ -918,7 +918,7 @@ const SB = {
     if (!CLOUD_ENABLED) return null;
     attempt = attempt || 0;
     const MAX_RETRY = 2;       // 총 3회 시도 (0,1,2)
-    const RETRY_DELAYS = [800, 2000]; // ms
+    const RETRY_DELAYS = [1500, 4000]; // ms — PostgREST 콜드 스타트 회피
     try {
       const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
         method,
@@ -6626,8 +6626,8 @@ function onLoginOK() {
   setTimeout(function(){if(typeof initReadiness==="function")initReadiness();if(typeof updateVillageCountLabel==="function")updateVillageCountLabel();},200);
   // 백업 알림 체크 (3일마다)
   setTimeout(function(){ checkBackupReminder(); }, 1500);
-  // 클라우드 동기화
-  setTimeout(function(){ CloudSync.syncOnLogin(); }, 900);
+  // 클라우드 동기화 — PostgREST write-path 콜드 스타트 회피를 위해 3초 지연
+  setTimeout(function(){ CloudSync.syncOnLogin(); }, 3000);
 }
 
 function checkBackupReminder() {
