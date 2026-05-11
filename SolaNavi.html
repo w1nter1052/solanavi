@@ -1421,11 +1421,18 @@ if (CLOUD_ENABLED) {
       <h1 class="cv-title">햇빛소득마을<br>컨설팅 매뉴얼</h1>
       <p class="cv-sub">마을 첫 방문부터 운영까지<br>컨설턴트가 순서대로 따라가는 실전 가이드</p>
 
-      <!-- 자가진단 + 부실 조기경보 + 운영 핸드북 빠른 진입 -->
-      <div style="display:flex;gap:10px;justify-content:center;margin:12px 0 6px;flex-wrap:wrap">
-        <button onclick="openSelfcheckModal()" style="background:#1A5276;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(26,82,118,.25)">📋 마을 자가진단 (5분)</button>
-        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openIntegrityReport() : alert('마을을 먼저 선택해주세요 (좌측 상단 ➕ 컨설팅 마을 선택)')" style="background:#C0392B;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(192,57,43,.25)">🔍 부실 조기경보</button>
-        <button onclick="openHandbookModal('gov')" style="background:#8E44AD;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(142,68,173,.25)">📚 운영 핸드북</button>
+      <!-- 안전망 빠른 진입 -->
+      <div style="display:flex;gap:8px;justify-content:center;margin:12px 0 6px;flex-wrap:wrap">
+        <button onclick="openSelfcheckModal()" style="background:#1A5276;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(26,82,118,.2)">📋 마을 자가진단</button>
+        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openIntegrityReport() : alert('마을을 먼저 선택해주세요')" style="background:#C0392B;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(192,57,43,.2)">🔍 부실 조기경보</button>
+        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openSiteCheckModal() : alert('마을을 먼저 선택해주세요')" style="background:#16A085;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(22,160,133,.2)">🌾 부지 점검</button>
+        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openConflictMatrix() : alert('마을을 먼저 선택해주세요')" style="background:#D35400;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(211,84,0,.2)">🤝 갈등 매트릭스</button>
+        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openRiskSimulator() : alert('마을을 먼저 선택해주세요')" style="background:#7B241C;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(123,36,28,.2)">🎲 시나리오 시뮬</button>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin:0 0 6px;flex-wrap:wrap">
+        <button onclick="openCoopCompare()" style="background:#2E86C1;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(46,134,193,.2)">⚖ 조합 형태 비교</button>
+        <button onclick="openPermitGantt()" style="background:#5B2C6F;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(91,44,111,.2)">⏱ 인허가 타임라인</button>
+        <button onclick="openHandbookModal('gov')" style="background:#8E44AD;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(142,68,173,.2)">📚 운영 핸드북</button>
       </div>
 
       <div class="step-grid">
@@ -7198,6 +7205,529 @@ async function dlExtraForm(key) {
 }
 
 // ──────────────────────────────────────────────────────────────
+// 인허가 타임라인 (Gantt) — 사업 착수부터 준공까지 18개월
+// ──────────────────────────────────────────────────────────────
+const PERMIT_TASKS = [
+  // start, dur(개월), label, agent, color, critical, desc
+  { s: 0, d: 1, l: '협동조합 설립신고', a: '시·도지사', c: '#27AE60', crit: true, desc: '신고서 + 정관 + 발기인 명부' },
+  { s: 0, d: 2, l: '주민 70% 동의 + 마을총회', a: '마을회', c: '#27AE60', crit: true, desc: '동의서 + 의결서' },
+  { s: 1, d: 1, l: '부지 토지이용 협의', a: '시·군 도시계획과', c: '#3498DB', crit: true, desc: '토지이용계획 확인서' },
+  { s: 1, d: 2, l: '한전 계통연계 사전 검토', a: '한국전력공사', c: '#3498DB', crit: true, desc: '잔여용량 확인 (30~60일)' },
+  { s: 2, d: 1, l: '농지·산지 전용 (필요 시)', a: '농림축산식품부', c: '#E67E22', crit: false, desc: '영농형은 불필요' },
+  { s: 2, d: 1, l: '환경영향 검토', a: '환경부·지자체', c: '#E67E22', crit: false, desc: '대규모 시만' },
+  { s: 3, d: 2, l: '발전사업허가 신청', a: '시·군 발전사업과', c: '#E74C3C', crit: true, desc: '선정 통보 후 6개월 내 필수' },
+  { s: 4, d: 1, l: '시공사 선정 (입찰·견적)', a: '협동조합', c: '#9B59B6', crit: true, desc: 'ReSCO 2~3곳 비교' },
+  { s: 5, d: 1, l: '이행보증보험 가입', a: '손해보험사', c: '#E74C3C', crit: true, desc: '총사업비 10%+' },
+  { s: 5, d: 1, l: '공사계획 인가', a: '한국전기안전공사', c: '#3498DB', crit: true, desc: '착공 전 필수' },
+  { s: 6, d: 1, l: '한전 계통연계 본 신청', a: '한국전력공사', c: '#3498DB', crit: true, desc: '사용전점검 신청서 동시' },
+  { s: 6, d: 6, l: '시공·설치 공사', a: '시공사', c: '#16A085', crit: true, desc: '패널·구조물·인버터' },
+  { s: 11, d: 1, l: '전기안전관리자 선임', a: '한국전기안전공사', c: '#3498DB', crit: true, desc: '준공 30일 전' },
+  { s: 12, d: 1, l: '사용전점검·검사', a: '한국전기안전공사', c: '#3498DB', crit: true, desc: '합격 시 송전 개시' },
+  { s: 13, d: 1, l: '준공 검사 + 한전 계통연계 완료', a: '한국전력공사', c: '#27AE60', crit: true, desc: '발전 개시' },
+  { s: 14, d: 1, l: 'REMS 등록', a: '한국에너지공단', c: '#8E44AD', crit: true, desc: '분기별 자동 보고 시작' },
+  { s: 14, d: 1, l: 'RPS·PPA 계약 체결', a: '발전공기업·민간', c: '#8E44AD', crit: true, desc: 'SMP+REC 판매 개시' },
+];
+
+function openPermitGantt() {
+  const months = 18;
+  const colW = 36;
+  const labelW = 280;
+  const totalW = labelW + months * colW + 30;
+  // 헤더 (월 번호)
+  let headerCells = '';
+  for (let i = 1; i <= months; i++) {
+    const bg = i === 6 ? '#FEF5E7' : i === 12 ? '#FEF5E7' : 'transparent';
+    headerCells += '<div style="width:'+colW+'px;text-align:center;font-size:10px;color:#666;border-right:1px dashed #ccc;background:'+bg+';padding:6px 0">M'+i+'</div>';
+  }
+  // Task rows
+  const rows = PERMIT_TASKS.map(function(t, i) {
+    const left = labelW + t.s * colW + 3;
+    const w = t.d * colW - 6;
+    const stripe = i % 2 === 0 ? '#FAFAF5' : '#fff';
+    return '<div style="display:flex;align-items:center;background:'+stripe+';border-bottom:1px solid #eee;min-height:38px;position:relative">'
+      + '<div style="width:'+labelW+'px;padding:6px 10px;font-size:12px;flex-shrink:0">'
+      + '<b>'+(t.crit?'⭐':'  ')+' '+t.l+'</b><div style="font-size:10px;color:#666">'+t.a+' · '+t.desc+'</div></div>'
+      + '<div style="position:relative;height:38px;flex:1">'
+      + '<div style="position:absolute;left:'+(t.s*colW)+'px;top:8px;height:22px;width:'+w+'px;background:'+t.c+';border-radius:5px;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.12)">'+t.d+'개월</div>'
+      + '</div></div>';
+  }).join('');
+  // 마일스톤 표시
+  const milestones = '<div style="display:flex;align-items:center;background:#FFF4E0;border-bottom:2px solid #F39C12;min-height:32px"><div style="width:'+labelW+'px;padding:6px 10px;font-size:11px;font-weight:700;color:#7A5A00;flex-shrink:0">📍 주요 마일스톤</div><div style="position:relative;height:32px;flex:1">'
+    + '<div style="position:absolute;left:'+(5*colW-30)+'px;top:8px;background:#E74C3C;color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">M6: 선정 통보 마감</div>'
+    + '<div style="position:absolute;left:'+(13*colW-20)+'px;top:8px;background:#27AE60;color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">M14: 준공</div>'
+    + '</div></div>';
+
+  const html = '<div id="permit-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:1100px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">⏱ 인허가 타임라인 (Gantt) — 18개월</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">17개 인허가·시공 단계 · ⭐ 표시는 임계 경로 (Critical Path) · 색상은 담당 기관</div></div>'
+    + '<button onclick="document.getElementById(\'permit-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="background:#FFFBF0;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:12px;color:#5D4037;line-height:1.7">💡 선정 통보 후 <b>6개월 내 발전사업허가 신청</b> 필수 (미신청 시 선정 취소). 준공까지 평균 14~18개월, 한전 계통연계·시공이 가장 큰 변수.</div>'
+    + '<div style="overflow-x:auto;border:1px solid #ddd;border-radius:8px"><div style="min-width:'+totalW+'px">'
+    + '<div style="display:flex;background:#1A3A6B;color:#fff;border-bottom:2px solid #1A3A6B"><div style="width:'+labelW+'px;padding:8px 10px;font-size:12px;font-weight:700;flex-shrink:0">단계 · 담당기관</div><div style="display:flex;flex:1">' + headerCells + '</div></div>'
+    + milestones
+    + rows + '</div></div>'
+    + '<div style="margin-top:14px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px"><span><span style="display:inline-block;width:12px;height:12px;background:#27AE60;border-radius:3px;vertical-align:middle;margin-right:4px"></span>설립·동의</span><span><span style="display:inline-block;width:12px;height:12px;background:#3498DB;border-radius:3px;vertical-align:middle;margin-right:4px"></span>한전·전기안전</span><span><span style="display:inline-block;width:12px;height:12px;background:#E74C3C;border-radius:3px;vertical-align:middle;margin-right:4px"></span>발전사업·보증</span><span><span style="display:inline-block;width:12px;height:12px;background:#16A085;border-radius:3px;vertical-align:middle;margin-right:4px"></span>시공</span><span><span style="display:inline-block;width:12px;height:12px;background:#8E44AD;border-radius:3px;vertical-align:middle;margin-right:4px"></span>운영 개시</span><span><span style="display:inline-block;width:12px;height:12px;background:#E67E22;border-radius:3px;vertical-align:middle;margin-right:4px"></span>토지·환경</span></div>'
+    + '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'
+    + '<button onclick="dlPermitTimeline()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📝 타임라인 Word</button>'
+    + '<button onclick="document.getElementById(\'permit-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function dlPermitTimeline() {
+  let md = '# 인허가 타임라인 — 18개월\n\n';
+  md += '햇빛소득마을 사업 착수부터 준공까지 17개 인허가·시공 단계를 정리한 타임라인입니다.\n\n';
+  md += '## 단계별 일정\n\n';
+  md += '| 시작(월) | 기간 | 단계 | 담당기관 | 임계경로 | 비고 |\n|---|---|---|---|---|---|\n';
+  PERMIT_TASKS.forEach(function(t){
+    md += '| M' + (t.s+1) + ' | ' + t.d + '개월 | ' + t.l + ' | ' + t.a + ' | ' + (t.crit?'⭐':'') + ' | ' + t.desc + ' |\n';
+  });
+  md += '\n## 주요 마일스톤\n\n';
+  md += '- **M6**: 선정 통보 마감 — 발전사업허가 신청 필수 (미신청 시 선정 취소)\n';
+  md += '- **M14**: 준공 + 송전 개시\n\n';
+  md += '## 변수 큰 단계 (지연 위험)\n\n';
+  md += '1. 한전 계통연계 (M2~M3, M7) — 잔여용량 부족 시 1년+ 대기\n';
+  md += '2. 농지·산지 전용 (M3) — 영농형은 불필요\n';
+  md += '3. 시공·설치 공사 (M7~M12) — 자재·인력 수급, 기상 영향\n';
+  const date = new Date().toISOString().split('T')[0];
+  await downloadAsWordDoc('인허가_타임라인_'+date, md, '인허가 타임라인 18개월');
+}
+
+// ──────────────────────────────────────────────────────────────
+// 조합 형태 비교 가이드 — 일반 협동조합 vs 사회적협동조합
+// ──────────────────────────────────────────────────────────────
+const COOP_COMPARE = [
+  { cat:'근거 법령', g:'협동조합 기본법 제2조 제1호', s:'협동조합 기본법 제2조 제3호 (특별법)' },
+  { cat:'인가권자', g:'시·도지사 (신고제)', s:'기획재정부장관 (인가제 — 심사 더 엄격)' },
+  { cat:'설립 절차', g:'발기인 5인 → 정관 → 창립총회 → 신고서 제출', s:'발기인 5인 → 정관 → 창립총회 → 인가신청 → 심사 2~3개월' },
+  { cat:'설립 기간', g:'평균 1~2개월', s:'평균 3~6개월' },
+  { cat:'목적', g:'경제·사회·문화적 수요 충족', s:'영리 목적 X, 지역사회 공헌·취약계층 지원' },
+  { cat:'배당 가능', g:'잉여금의 50% 한도', s:'❌ 배당 금지 (잉여금은 사업 재투자)' },
+  { cat:'법인세', g:'일반 법인 (다단계 누진세율)', s:'법인세 면제 (조세특례제한법)' },
+  { cat:'부가세', g:'면세 사업 (조합원 거래)', s:'면세 + 추가 혜택' },
+  { cat:'재정·세제 지원', g:'기본 지원', s:'우대 지원 (정부 보조·정책 융자 우선순위)' },
+  { cat:'사회적기업 인증', g:'추가 신청 필요', s:'요건 충족 시 자동 검토' },
+  { cat:'공시 의무', g:'경영공시 권고', s:'경영공시 의무 (홈페이지 게시)' },
+  { cat:'해산 시 잔여재산', g:'조합원 분배 가능', s:'유사 단체 또는 국가·지자체 귀속' },
+  { cat:'햇빛소득마을 적합도', g:'⭐⭐⭐⭐ 우수 · 빠른 설립', s:'⭐⭐⭐ 보통 · 취약계층 지원 명분 강함' },
+];
+
+function openCoopCompare() {
+  let rows = COOP_COMPARE.map(function(c){
+    return '<tr><td style="padding:8px 10px;background:#FAFAF5;font-weight:700;white-space:nowrap">'+c.cat+'</td>'
+      + '<td style="padding:8px 10px">'+c.g+'</td>'
+      + '<td style="padding:8px 10px;background:#FEF9E7">'+c.s+'</td></tr>';
+  }).join('');
+  const html = '<div id="coop-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:900px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">⚖ 조합 형태 비교 — 일반 vs 사회적</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">햇빛소득마을 협동조합 설립 시 어떤 형태로 갈지 13가지 항목 비교</div></div>'
+    + '<button onclick="document.getElementById(\'coop-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:700px">'
+    + '<thead><tr><th style="padding:10px;background:#1A3A6B;color:#fff;text-align:left;width:25%">비교 항목</th>'
+    + '<th style="padding:10px;background:#27AE60;color:#fff;text-align:left">일반 협동조합</th>'
+    + '<th style="padding:10px;background:#8E44AD;color:#fff;text-align:left">사회적 협동조합</th></tr></thead>'
+    + '<tbody>' + rows + '</tbody></table></div>'
+    + '<div style="margin-top:14px;background:#FFFBF0;padding:12px 16px;border-radius:8px;font-size:12.5px;color:#5D4037;line-height:1.8">'
+    + '<b>💡 추천 기준</b><br>'
+    + '✅ <b>일반 협동조합 권장 케이스</b> — 7월 마감 압박, 마을 자체 부지·자본 충분, 일반 수익 사업으로 운영하고자 할 때<br>'
+    + '✅ <b>사회적 협동조합 권장 케이스</b> — 시간 여유 있음, 취약계층 지원 비중 70%↑, 지자체·정부 추가 지원 받고자 할 때<br>'
+    + '⚠ <b>2026 햇빛소득마을 공모는 둘 다 가능</b>하지만, <b>일반 협동조합이 설립 기간 짧아 7월 마감 대응에 유리</b>합니다.'
+    + '</div>'
+    + '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'
+    + '<button onclick="dlCoopCompareDoc()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📝 비교표 Word</button>'
+    + '<button onclick="document.getElementById(\'coop-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function dlCoopCompareDoc() {
+  let md = '# 협동조합 형태 비교 — 일반 vs 사회적\n\n';
+  md += '햇빛소득마을 협동조합 설립 시 어떤 형태로 갈지 결정하기 위한 비교표입니다.\n\n';
+  md += '| 비교 항목 | 일반 협동조합 | 사회적 협동조합 |\n|---|---|---|\n';
+  COOP_COMPARE.forEach(function(c){ md += '| ' + c.cat + ' | ' + c.g.replace(/\|/g,'｜') + ' | ' + c.s.replace(/\|/g,'｜') + ' |\n'; });
+  md += '\n## 추천 기준\n\n';
+  md += '### ✅ 일반 협동조합 권장\n- 7월 마감 압박, 빠른 설립이 우선\n- 마을 자체 부지·자본 충분\n- 일반 수익 사업으로 운영하고자 할 때\n\n';
+  md += '### ✅ 사회적 협동조합 권장\n- 시간 여유 있음 (3~6개월 설립 기간)\n- 취약계층 지원 비중 70% 이상\n- 지자체·정부 추가 지원 받고자 할 때\n- 배당 금지(사업 재투자) 수용 가능\n\n';
+  md += '⚠ **2026 햇빛소득마을 공모는 둘 다 가능**하지만, 일반 협동조합이 설립 기간이 짧아 7월 마감 대응에 유리합니다.\n';
+  const date = new Date().toISOString().split('T')[0];
+  await downloadAsWordDoc('협동조합_형태_비교_'+date, md, '협동조합 형태 비교');
+}
+
+// ──────────────────────────────────────────────────────────────
+// 위험 시나리오 시뮬레이터 — 15개 변수 What-If 분석
+// ──────────────────────────────────────────────────────────────
+function openRiskSimulator(vid) {
+  vid = vid || (typeof selectedVid !== 'undefined' && selectedVid);
+  const v = vid ? (villages||[]).find(function(x){return x.id===vid;}) : null;
+  const base = (v && v.lastCalc) || { kw:500, sun:3.6, smp:110, rec:70000, wt:1.2, maint:150, loan:540, unitCost:180, selfRatio:15, df:40, dw:40, dm:10, dops:10 };
+
+  function calcRev(p) {
+    const annualGenKWh = p.kw * p.sun * 365;
+    const annualGenMWh = annualGenKWh / 1000;
+    const smpRev = Math.round(annualGenKWh * p.smp / 10000);
+    const recRev = Math.round(annualGenMWh * p.rec * p.wt / 10000);
+    const totalRev = smpRev + recRev;
+    const netRev = totalRev - p.maint - p.loan;
+    const selfPay = Math.round(p.kw * p.unitCost * p.selfRatio / 100);
+    const payback = netRev > 0 ? +(selfPay / netRev).toFixed(1) : null;
+    let cum = 0;
+    for (let y=1; y<=20; y++) {
+      const decay = Math.pow(0.995, y);
+      const yMWh = annualGenMWh * decay;
+      const yRev = Math.round(yMWh*1000*p.smp/10000 + yMWh*p.rec*p.wt/10000);
+      cum += yRev - p.maint - p.loan;
+    }
+    return { netRev, payback, cum20: cum, totalRev };
+  }
+
+  const baseRes = calcRev(base);
+  const SCENARIOS = [
+    { id:'smp_drop', icon:'📉', label:'SMP 단가 30% 하락', desc:'유가 하락·재생E 과잉 공급', tweak: { smp: base.smp * 0.7 }, severity:'high' },
+    { id:'rec_drop', icon:'📉', label:'REC 가격 40% 하락', desc:'정부 정책 변경·시장 포화', tweak: { rec: base.rec * 0.6 }, severity:'high' },
+    { id:'weight_lose', icon:'⚖', label:'REC 가중치 +0.2 상실', desc:'마을 귀속 70% 미달 또는 정책 변경', tweak: { wt: 1.0 }, severity:'high' },
+    { id:'sun_short', icon:'☁', label:'일조시간 15% 감소', desc:'기후 변화·차폐 누적', tweak: { sun: base.sun * 0.85 }, severity:'mid' },
+    { id:'maint_up', icon:'🔧', label:'유지보수비 2배', desc:'패널 부실·인버터 잦은 고장', tweak: { maint: base.maint * 2 }, severity:'mid' },
+    { id:'loan_up', icon:'💸', label:'금리 1.75%→3.5% 인상', desc:'정책 융자 종료·시중 금리 이동', tweak: { loan: base.loan * 2 }, severity:'mid' },
+    { id:'unitcost_up', icon:'🏗', label:'kW당 설치비 30% 상승', desc:'자재값·인건비 상승', tweak: { unitCost: base.unitCost * 1.3 }, severity:'low' },
+    { id:'self_up', icon:'💰', label:'자부담률 15→25%', desc:'정부 보조 축소', tweak: { selfRatio: 25 }, severity:'high' },
+    { id:'kw_down', icon:'📐', label:'설치 용량 20% 축소', desc:'부지 변경·이격거리 위반', tweak: { kw: base.kw * 0.8 }, severity:'mid' },
+    { id:'panel_decay', icon:'🌫', label:'패널 효율 연 1.5% 열화', desc:'저품질 패널·관리 부실', tweak: { _decay: 0.985 }, severity:'mid' },
+    { id:'grid_delay', icon:'⏰', label:'계통연계 1년 지연', desc:'한전 보강공사 대기', tweak: { _delay1y: true }, severity:'mid' },
+    { id:'community_dispute', icon:'🚨', label:'주민 분쟁으로 6개월 정지', desc:'배분 비율 갈등 → 운영 중단', tweak: { _pauseMonths: 6 }, severity:'high' },
+    { id:'rems_penalty', icon:'📋', label:'REMS 미보고 환수 10%', desc:'운영 의무 누락', tweak: { _penalty: 0.10 }, severity:'high' },
+    { id:'best_case', icon:'🌟', label:'베스트 케이스 (SMP+15%, 가중치 1.5)', desc:'유가 상승 + ESS 풀 가중치', tweak: { smp: base.smp * 1.15, wt: 1.5 }, severity:'positive' },
+    { id:'realistic', icon:'📊', label:'현실 시나리오 (SMP-10%, 가중치 유지)', desc:'시장 평균 추세', tweak: { smp: base.smp * 0.9 }, severity:'low' },
+  ];
+
+  function simRow(s) {
+    const p = Object.assign({}, base, s.tweak);
+    let r = calcRev(p);
+    let cum = r.cum20;
+    if (s.tweak._decay) {
+      let cum2 = 0; const aGen = p.kw * p.sun * 365 / 1000;
+      for (let y=1; y<=20; y++) { const d = Math.pow(s.tweak._decay, y); const yM = aGen*d; cum2 += Math.round(yM*1000*p.smp/10000 + yM*p.rec*p.wt/10000) - p.maint - p.loan; }
+      cum = cum2;
+    }
+    if (s.tweak._delay1y) cum = cum - (r.totalRev - p.maint - p.loan); // 첫 해 수익 손실
+    if (s.tweak._pauseMonths) cum = cum - Math.round((r.totalRev - p.maint - p.loan) * s.tweak._pauseMonths / 12);
+    if (s.tweak._penalty) cum = Math.round(cum * (1 - s.tweak._penalty));
+    const diff = cum - baseRes.cum20;
+    const diffPct = Math.round(diff / Math.abs(baseRes.cum20) * 100);
+    const color = s.severity==='positive' ? '#27AE60' : diff >= 0 ? '#27AE60' : Math.abs(diffPct) > 30 ? '#C0392B' : Math.abs(diffPct) > 10 ? '#E67E22' : '#7D6608';
+    return '<tr><td style="text-align:center;font-size:18px">'+s.icon+'</td>'
+      + '<td style="padding:8px 10px"><b>'+s.label+'</b><div style="font-size:11px;color:#666">'+s.desc+'</div></td>'
+      + '<td style="padding:8px 10px;text-align:right;color:'+color+';font-weight:700">'+r.netRev.toLocaleString()+' 만원</td>'
+      + '<td style="padding:8px 10px;text-align:right;color:'+color+';font-weight:700">'+cum.toLocaleString()+' 만원</td>'
+      + '<td style="padding:8px 10px;text-align:right;color:'+color+';font-weight:700">'+(diff>=0?'+':'')+diffPct+'%</td></tr>';
+  }
+
+  const rows = SCENARIOS.map(simRow).join('');
+  const html = '<div id="risksim-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:980px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">🎲 위험 시나리오 시뮬레이터 (What-If)</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">'+(v?v.name+' · ':'')+'15개 변수가 사업에 미치는 영향 — 20년 누적 순수익 기준</div></div>'
+    + '<button onclick="document.getElementById(\'risksim-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="background:#FFFBF0;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:12px;color:#5D4037;line-height:1.7">💡 <b>기준 시나리오</b>: 설치 '+base.kw+'kW · 일조 '+base.sun+'h · SMP '+base.smp+'원 · 가중치 '+base.wt+' · 20년 누적 <b>'+baseRes.cum20.toLocaleString()+'만원</b>. 각 시나리오가 발생했을 때 20년 누적이 어떻게 변하는지 비교합니다.</div>'
+    + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:700px">'
+    + '<thead><tr style="background:#FFF4E0;border-bottom:2px solid #F39C12">'
+    + '<th style="padding:8px;text-align:center">아이콘</th><th style="padding:8px;text-align:left">시나리오</th>'
+    + '<th style="padding:8px;text-align:right">1년 순수익</th><th style="padding:8px;text-align:right">20년 누적</th><th style="padding:8px;text-align:right">기준 대비</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+    + '<div style="margin-top:14px;font-size:11.5px;color:#666;line-height:1.7">⚠ 본 시뮬레이터는 단순 산식 기반 추정치입니다. 실제 발전사업·계통연계·금융 조건에 따라 결과가 달라질 수 있으며, 정확한 분석은 한국에너지공단 또는 전문 발전사업자 검토를 받으시기 바랍니다.</div>'
+    + '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'
+    + '<button onclick="document.getElementById(\'risksim-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// ──────────────────────────────────────────────────────────────
+// 마을 갈등 매트릭스 — 4대 이해관계자 입장·우려·설득 포인트
+// ──────────────────────────────────────────────────────────────
+const STAKEHOLDERS = [
+  { id:'chief', label:'이장·마을회', icon:'🏛️', weight:25,
+    typical:'사업 추진 주도, 컨설턴트 1차 접점, 행정 처리 책임',
+    concerns:['사업 실패 시 책임 부담','외부 비난·반대층 항의','임기 중 마무리 어려움'],
+    persuade:['리더십 보장 (이사장직)','단계별 부담 분산 — 협동조합 이사회 공동책임','책임보험·면책 조항']
+  },
+  { id:'elder', label:'노인회', icon:'🌾', weight:30,
+    typical:'마을 다수, 보수적, 변화에 신중, 부지 소유자 다수 포함',
+    concerns:['"눈에 안 익은 시설" 거부감','부지 임대료 갈등','수익보다 농지 보전 우선','죽기 전에 결실 못 봄'],
+    persuade:['실제 수익 사례 영상·견학','연 1회 지역화폐 배분 직접 체감','농사 병행(영농형) 강조','부지 임대료 별도 지급']
+  },
+  { id:'women', label:'부녀회', icon:'🍱', weight:20,
+    typical:'생활·복지·교육 관심 높음, 가계 수익 관심',
+    concerns:['일거리 추가 부담','자녀 교육·복지 사업 우선 원함'],
+    persuade:['취약계층·아동복지 배분 비율 강조','마을 공동 부엌·돌봄 시설 재원 제안','부녀회 추천 임원 보장']
+  },
+  { id:'youth', label:'청년회·귀농인', icon:'🌱', weight:15,
+    typical:'(있다면) 변화·신사업 적극적, 인구 유입 기대',
+    concerns:['단순 발전소가 아닌 마을 활성화 원함','지역화폐 사용처 부족'],
+    persuade:['협동조합 청년 임원 자리 확보','수익 활용 청년 창업 기금 운용','SNS·홍보 역할 위임']
+  },
+  { id:'opposing', label:'반대층', icon:'🚫', weight:30,
+    typical:'경관·소음 우려, 외지인 자본 의심, 친환경 단체, 인접 부지 소유자',
+    concerns:['"태양광은 환경 파괴" 인식','수익이 일부에만 돌아갈까 우려','외지인 자본 유입 의심','경관·반사 영향'],
+    persuade:['공고문·운영구조 1:1 설명회','외부 자본 차단 명문화 (정관)','반대층 의견 회의록 명시 + 수정 반영','환경영향 자료 공유']
+  },
+];
+
+function openConflictMatrix(vid) {
+  vid = vid || (typeof selectedVid !== 'undefined' && selectedVid);
+  const v = vid ? (villages||[]).find(function(x){return x.id===vid;}) : null;
+  const stored = (v && v.conflict) || {};
+
+  let bodyHtml = '';
+  STAKEHOLDERS.forEach(function(s) {
+    const cur = stored[s.id] || { stance:'unknown', notes:'' };
+    const stanceColor = cur.stance==='support'?'#27AE60':cur.stance==='neutral'?'#7D6608':cur.stance==='oppose'?'#C0392B':'#888';
+    bodyHtml += '<div style="border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:12px;background:#FAFAF5">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">'
+      + '<div style="font-size:14px;font-weight:700">'+s.icon+' '+s.label+' <span style="font-size:11px;color:#888;font-weight:400">· 영향가중치 '+s.weight+'%</span></div>'
+      + '<div style="display:flex;gap:4px">'
+      + ['support:#27AE60:✅ 우호','neutral:#7D6608:🟡 중립','oppose:#C0392B:❌ 반대','unknown:#888:❓ 미파악'].map(function(o){
+          const [val,col,txt] = o.split(':');
+          const checked = cur.stance===val;
+          return '<button onclick="setConflictStance(\''+s.id+'\',\''+val+'\')" style="background:'+(checked?col:'#fff')+';color:'+(checked?'#fff':col)+';border:1.5px solid '+col+';border-radius:5px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;min-height:auto">'+txt+'</button>';
+        }).join('') + '</div></div>'
+      + '<div style="font-size:11.5px;color:#666;margin-bottom:6px"><b>특징:</b> '+s.typical+'</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">'
+      + '<div style="background:#FEF5E7;padding:8px 10px;border-radius:6px"><b style="font-size:11px;color:#7A5A00">💭 주요 우려</b><ul style="margin:4px 0 0;padding-left:16px;font-size:11.5px;line-height:1.7">'+s.concerns.map(function(c){return '<li>'+c+'</li>';}).join('')+'</ul></div>'
+      + '<div style="background:#D6EAF8;padding:8px 10px;border-radius:6px"><b style="font-size:11px;color:#1A5276">🎯 설득 포인트</b><ul style="margin:4px 0 0;padding-left:16px;font-size:11.5px;line-height:1.7">'+s.persuade.map(function(p){return '<li>'+p+'</li>';}).join('')+'</ul></div>'
+      + '</div>'
+      + '<textarea id="conflict-note-'+s.id+'" placeholder="이 마을의 '+s.label+' 관련 메모 (주요 인물·갈등 사례·진척 상황)" rows="2" oninput="setConflictNote(\''+s.id+'\',this.value)" style="width:100%;border:1px solid #ddd;border-radius:6px;padding:6px 10px;font-size:12px;font-family:inherit;resize:vertical">'+(cur.notes||'')+'</textarea>'
+      + '</div>';
+  });
+
+  const html = '<div id="conflict-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:900px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">🤝 마을 갈등 매트릭스</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">'+(v?v.name+' · ':'')+'5대 이해관계자별 입장·우려·설득 포인트 + 메모</div></div>'
+    + '<button onclick="document.getElementById(\'conflict-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="font-size:12px;color:#5D4037;background:#FFFBF0;padding:10px 14px;border-radius:8px;margin-bottom:14px">💡 각 그룹별 입장을 ✅우호 / 🟡중립 / ❌반대 / ❓미파악으로 파악하세요. 영향가중치는 사업 진행 영향력. <b>반대층 30%</b>를 가장 무겁게 다룬 이유는 인접 부지 민원 한 건이 인허가를 6개월 이상 지연시킬 수 있기 때문입니다.</div>'
+    + bodyHtml
+    + '<div id="conflict-result" style="margin-top:14px"></div>'
+    + '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'
+    + '<button onclick="computeConflict(\''+(vid||'')+'\')" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📊 종합 평가</button>'
+    + '<button onclick="document.getElementById(\'conflict-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+  window._conflictAns = Object.assign({}, stored);
+}
+
+function setConflictStance(id, stance) {
+  window._conflictAns = window._conflictAns || {};
+  window._conflictAns[id] = window._conflictAns[id] || {};
+  window._conflictAns[id].stance = stance;
+  // 다시 그리기 (UX 단순화)
+  const cur = (typeof selectedVid !== 'undefined' && selectedVid) ? selectedVid : '';
+  document.getElementById('conflict-modal').remove();
+  // 마을에 임시 저장 후 재오픈
+  if (cur) {
+    var v = (villages||[]).find(function(x){return x.id===cur;});
+    if (v) { v.conflict = Object.assign({}, v.conflict, window._conflictAns); }
+  }
+  openConflictMatrix(cur);
+}
+
+function setConflictNote(id, note) {
+  window._conflictAns = window._conflictAns || {};
+  window._conflictAns[id] = window._conflictAns[id] || {};
+  window._conflictAns[id].notes = note;
+}
+
+function computeConflict(vid) {
+  const ans = window._conflictAns || {};
+  let supportScore = 0, total = 0, risks = [];
+  STAKEHOLDERS.forEach(function(s){
+    total += s.weight;
+    const cur = ans[s.id] || {};
+    if (cur.stance === 'support') supportScore += s.weight;
+    else if (cur.stance === 'neutral') supportScore += s.weight * 0.5;
+    else if (cur.stance === 'oppose') {
+      supportScore += 0;
+      risks.push({ label: s.label, weight: s.weight, persuade: s.persuade });
+    } else risks.push({ label: s.label, weight: s.weight, unknown: true });
+  });
+  const pct = Math.round(supportScore / total * 100);
+  const level = pct >= 75 ? { txt:'✅ 추진 안전', color:'#27AE60' }
+    : pct >= 55 ? { txt:'🟡 보완 후 추진', color:'#7D6608' }
+    : pct >= 35 ? { txt:'⚠ 갈등 위험 — 정밀 대응 필요', color:'#E67E22' }
+    : { txt:'🚨 추진 보류 권장', color:'#C0392B' };
+  let html = '<div style="border:2px solid '+level.color+';border-radius:12px;padding:18px;background:'+level.color+'15">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'
+    + '<div><div style="font-size:14px;color:'+level.color+';font-weight:700">우호도 종합 점수</div>'
+    + '<div style="font-size:30px;font-weight:900;color:'+level.color+'">'+pct+'<span style="font-size:18px">%</span></div>'
+    + '<div style="font-size:13px;color:'+level.color+';font-weight:700">'+level.txt+'</div></div>'
+    + '<div style="font-size:12px;color:#666">위험·미파악 ' + risks.length + '개 그룹</div></div>';
+  if (risks.length) {
+    html += '<div style="margin-top:14px"><b>🎯 우선 대응 그룹</b><ul style="margin:6px 0 0;padding-left:20px;font-size:12.5px;line-height:1.9">';
+    risks.sort(function(a,b){return b.weight-a.weight;}).forEach(function(r){
+      html += '<li><b>'+r.label+'</b> (가중치 '+r.weight+'%)' + (r.unknown ? ' — <span style="color:#888">먼저 입장 파악 필요</span>' : '') + (r.persuade ? '<br><span style="color:#1A5276;font-size:11.5px">→ '+r.persuade[0]+'</span>' : '') + '</li>';
+    });
+    html += '</ul></div>';
+  }
+  html += '</div>';
+  document.getElementById('conflict-result').innerHTML = html;
+  if (vid) {
+    var v = (villages||[]).find(function(x){return x.id===vid;});
+    if (v) {
+      v.conflict = Object.assign({}, ans, { _score: pct, _level: level.txt, _updatedAt: new Date().toISOString() });
+      (window.safeSaveLocal||function(k,vv){localStorage.setItem(k,vv);return true;})('hsv_villages', JSON.stringify(villages));
+    }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// 부지 점검 체크리스트 — 8개 항목 자동 점검 + 진단 보고서
+// ──────────────────────────────────────────────────────────────
+const SITE_CHECK_ITEMS = [
+  { id:'ownership', q:'부지 소유 형태', opts:[
+    { v:'village', t:'마을 공동소유', ok:true, note:'가장 이상적 — 즉시 사용 가능' },
+    { v:'private_agree', t:'개인소유 + 토지이용 동의서 확보', ok:true, note:'동의서·임대차계약(최소 20년) 필수' },
+    { v:'private_no', t:'개인소유 (동의서 미확보)', ok:false, sev:'high', note:'즉시 동의서 확보 또는 부지 변경' },
+    { v:'public', t:'국·공유지 (임대)', ok:'mid', note:'기획재정부·지자체 임대 절차 별도' },
+    { v:'forest', t:'임야·산림 (전환 필요)', ok:'mid', note:'산지전용 인가 절차 + 6개월~1년' },
+    { v:'rooftop', t:'공공시설 옥상', ok:true, note:'좋은 선택 — 농지전용 불필요' },
+  ]},
+  { id:'usage', q:'농지·산지 용도', opts:[
+    { v:'farming_solar', t:'영농형 태양광 (농사 병행)', ok:true, note:'농지법 위반 X · REC 가산점' },
+    { v:'land_conv', t:'농지 전용', ok:'mid', sev:'mid', note:'농지 전용 인가 + 농지보전부담금' },
+    { v:'forest_conv', t:'산지 전용', ok:'mid', sev:'mid', note:'산지전용 인가 + 대체산림자원조성비' },
+    { v:'non_agri', t:'비농지 (대지·잡종지)', ok:true, note:'전용 절차 불필요' },
+    { v:'unknown', t:'미확인', ok:false, sev:'high', note:'토지이용계획확인서 즉시 발급' },
+  ]},
+  { id:'grid', q:'한전 계통연계 검토', opts:[
+    { v:'confirmed', t:'검토 신청 + 잔여용량 확인 완료', ok:true, note:'증빙(회신문) 보관' },
+    { v:'requested', t:'검토 신청만 한 상태', ok:'mid', note:'회신 대기 — 보통 30~60일' },
+    { v:'capacity_short', t:'잔여용량 부족 — 보강공사 필요', ok:false, sev:'high', note:'한전 보강비 + 대기 1년+ · 사업 보류 검토' },
+    { v:'not_yet', t:'아직 신청 안 함', ok:false, sev:'high', note:'STEP4 진입 전 즉시 신청 — 사업 가능 여부 결정 사항' },
+  ]},
+  { id:'distance', q:'시·군 이격거리 조례 적합성', opts:[
+    { v:'compliant', t:'주거지/도로/문화재 모두 이격거리 충족', ok:true },
+    { v:'borderline', t:'경계선 — 측량 필요', ok:'mid', sev:'mid', note:'지적측량 + 시·군 도시계획과 사전 협의' },
+    { v:'violation', t:'위반 — 즉시 탈락 가능성', ok:false, sev:'high', note:'부지 변경 또는 예외조항(2026.9.18 시행) 적용 검토' },
+    { v:'not_checked', t:'조례 미확인', ok:false, sev:'high', note:'시·군 도시계획과 또는 조례 검색 사이트' },
+  ]},
+  { id:'environment', q:'환경·경관·수목 제약', opts:[
+    { v:'none', t:'제약 없음', ok:true },
+    { v:'view', t:'경관지구 (시각적 영향 검토 필요)', ok:'mid', note:'환경영향 조사 + 설명회 사전 개최' },
+    { v:'protected', t:'보호수목·생태 보전구역', ok:false, sev:'high', note:'부지 변경 강력 권장' },
+    { v:'cultural', t:'문화재 보호구역 인접', ok:false, sev:'high', note:'문화재청 협의 — 통상 거절' },
+  ]},
+  { id:'size', q:'설치 가능 면적 (평수)', opts:[
+    { v:'over500', t:'500평 이상 (300kW+ 가능)', ok:true },
+    { v:'200_500', t:'200~500평 (100~300kW)', ok:true, note:'소형 마을형 적합' },
+    { v:'100_200', t:'100~200평 (50~100kW)', ok:'mid', note:'사업성 검토 — 경상비 대비 수익 확인' },
+    { v:'under100', t:'100평 미만', ok:false, sev:'mid', note:'사업성 낮음 — 옥상태양광 등 대안 검토' },
+  ]},
+  { id:'access', q:'진입로·공사 차량 접근', opts:[
+    { v:'good', t:'4톤 트럭 진입 가능', ok:true },
+    { v:'narrow', t:'좁음 — 1톤 가능', ok:'mid', note:'시공비 약간 증가' },
+    { v:'impossible', t:'진입로 없음 — 신규 개설 필요', ok:false, sev:'high', note:'개설 비용·동의 추가 부담' },
+  ]},
+  { id:'shadow', q:'주변 차폐(그림자) 영향', opts:[
+    { v:'open', t:'개활지 — 차폐 없음', ok:true },
+    { v:'partial', t:'부분 차폐 (오전·오후 일부)', ok:'mid', note:'발전량 10~20% 손실' },
+    { v:'severe', t:'심각한 차폐 (산·건물)', ok:false, sev:'high', note:'발전량 30%+ 손실 — 부지 부적합' },
+  ]},
+];
+
+function openSiteCheckModal(vid) {
+  vid = vid || (typeof selectedVid !== 'undefined' && selectedVid);
+  const v = vid ? (villages||[]).find(function(x){return x.id===vid;}) : null;
+  const stored = (v && v.siteCheck) || {};
+  let bodyHtml = '';
+  SITE_CHECK_ITEMS.forEach(function(item, idx){
+    bodyHtml += '<div style="border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:10px">'
+      + '<div style="font-size:13px;color:#888;font-weight:700;margin-bottom:6px">'+(idx+1)+'. ['+item.id+']</div>'
+      + '<div style="font-size:14px;font-weight:700;margin-bottom:10px">'+item.q+'</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px">';
+    item.opts.forEach(function(o){
+      const checked = stored[item.id] === o.v;
+      const color = o.ok === true ? '#27AE60' : o.ok === false ? '#C0392B' : '#E67E22';
+      bodyHtml += '<label style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:1px solid '+(checked?color:'#eee')+';border-radius:6px;cursor:pointer;background:'+(checked?color+'15':'#fff')+'">'
+        + '<input type="radio" name="site_'+item.id+'" value="'+o.v+'"'+(checked?' checked':'')+' onchange="setSiteCheckAns(\''+item.id+'\',\''+o.v+'\')" style="margin-top:3px;flex-shrink:0">'
+        + '<div style="flex:1"><div style="font-weight:600;color:'+color+'">'+o.t+'</div>'
+        + (o.note ? '<div style="font-size:11px;color:#666;margin-top:2px">💡 '+o.note+'</div>' : '')
+        + '</div></label>';
+    });
+    bodyHtml += '</div></div>';
+  });
+  const html = '<div id="sitecheck-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:780px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">🌾 부지 점검 체크리스트</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">'+(v?v.name+' · ':'')+'8개 항목 — 부지 소유·용도·계통·이격거리·환경·면적·진입·차폐</div></div>'
+    + '<button onclick="document.getElementById(\'sitecheck-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="font-size:12px;color:#5D4037;background:#FFFBF0;padding:10px 14px;border-radius:8px;margin-bottom:14px">💡 STEP4 발전소 준비 진입 전 반드시 체크. <b>1개라도 🚨 위험</b>이면 사업 보류·부지 변경 검토 필요.</div>'
+    + bodyHtml
+    + '<div id="sitecheck-result" style="margin-top:14px"></div>'
+    + '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">'
+    + '<button onclick="computeSiteCheck(\''+(vid||'')+'\')" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📊 결과 보기</button>'
+    + '<button onclick="document.getElementById(\'sitecheck-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+  window._siteCheckAns = Object.assign({}, stored);
+}
+
+function setSiteCheckAns(id, val) {
+  window._siteCheckAns = window._siteCheckAns || {};
+  window._siteCheckAns[id] = val;
+}
+
+function computeSiteCheck(vid) {
+  const ans = window._siteCheckAns || {};
+  let highs = [], mids = [], oks = [];
+  SITE_CHECK_ITEMS.forEach(function(item){
+    const v = ans[item.id];
+    if (!v) { highs.push({ q: item.q, sel: '미답변', sev:'high' }); return; }
+    const o = item.opts.find(function(x){return x.v===v;});
+    if (!o) return;
+    if (o.ok === false) highs.push({ q: item.q, sel: o.t, note: o.note, sev:'high' });
+    else if (o.ok === 'mid') mids.push({ q: item.q, sel: o.t, note: o.note, sev:'mid' });
+    else oks.push({ q: item.q, sel: o.t });
+  });
+  const score = Math.max(0, 100 - highs.length*20 - mids.length*8);
+  const level = score >= 80 ? { txt:'✅ 부지 적합', color:'#27AE60' }
+    : score >= 60 ? { txt:'🟡 보완 후 진행', color:'#7D6608' }
+    : score >= 40 ? { txt:'⚠ 위험 — 정밀 점검', color:'#E67E22' }
+    : { txt:'🚨 부적합 — 부지 변경 권장', color:'#C0392B' };
+  let html = '<div style="border:2px solid '+level.color+';border-radius:12px;padding:18px;background:'+level.color+'15">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'
+    + '<div><div style="font-size:14px;color:'+level.color+';font-weight:700">부지 진단</div>'
+    + '<div style="font-size:30px;font-weight:900;color:'+level.color+'">'+score+'<span style="font-size:18px">점</span></div>'
+    + '<div style="font-size:13px;color:'+level.color+';font-weight:700">'+level.txt+'</div></div>'
+    + '<div style="font-size:12px;color:#666">위험 '+highs.length+'개 · 보완 '+mids.length+'개 · 양호 '+oks.length+'개</div>'
+    + '</div>';
+  if (highs.length) {
+    html += '<div style="margin-top:14px"><b style="color:#C0392B">🚨 위험 항목</b><ul style="margin:6px 0 0;padding-left:20px;font-size:12.5px;line-height:1.9">';
+    highs.forEach(function(h){ html += '<li><b>'+h.q+'</b>: '+h.sel+(h.note?'<br><span style="color:#1A5276;font-size:11.5px">→ '+h.note+'</span>':'')+'</li>'; });
+    html += '</ul></div>';
+  }
+  if (mids.length) {
+    html += '<div style="margin-top:10px"><b style="color:#E67E22">⚠ 보완 항목</b><ul style="margin:6px 0 0;padding-left:20px;font-size:12.5px;line-height:1.9">';
+    mids.forEach(function(m){ html += '<li><b>'+m.q+'</b>: '+m.sel+(m.note?' — <span style="color:#666">'+m.note+'</span>':'')+'</li>'; });
+    html += '</ul></div>';
+  }
+  html += '</div>';
+  document.getElementById('sitecheck-result').innerHTML = html;
+  // 마을 객체에 저장
+  if (vid) {
+    var v = (villages||[]).find(function(x){return x.id===vid;});
+    if (v) {
+      v.siteCheck = Object.assign({}, ans, { _score: score, _highs: highs.length, _mids: mids.length, _updatedAt: new Date().toISOString() });
+      (window.safeSaveLocal||function(k,vv){localStorage.setItem(k,vv);return true;})('hsv_villages', JSON.stringify(villages));
+    }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
 // 운영 핸드북 — 지자체 담당자 가이드 + 분쟁·실패 사례 + 사후관리
 // ──────────────────────────────────────────────────────────────
 const HANDBOOK = {
@@ -10941,10 +11471,26 @@ function renderDash() {
       ? '<button onclick="openHandoverModal()" style="background:#8E44AD;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🤝 인계인수 패키지</button>'
       : '';
     var handbookBtn = '<button onclick="openHandbookModal(\'gov\')" style="background:#34495E;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📚 운영 핸드북</button>';
+    var siteBtn = (typeof selectedVid !== 'undefined' && selectedVid)
+      ? '<button onclick="openSiteCheckModal()" style="background:#16A085;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🌾 부지 점검</button>'
+      : '';
+    var conflictBtn = (typeof selectedVid !== 'undefined' && selectedVid)
+      ? '<button onclick="openConflictMatrix()" style="background:#D35400;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🤝 갈등 매트릭스</button>'
+      : '';
+    var simBtn = (typeof selectedVid !== 'undefined' && selectedVid)
+      ? '<button onclick="openRiskSimulator()" style="background:#7B241C;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🎲 시나리오 시뮬</button>'
+      : '';
+    var coopBtn = '<button onclick="openCoopCompare()" style="background:#2E86C1;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⚖ 조합 비교</button>';
+    var permitBtn = '<button onclick="openPermitGantt()" style="background:#5B2C6F;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⏱ 인허가 타임라인</button>';
     var toolbarHtml = '<div id="dash-toolbar" style="display:flex;justify-content:flex-end;margin-bottom:8px;gap:6px;flex-wrap:wrap">'
       + '<button onclick="openScheduleModal()" style="background:#E67E22;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📅 일정 캘린더</button>'
+      + permitBtn
       + compareBtn
       + integrityBtn
+      + siteBtn
+      + conflictBtn
+      + simBtn
+      + coopBtn
       + handoverBtn
       + handbookBtn
       + '<button onclick="openSelfcheckModal()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📋 자가진단</button>'
