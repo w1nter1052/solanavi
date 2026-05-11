@@ -447,7 +447,7 @@ body{font-family:'Pretendard',-apple-system,'Noto Sans KR',sans-serif;background
   .brow{flex-direction:column}
   .brow .btn{width:100%;text-align:center;justify-content:center}
   #app-assistant #tabbar{padding:0 4px}
-  .tab{padding:0 8px;font-size:11px}
+  .tab{padding:0 7px;font-size:10.5px}
   #village-chip{display:none}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .kpi-v{font-size:20px}
@@ -5329,14 +5329,14 @@ localStorage.setItem = function(k, v) {
   <!-- 탭바 -->
   <div id="tabbar">
     <div class="tab on" onclick="go('dash',this)">🏠 대시보드</div>
-    <div class="tab" onclick="go('villages',this)">🏘 마을 관리</div>
-    <div class="tab" onclick="checkPaidTab('workdocs',this)">📄 서류작업 <span class="tbadge">AI</span></div>
+    <div class="tab" onclick="go('villages',this)">🏘 마을</div>
+    <div class="tab" onclick="checkPaidTab('workdocs',this)">📄 서류 <span class="tbadge">AI</span></div>
     <div class="tab" onclick="checkPaidTab('minutes',this)">🎙 회의록 <span class="tbadge">AI</span></div>
-    <div class="tab" onclick="checkPaidTab('law',this)">⚖️ 법령·인허가 <span class="tbadge">AI</span></div>
-    <div class="tab" onclick="go('revenue',this)">💰 수익 분석</div>
-    <div class="tab" onclick="go('checklist',this)">✅ 준비도 체크</div>
-    <div class="tab" onclick="checkPaidTab('chat',this)">💬 AI 상담</div>
-    <div class="tab" onclick="go('faqissue',this)">📋 FAQ·이슈</div>
+    <div class="tab" onclick="checkPaidTab('law',this)">⚖️ 법령 <span class="tbadge">AI</span></div>
+    <div class="tab" onclick="go('revenue',this)">💰 수익</div>
+    <div class="tab" onclick="go('checklist',this)">✅ 준비도</div>
+    <div class="tab" onclick="checkPaidTab('chat',this)">💬 AI상담</div>
+    <div class="tab" onclick="go('faqissue',this)">📋 FAQ</div>
     <div class="tab" onclick="checkProTab('community',this)">🌐 커뮤니티</div>
   </div>
 
@@ -10912,6 +10912,28 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     } catch(e) {}
   }
+
+  // ── 물리 뒤로가기 버튼 가로채기 (앱 꺼지지 않게) ──────────
+  // 최초 진입 시 history state 추가
+  history.pushState({ solanavi: true }, '', location.href);
+  window.addEventListener('popstate', function(e) {
+    // 브라우저/카카오톡 뒤로가기 → 앱 내 뒤로가기로 처리
+    history.pushState({ solanavi: true }, '', location.href); // 다시 state 추가 (앱 안 꺼지게)
+    // 매뉴얼 탭이면 페이지 히스토리로 뒤로가기
+    var manualApp = document.getElementById('app-manual');
+    var isManualActive = manualApp && manualApp.classList.contains('active');
+    if (isManualActive && _pageHistory && _pageHistory.length > 1) {
+      manualBack();
+    } else if (isManualActive) {
+      // 히스토리 없으면 홈으로
+      manualGo('home');
+    } else {
+      // 업무도우미 탭이면 대시보드로
+      var goFn = typeof go === 'function' ? go : null;
+      if (goFn) goFn('dash', document.querySelector('#tabbar .tab'));
+    }
+  });
+
   document.addEventListener('contextmenu', e => {
     if (!e.target.closest('input,textarea,select')) { e.preventDefault(); return false; }
   });
