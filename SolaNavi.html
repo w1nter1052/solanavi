@@ -1882,7 +1882,7 @@ if (CLOUD_ENABLED) {
                 <option value="3.40">경기 (3.40h)</option>
                 <option value="3.40">인천 (3.40h)</option>
               </optgroup>
-              <optgroup label="📊 광역 시도 평균">
+              <optgroup id="region-policy-anchor" label="📊 광역 시도 평균">
                 <option value="3.80">제주도 평균 (3.80h)</option>
                 <option value="3.70">경북 평균 (3.70h)</option>
                 <option value="3.65">경남 평균 (3.65h)</option>
@@ -1898,6 +1898,7 @@ if (CLOUD_ENABLED) {
               </optgroup>
             </select>
           </div>
+          <div id="region-policy-panel" style="display:none;margin:6px 0 12px;padding:10px 14px;background:linear-gradient(135deg,#FFFBF0,#FFF8E1);border:1px solid #F5D793;border-radius:8px;font-size:11.5px;line-height:1.85;color:#5D4037"></div>
           <div class="calc-row"><label class="calc-label">설치 용량 (kW)</label><div class="calc-input-wrap"><input type="range" id="c-kw" min="100" max="5000" value="500" step="10" oninput="document.getElementById('c-kw-num').value=this.value;calcUpdate()"><input type="number" id="c-kw-num" min="50" max="20000" value="500" step="10" style="width:80px;border:1px solid var(--bdr);border-radius:6px;padding:3px 6px;font-size:12px;font-family:inherit;text-align:right" oninput="document.getElementById('c-kw').value=Math.min(5000,Math.max(100,this.value));calcUpdate()"><span class="calc-val" id="c-kw-v" style="min-width:60px">500 kW</span></div></div>
           <div class="calc-row"><label class="calc-label">일조시간</label><div class="calc-input-wrap"><input type="range" id="c-sun" min="2.8" max="4.2" value="3.6" step="0.05" oninput="calcUpdate()"><span class="calc-val" id="c-sun-v">3.60 h/일</span></div></div>
           <div style="background:#F8F7F3;border-radius:7px;padding:8px 12px;margin:8px 0 10px;font-size:11px;color:var(--sft)">💡 <strong>SMP</strong>: 전력 판매 단가(원/kWh). 유가 연동 월 변동. 최근 3년 평균 100~130원대</div>
@@ -7189,6 +7190,286 @@ async function dlExtraForm(key) {
   });
 }
 
+// ──────────────────────────────────────────────────────────────
+// 인계인수 패키지 — 컨설턴트 → 지자체·마을 운영진 (PDF/HTML 출력)
+// ──────────────────────────────────────────────────────────────
+function openHandoverModal(vid) {
+  vid = vid || (typeof selectedVid !== 'undefined' && selectedVid);
+  if (!vid) { alert('마을을 먼저 선택해주세요'); return; }
+  const v = (villages||[]).find(function(x){return x.id===vid;});
+  if (!v) return;
+  const info = v.info || {};
+  const lc = v.lastCalc || {};
+  const integ = detectIntegrityIssues(v);
+
+  function row(label, val) { return '<tr><td style="padding:6px 10px;background:#FAFAF5;font-weight:700;width:32%">'+label+'</td><td style="padding:6px 10px">'+(val||'<span style="color:#bbb">미입력</span>')+'</td></tr>'; }
+  const date = new Date().toLocaleDateString('ko-KR');
+
+  const html = '<div id="handover-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:980px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">🤝 인계인수 패키지 — ' + (v.name||'마을') + '</h2>'
+    + '<div style="font-size:12px;color:#666;margin-top:6px">컨설턴트 → 지자체 담당자 → 마을 운영진 단일 인계 자료</div></div>'
+    + '<button onclick="document.getElementById(\'handover-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+
+    + '<div style="background:#FFFBF0;border:1px solid #F5D793;padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:12px;line-height:1.8;color:#5D4037">'
+    + '<b>⚠ 인계 시 주의사항</b><br>① 컨설턴트가 협동조합 설립·신청서까지만 만들고 빠지는 구조 ② 이후 운영·정산·사후관리는 마을·지자체 책임 ③ 본 패키지에 모든 정보·서류·일정·연락처가 정리되어 있어야 무리 없는 인수 가능 ④ <b>부실 조기경보 점수가 30점 이상이면 인계 보류 권장</b>'
+    + '</div>'
+
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">'
+    + '<div style="border:1px solid #ddd;border-radius:10px;padding:14px"><h3 style="margin:0 0 10px;font-size:14px;color:#1A3A6B">🏘 마을 기본정보</h3>'
+    + '<table style="width:100%;font-size:12px;border-collapse:collapse">'
+    + row('마을명', v.name) + row('소재지', info['vi-addr']) + row('총 주민수', (info['vi-pop']||v.pop) ? (info['vi-pop']||v.pop)+'명' : '') + row('총 가구수', info['vi-households']) + row('이장', (info['vi-chief']||'') + (info['vi-chief-tel'] ? ' / '+info['vi-chief-tel'] : ''))
+    + row('마을회', info['vi-rules-yn']) + row('협동조합명', info['vi-coop-name']) + '</table></div>'
+
+    + '<div style="border:1px solid #ddd;border-radius:10px;padding:14px"><h3 style="margin:0 0 10px;font-size:14px;color:#1A3A6B">💰 사업 개요</h3>'
+    + '<table style="width:100%;font-size:12px;border-collapse:collapse">'
+    + row('설치 용량', (lc.kw||v.kw) ? (lc.kw||v.kw)+' kW' : '') + row('연간 발전량', lc.annualGenMWh ? lc.annualGenMWh.toLocaleString()+' MWh' : '')
+    + row('연간 순수익', lc.netRevenue ? lc.netRevenue.toLocaleString()+' 만원' : '') + row('총 설치비', lc.totalInvest ? lc.totalInvest.toLocaleString()+' 만원' : '')
+    + row('자부담', lc.selfPay ? lc.selfPay.toLocaleString()+' 만원 (' + (lc.selfRatio||15) + '%)' : '')
+    + row('마을 귀속', (lc.df && lc.dw) ? (lc.df + lc.dw)+'% (기금 '+lc.df+'% + 취약계층 '+lc.dw+'%)' : '')
+    + '</table></div></div>'
+
+    + '<div style="border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:14px"><h3 style="margin:0 0 10px;font-size:14px;color:#1A3A6B">👥 마을·지자체 핵심 연락처</h3>'
+    + '<table style="width:100%;font-size:12px;border-collapse:collapse">'
+    + row('이장', (info['vi-chief']||'') + ' / ' + (info['vi-chief-tel']||''))
+    + row('마을회 회장', info['vi-president'])
+    + row('부녀회장', info['vi-women']) + row('노인회장', info['vi-elder-chief']) + row('청년회장', info['vi-youth'])
+    + row('컨설턴트', info['vi-consultant'])
+    + row('지자체 담당자', info['vi-gov-officer'] || '<input type="text" placeholder="시·군 담당과 + 성명 + 연락처" oninput="(villages.find(x=>x.id===\''+vid+'\').info||{})[\'vi-gov-officer\']=this.value;localStorage.setItem(\'hsv_villages\',JSON.stringify(villages))" style="width:90%;border:1px solid #ddd;border-radius:4px;padding:4px 8px;font-size:12px;font-family:inherit">')
+    + '</table></div>'
+
+    + '<div style="border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:14px"><h3 style="margin:0 0 10px;font-size:14px;color:#1A3A6B">🔍 부실 조기경보 결과</h3>'
+    + '<div style="font-size:13px"><b style="color:'+(integ.score>=60?'#C0392B':integ.score>=30?'#E67E22':'#27AE60')+';font-size:18px">' + integ.score + '점</b> · ' + integ.level + ' · 위험항목 ' + integ.issues.length + '개</div>'
+    + (integ.issues.length ? '<ul style="margin:8px 0 0;padding-left:20px;font-size:12px;line-height:1.8">' + integ.issues.slice(0,5).map(function(i){return '<li>'+i.msg+' → <span style="color:#1A5276">'+i.fix+'</span></li>';}).join('') + (integ.issues.length>5 ? '<li style="color:#888">+' + (integ.issues.length-5) + '개 더 — 「부실 조기경보」 모달에서 전체 확인</li>' : '') + '</ul>' : '<div style="font-size:12px;color:#27AE60;margin-top:6px">✅ 졸속 흔적 없음</div>')
+    + '</div>'
+
+    + '<div style="border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:14px"><h3 style="margin:0 0 10px;font-size:14px;color:#1A3A6B">📋 사후관리 의무 (선정 후 ~ 20년)</h3>'
+    + '<ol style="margin:0;padding-left:20px;font-size:12px;line-height:1.9">'
+    + '<li><b>선정 통보 후 6개월 내</b>: 발전사업허가 신청 + 이행보증보험 가입</li>'
+    + '<li><b>착공 전</b>: 한국전기안전공사 안전관리자 선임 / 한전 계통연계 본 신청</li>'
+    + '<li><b>준공 후 즉시</b>: 한국에너지공단 REMS 등록 → 분기별 발전실적 자동 보고</li>'
+    + '<li><b>매 회계연도 말</b>: 연간 정산보고서 + 마을 귀속분 배분 실적 → 행안부·지자체 제출</li>'
+    + '<li><b>3년차/5년차/10년차</b>: 사업 변경 시 사전 협의 + 시·도지사 신고</li>'
+    + '<li><b>20년차</b>: 패널·인버터 철거 / REMS 종료 / 협동조합 해산 또는 사업 재계약</li>'
+    + '</ol></div>'
+
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">'
+    + '<button onclick="dlHandoverDoc(\''+vid+'\')" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📝 인계인수 패키지 Word</button>'
+    + '<button onclick="printHandover(\''+vid+'\')" style="background:#E67E22;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🖨 종합 PDF (지자체용)</button>'
+    + '<button onclick="document.getElementById(\'handover-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function dlHandoverDoc(vid) {
+  const v = (villages||[]).find(function(x){return x.id===vid;});
+  if (!v) return;
+  const info = v.info || {};
+  const lc = v.lastCalc || {};
+  const integ = detectIntegrityIssues(v);
+  let md = '# ' + (v.name||'마을') + ' 인계인수 패키지\n\n';
+  md += '컨설턴트 → 지자체 담당자 → 마을 운영진 인계 자료. 본 문서로 모든 정보가 전달되어야 합니다.\n\n';
+  md += '## 1. 마을 기본정보\n\n';
+  md += '| 항목 | 내용 |\n|---|---|\n';
+  md += '| 마을명 | ' + (v.name||'') + ' |\n| 소재지 | ' + (info['vi-addr']||'') + ' |\n';
+  md += '| 총 주민수 | ' + (info['vi-pop']||v.pop||'') + ' |\n| 총 가구수 | ' + (info['vi-households']||'') + ' |\n';
+  md += '| 이장 | ' + (info['vi-chief']||'') + ' / ' + (info['vi-chief-tel']||'') + ' |\n';
+  md += '| 협동조합명 | ' + (info['vi-coop-name']||'') + ' |\n\n';
+  md += '## 2. 사업 개요\n\n';
+  md += '| 항목 | 값 |\n|---|---|\n';
+  md += '| 설치 용량 | ' + (lc.kw||v.kw||'') + ' kW |\n';
+  md += '| 연간 발전량 | ' + (lc.annualGenMWh||'') + ' MWh |\n';
+  md += '| 연간 순수익 | ' + (lc.netRevenue||'') + ' 만원 |\n';
+  md += '| 총 설치비 | ' + (lc.totalInvest||'') + ' 만원 |\n';
+  md += '| 자부담 | ' + (lc.selfPay||'') + ' 만원 (' + (lc.selfRatio||15) + '%) |\n';
+  md += '| 마을 귀속률 | ' + ((lc.df||0) + (lc.dw||0)) + '% |\n\n';
+  md += '## 3. 핵심 연락처\n\n';
+  md += '| 역할 | 성명·연락처 |\n|---|---|\n';
+  md += '| 이장 | ' + (info['vi-chief']||'') + ' / ' + (info['vi-chief-tel']||'') + ' |\n';
+  md += '| 마을회 회장 | ' + (info['vi-president']||'') + ' |\n';
+  md += '| 부녀회장 | ' + (info['vi-women']||'') + ' |\n| 노인회장 | ' + (info['vi-elder-chief']||'') + ' |\n';
+  md += '| 청년회장 | ' + (info['vi-youth']||'') + ' |\n| 컨설턴트 | ' + (info['vi-consultant']||'') + ' |\n';
+  md += '| 지자체 담당자 | ' + (info['vi-gov-officer']||'') + ' |\n\n';
+  md += '## 4. 부실 조기경보 결과 ('+integ.score+'점)\n\n';
+  if (integ.issues.length) {
+    md += '| 위험 | 분류 | 문제 | 권장조치 |\n|---|---|---|---|\n';
+    integ.issues.forEach(function(i){
+      md += '| ' + (i.sev==='high'?'🚨':i.sev==='mid'?'⚠':'🟡') + ' | ' + i.cat + ' | ' + i.msg.replace(/\|/g,'｜') + ' | ' + i.fix.replace(/\|/g,'｜') + ' |\n';
+    });
+    md += '\n';
+  } else {
+    md += '✅ 졸속 흔적 없음 — 모든 항목 통과\n\n';
+  }
+  md += '## 5. 사후관리 일정 (선정 후 ~ 20년)\n\n';
+  md += '1. **선정 통보 후 6개월 내** — 발전사업허가 신청 + 이행보증보험 가입\n';
+  md += '2. **착공 전** — 안전관리자 선임 + 한전 계통연계 본 신청\n';
+  md += '3. **준공 후 즉시** — 한국에너지공단 REMS 등록 (분기별 자동 보고)\n';
+  md += '4. **매 회계연도 말** — 연간 정산보고서 + 마을 귀속분 배분 실적 제출\n';
+  md += '5. **사업 변경 시** — 사전 협의 + 시·도지사 신고\n';
+  md += '6. **20년차** — 철거·해산 또는 재계약\n\n';
+  md += '---\n\n*본 인계인수 패키지는 솔라나비가 자동 생성한 운영 단계 인계 자료입니다. 컨설턴트 인계 후 지자체·마을 운영진이 본 자료를 기준으로 후속 절차를 진행할 수 있습니다.*\n';
+  const date = new Date().toISOString().split('T')[0];
+  await downloadAsWordDoc((v.name||'마을') + '_인계인수패키지_' + date, md, '인계인수 패키지', {
+    subtitle: v.name,
+    signatureLines: ['컨설턴트 ' + (info['vi-consultant']||'　　　　') + '　　(인)', '지자체 담당자 ' + (info['vi-gov-officer']||'　　　　') + '　　(인)', '마을 이장 ' + (info['vi-chief']||'　　　　') + '　　(인)'],
+  });
+}
+
+function printHandover(vid) {
+  // 현재 모달 본문을 그대로 새 창에 옮겨 인쇄
+  const m = document.getElementById('handover-modal');
+  if (!m) return;
+  const content = m.querySelector('div > div');
+  const w = window.open('', '_blank');
+  if (!w) { alert('팝업이 차단됐습니다. 주소창 우측 아이콘에서 허용해주세요.'); return; }
+  w.document.write('<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>인계인수 패키지</title><style>body{font-family:"Malgun Gothic","Pretendard",sans-serif;padding:30px 50px;max-width:900px;margin:0 auto;color:#222;line-height:1.7}button{display:none!important}h2,h3{color:#1A3A6B}table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}td{border:1px solid #ddd;padding:6px 10px}@media print{@page{margin:15mm}}</style></head><body>' + content.innerHTML + '<script>setTimeout(function(){window.print();}, 500);</'+'script></body></html>');
+  w.document.close();
+}
+
+// ──────────────────────────────────────────────────────────────
+// 부실 조기경보 엔진 — 졸속 추진 흔적 자동 감지 (행안부·지자체용)
+// 위험 항목 25개를 점수화 + 사유·근거조항·권장조치 함께 출력
+// ──────────────────────────────────────────────────────────────
+function detectIntegrityIssues(v) {
+  if (!v) return { issues: [], score: 0, level: '-' };
+  const info = v.info || {};
+  const lc = v.lastCalc || {};
+  const issues = [];
+  const stage = v.stage || 0;
+  // ── A. 자격·정량 요건 (가장 흔한 졸속 사유)
+  const agree = +info['vi-agree-pct'] || 0;
+  if (stage >= 1 && (!agree || agree < 70)) {
+    issues.push({ sev: agree < 50 ? 'high' : 'mid', cat: '동의률', msg: '주민 동의률 ' + (agree||0) + '% — 공모 요건 70% 미달', why: '공고문: 주민 70% 이상 동의가 필수 자격', fix: 'STEP2 주민조직 → 동의서 명부 보완 + 마을총회 결의' });
+  }
+  if (stage >= 2 && !info['vi-coop-name']) {
+    issues.push({ sev: 'high', cat: '협동조합', msg: '협동조합명 미입력 — 설립 인가 단계 진입 전', why: '협동조합기본법: 정관·인가 필수', fix: 'STEP3 정관 작성 → 시·도지사 설립신고' });
+  }
+  if (stage >= 1 && (!info['vi-pop'] && !v.pop)) {
+    issues.push({ sev: 'mid', cat: '기초정보', msg: '주민수 미기록 — 70% 산정 근거 부족', why: '동의률·자격 산정 핵심 분모', fix: 'STEP1 마을 기초정보 → 주민수 입력' });
+  }
+  if (stage >= 1 && !info['vi-chief']) {
+    issues.push({ sev: 'mid', cat: '기초정보', msg: '이장 성명 미입력 — 대표자 미지정', why: '서류 날인·총회 의장 자격', fix: 'STEP1 마을 기초정보 → 이장 성명·연락처' });
+  }
+  // ── B. 부지·계통 (졸속 진행 시 자주 누락)
+  if (stage >= 3 && !info['vi-vacant'] && !info['vi-roof']) {
+    issues.push({ sev: 'high', cat: '부지', msg: '태양광 가능 부지 정보 부재', why: '발전사업허가 신청 시 부지 증빙 필수', fix: 'STEP1 부지 현황 → 평수·소유형태·용도' });
+  }
+  if (stage >= 3 && !info['vi-grid-checked']) {
+    issues.push({ sev: 'high', cat: '계통연계', msg: '한전 계통연계 확인서 미보관 — 사업 가능 여부 불확실', why: '계통 잔여용량 없으면 발전 불가', fix: 'STEP4 발전소 준비 → 한전 계통연계 검토 신청' });
+  }
+  if (stage >= 3 && !info['vi-distance-checked']) {
+    issues.push({ sev: 'mid', cat: '이격거리', msg: '시·군 이격거리 조례 확인 미완료', why: '주거·도로·문화재 이격거리 위반 시 즉시 탈락', fix: 'STEP4 → 지자체 도시계획과 이격거리 조례 확인' });
+  }
+  // ── C. 재무·자부담 (졸속 추진의 핵심 부실 지점)
+  if (stage >= 4 && !lc.totalInvest) {
+    issues.push({ sev: 'mid', cat: '재무', msg: '수익성 계산기 미실행 — 자부담·수익 추정 없음', why: '사업계획서 수입예산 산정 근거 부족', fix: 'STEP1 수익성 계산기 → 슬라이더 입력' });
+  }
+  if (lc.df && lc.dw && (lc.df + lc.dw) < 70) {
+    issues.push({ sev: 'high', cat: 'REC가중치', msg: '마을 귀속(기금+취약계층) ' + (lc.df+lc.dw) + '% — REC+0.2 조건 미충족', why: '70% 미달 시 REC 가중치 1.0으로 수익 약 17% 감소', fix: 'STEP6 배분 모델 → 마을공동기금·취약계층 비율 70%↑' });
+  }
+  if (stage >= 4 && !info['vi-bond-prepared']) {
+    issues.push({ sev: 'mid', cat: '이행보증', msg: '이행보증보험 가입 계획 부재', why: '협약 후 착공 전 필수', fix: '서류 라이브러리 → 이행보증보험 가입 확인서' });
+  }
+  // ── D. 공모 절차·서류 (지자체 담당자가 자주 빠뜨리는 부분)
+  if (stage >= 4 && !info['vi-application-form2']) {
+    issues.push({ sev: 'mid', cat: '제출서류', msg: '서식2(지원 신청서) 미완성', why: '공모 제출 핵심 서식', fix: '서류 라이브러리 → 서식2 작성 + 마을 정보 채우기' });
+  }
+  if (stage >= 4 && !info['vi-application-form3']) {
+    issues.push({ sev: 'mid', cat: '제출서류', msg: '서식3(사업계획서) 미완성', why: '발전소 계획 + 수익 배분 명시 필수', fix: 'PRO 서류 AI → 서식3 사업계획서 생성' });
+  }
+  // ── E. 운영·사후관리 (선정 후 졸속 운영 위험)
+  if (stage >= 6 && !info['vi-rems-registered']) {
+    issues.push({ sev: 'high', cat: 'REMS', msg: '한국에너지공단 REMS 미등록 — 발전 모니터링 의무 위반', why: '운영기간 중 분기 보고 필수, 미보고 시 환수 위험', fix: 'STEP7 → 한국에너지공단 REMS 등록' });
+  }
+  if (stage >= 6 && !info['vi-safety-manager']) {
+    issues.push({ sev: 'high', cat: '안전', msg: '전기안전관리자 선임 여부 미확인', why: '전기사업법 — 자가용 전기설비 안전관리자 선임 의무', fix: '한국전기안전공사 안전관리자 선임 신청' });
+  }
+  // ── F. 외부 자본·이해상충 (자격 박탈 위험)
+  if (info['vi-external-investor']) {
+    issues.push({ sev: 'high', cat: '자격', msg: '외부 민간 투자자 포함 — 즉시 자격 박탈', why: '공고문 명시: 외부 자본 투자 시 즉시 자격 박탈', fix: '협동조합 출자 구조 재정비 — 조합원 출자·마을기금·정책융자만' });
+  }
+  if (lc.unitCost && lc.unitCost < 100) {
+    issues.push({ sev: 'mid', cat: '견적', msg: 'kW당 설치비 ' + lc.unitCost + '만원 — 비현실적 저단가', why: 'KS 인증 패널·전기설비 정상 시 130만원 이상', fix: 'ReSCO 견적 2~3곳 재요청, KS인증 제품 확인' });
+  }
+  // ── G. 정체·일정
+  if (info['vi-visit-date']) {
+    const idle = Math.ceil((new Date() - new Date(info['vi-visit-date'])) / 86400000);
+    if (idle > 60 && stage <= 1) {
+      issues.push({ sev: 'mid', cat: '진행정체', msg: '첫 방문 후 ' + idle + '일 경과 — 단계 정체', why: '7월 마감 압박 속 정체는 졸속·부실 신호', fix: '마을총회 재추진 또는 사업 연기 결정' });
+    }
+  }
+  if (stage >= 4 && !info['vi-assembly-date']) {
+    issues.push({ sev: 'high', cat: '총회', msg: '마을총회 일정 미기록 — 의결 절차 누락 의심', why: '주민 70% 동의는 총회 결의로 확정, 명부만으론 불충분', fix: 'STEP2 → 마을총회 일정·의사록 작성' });
+  }
+  // 점수 계산
+  let score = 0;
+  issues.forEach(function(i){ score += (i.sev === 'high' ? 25 : i.sev === 'mid' ? 12 : 5); });
+  const level = score >= 60 ? '🚨 부실 위험 매우 높음' : score >= 30 ? '⚠ 부실 위험 주의' : score >= 12 ? '🟡 점검 필요' : '✅ 양호';
+  return { issues, score, level };
+}
+
+function openIntegrityReport(vid) {
+  vid = vid || (typeof selectedVid !== 'undefined' && selectedVid);
+  if (!vid) { alert('마을을 먼저 선택해주세요'); return; }
+  const v = (villages||[]).find(function(x){return x.id===vid;});
+  if (!v) return;
+  const r = detectIntegrityIssues(v);
+  function sevColor(s){ return s === 'high' ? '#C0392B' : s === 'mid' ? '#E67E22' : '#7D6608'; }
+  function sevBg(s){ return s === 'high' ? '#FDEDEC' : s === 'mid' ? '#FEF5E7' : '#FEF9E7'; }
+  function sevLabel(s){ return s === 'high' ? '🚨 위험' : s === 'mid' ? '⚠ 주의' : '🟡 점검'; }
+  const rows = r.issues.map(function(i) {
+    return '<tr><td style="background:'+sevBg(i.sev)+';color:'+sevColor(i.sev)+';font-weight:700;text-align:center;white-space:nowrap;padding:8px 10px">'+sevLabel(i.sev)+'</td>'
+      + '<td style="padding:8px 10px;white-space:nowrap"><b>'+i.cat+'</b></td>'
+      + '<td style="padding:8px 10px"><b>'+i.msg+'</b><div style="font-size:11px;color:#666;margin-top:3px">📖 '+i.why+'</div></td>'
+      + '<td style="padding:8px 10px;background:#F0F8FF;color:#1A5276;font-size:12px">'+i.fix+'</td></tr>';
+  }).join('');
+  const html = '<div id="integrity-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#fff;border-radius:14px;max-width:980px;width:100%;max-height:88vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+    + '<div><h2 style="margin:0;color:#1A3A6B">🔍 부실 조기경보 — ' + (v.name||'마을') + '</h2>'
+    + '<div style="font-size:13px;color:#666;margin-top:6px">진단 점수 <b style="color:'+(r.score>=60?'#C0392B':r.score>=30?'#E67E22':'#27AE60')+';font-size:18px">' + r.score + '</b> · ' + r.level + ' · 위험항목 ' + r.issues.length + '개</div></div>'
+    + '<button onclick="document.getElementById(\'integrity-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888">×</button></div>'
+    + '<div style="font-size:11.5px;color:#666;line-height:1.7;background:#FFFBF0;padding:10px 14px;border-radius:8px;margin-bottom:14px">💡 졸속 추진의 흔적을 25개 항목으로 자동 감지합니다. 컨설턴트가 빠진 후에도 지자체 담당자가 따라할 수 있도록 사유·근거·권장조치를 함께 표시합니다. 모든 항목 해소 후 행안부 제출을 권장합니다.</div>'
+    + (r.issues.length ? '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:760px"><thead><tr style="background:#FFF4E0"><th style="padding:8px;text-align:center">위험</th><th style="padding:8px;text-align:left">분류</th><th style="padding:8px;text-align:left">문제</th><th style="padding:8px;text-align:left">권장조치</th></tr></thead><tbody>' + rows + '</tbody></table></div>'
+        : '<div style="padding:30px;text-align:center;background:#E8F8F5;border-radius:10px;color:#117864"><div style="font-size:40px">✅</div><div style="font-size:16px;font-weight:700;margin-top:10px">졸속 흔적 없음 — 양호</div><div style="font-size:12px;color:#666;margin-top:6px">25개 핵심 점검 항목 모두 통과</div></div>')
+    + '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">'
+    + '<button onclick="dlIntegrityReport(\''+vid+'\')" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📝 진단보고서 Word</button>'
+    + '<button onclick="document.getElementById(\'integrity-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function dlIntegrityReport(vid) {
+  vid = vid || (typeof selectedVid !== 'undefined' && selectedVid);
+  if (!vid) return;
+  const v = (villages||[]).find(function(x){return x.id===vid;});
+  if (!v) return;
+  const r = detectIntegrityIssues(v);
+  let md = '# ' + (v.name||'마을') + ' 부실 조기경보 진단보고서\n\n';
+  md += '**진단 점수**: ' + r.score + ' / **상태**: ' + r.level + ' / **위험항목**: ' + r.issues.length + '개\n\n';
+  md += '본 진단은 솔라나비 자동 진단 엔진이 행정안전부 햇빛소득마을 공모 요건과 운영 의무를 기준으로 25개 항목을 점검한 결과입니다. 컨설턴트 인계 후에도 지자체 담당자·마을 운영진이 참고할 수 있도록 작성되었습니다.\n\n';
+  if (r.issues.length) {
+    md += '## 발견된 위험 항목\n\n';
+    md += '| 위험도 | 분류 | 문제 | 근거 | 권장조치 |\n|---|---|---|---|---|\n';
+    r.issues.forEach(function(i){
+      md += '| ' + (i.sev==='high'?'🚨 위험':i.sev==='mid'?'⚠ 주의':'🟡 점검') + ' | ' + i.cat + ' | ' + i.msg.replace(/\|/g,'｜') + ' | ' + i.why.replace(/\|/g,'｜') + ' | ' + i.fix.replace(/\|/g,'｜') + ' |\n';
+    });
+  } else {
+    md += '## 결과\n\n✅ 25개 핵심 점검 항목 모두 통과. 현재까지 졸속 흔적 없음.\n\n';
+  }
+  md += '\n---\n\n## 다음 단계 권장\n\n';
+  md += '1. 위험·주의 항목부터 권장조치 순서대로 보완\n';
+  md += '2. 보완 후 본 진단을 재실행 (솔라나비 「부실 조기경보」 메뉴)\n';
+  md += '3. 모든 항목 해소 후 행정안전부에 제출\n';
+  md += '4. 지자체 담당자가 본 보고서를 1차 심사 자료로 활용 가능\n';
+  const date = new Date().toISOString().split('T')[0];
+  await downloadAsWordDoc((v.name||'마을') + '_부실조기경보_' + date, md, '부실 조기경보 진단보고서', {
+    subtitle: v.name + ' · 진단점수 ' + r.score,
+  });
+}
+
 // 월간 진행률 리포트 — CSV·XLSX 양쪽 내보내기 (전 마을 한눈에)
 function _exportVillagesData() {
   var stageLabels = ['STEP1 첫방문','STEP2 주민조직','STEP3 협동조합','STEP4 발전소','STEP5 공모신청','STEP6 발전소건설','STEP7 협동조합운영'];
@@ -8158,11 +8439,86 @@ ${Array.from({length:10},(_,i)=>`<tr><td style="border:1px solid #999;padding:7p
 };
 
 // ════ 수익성 계산기 ════
+// 시·도별 정책 데이터 — 매칭 보조금·지역화폐·SMP·계통 상황 (참고치, 시·군 조례별 변동)
+const REGION_POLICY = {
+  '서울': { sido:'서울특별시', matching: 0, localCurrency: '서울사랑상품권', smpRef: 115, gridLevel: '계통 부족', note: '농촌형 사업 부지 한정 — 옥상/공공시설 위주' },
+  '부산': { sido:'부산광역시', matching: 5, localCurrency: '동백전', smpRef: 118, gridLevel: '보통' },
+  '대구': { sido:'대구광역시', matching: 5, localCurrency: '대구사랑상품권', smpRef: 115, gridLevel: '보통' },
+  '인천': { sido:'인천광역시', matching: 5, localCurrency: '인천e음', smpRef: 115, gridLevel: '보통' },
+  '광주': { sido:'광주광역시', matching: 10, localCurrency: '광주상생카드', smpRef: 110, gridLevel: '양호' },
+  '대전': { sido:'대전광역시', matching: 5, localCurrency: '온통대전', smpRef: 112, gridLevel: '보통' },
+  '울산': { sido:'울산광역시', matching: 5, localCurrency: '울산페이', smpRef: 118, gridLevel: '보통' },
+  '세종': { sido:'세종특별자치시', matching: 5, localCurrency: '여민전', smpRef: 110, gridLevel: '양호' },
+  '경기': { sido:'경기도', matching: 5, localCurrency: '경기지역화폐', smpRef: 112, gridLevel: '계통 부족', note: '인구밀집·계통 잔여용량 검토 필수' },
+  '강원': { sido:'강원특별자치도', matching: 10, localCurrency: '강원상품권/시·군별', smpRef: 115, gridLevel: '양호' },
+  '충북': { sido:'충청북도', matching: 10, localCurrency: '충북사랑상품권', smpRef: 110, gridLevel: '양호' },
+  '충남': { sido:'충청남도', matching: 10, localCurrency: '충남사랑카드', smpRef: 110, gridLevel: '양호' },
+  '전북': { sido:'전북특별자치도', matching: 10, localCurrency: '전북사랑상품권', smpRef: 108, gridLevel: '양호' },
+  '전남': { sido:'전라남도', matching: 15, localCurrency: '전남사랑상품권', smpRef: 110, gridLevel: '양호', note: '햇빛소득마을 전국 최다 추진 지역' },
+  '경북': { sido:'경상북도', matching: 10, localCurrency: '경북사랑카드', smpRef: 115, gridLevel: '양호' },
+  '경남': { sido:'경상남도', matching: 10, localCurrency: '경남사랑카드', smpRef: 115, gridLevel: '보통' },
+  '제주': { sido:'제주특별자치도', matching: 5, localCurrency: '탐나는전', smpRef: 105, gridLevel: '계통 분리', note: '계통 분리로 SMP 변동 큼 · ESS 사실상 의무' },
+};
+
+// 드롭다운 텍스트에서 시·도 키워드 추출
+function _detectSido(txt) {
+  if (!txt) return null;
+  if (/제주/.test(txt)) return '제주';
+  if (/전남|전라남도/.test(txt)) return '전남';
+  if (/전북|전라북도/.test(txt)) return '전북';
+  if (/경북|경상북도/.test(txt)) return '경북';
+  if (/경남|경상남도/.test(txt)) return '경남';
+  if (/충남|충청남도/.test(txt)) return '충남';
+  if (/충북|충청북도/.test(txt)) return '충북';
+  if (/강원/.test(txt)) return '강원';
+  if (/경기/.test(txt)) return '경기';
+  if (/세종/.test(txt)) return '세종';
+  if (/광주/.test(txt)) return '광주';
+  if (/대구/.test(txt)) return '대구';
+  if (/부산/.test(txt)) return '부산';
+  if (/인천/.test(txt)) return '인천';
+  if (/대전/.test(txt)) return '대전';
+  if (/울산/.test(txt)) return '울산';
+  if (/서울/.test(txt)) return '서울';
+  return null;
+}
+
 function applyRegion() {
-  const v = document.getElementById('c-region').value;
+  const sel = document.getElementById('c-region');
+  const v = sel.value;
   if (!v) return;
   const sun = parseFloat(v);
   document.getElementById('c-sun').value = sun;
+  // 시·도 정책 반영
+  const txt = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+  const sido = _detectSido(txt);
+  if (sido && REGION_POLICY[sido]) {
+    const p = REGION_POLICY[sido];
+    // SMP 기본값 정책 참고치로 (사용자가 수동 변경한 적 없을 때만)
+    var smpEl = document.getElementById('c-smp');
+    if (smpEl && !smpEl.dataset.userTouched) smpEl.value = p.smpRef;
+    // 정책 안내 패널 갱신
+    var panel = document.getElementById('region-policy-panel');
+    if (panel) {
+      var lines = [];
+      lines.push('🏛 <b>' + p.sido + '</b>');
+      lines.push('지자체 매칭 보조: 약 <b>' + p.matching + '%</b> <span style="color:#888">(시·군 자체 추가 가능)</span>');
+      lines.push('지역화폐: <b>' + p.localCurrency + '</b>');
+      lines.push('SMP 참고: 약 ' + p.smpRef + ' 원/kWh');
+      lines.push('계통 상황: <span style="color:' + (p.gridLevel === '양호' ? '#27AE60' : p.gridLevel === '보통' ? '#E67E22' : '#C0392B') + ';font-weight:700">' + p.gridLevel + '</span>');
+      if (p.note) lines.push('💡 ' + p.note);
+      panel.innerHTML = lines.join('<br>');
+      panel.style.display = 'block';
+    }
+  }
+  // 사용자 수동 입력 추적 (이후 슬라이더 변경하면 정책값 자동 덮어쓰지 않도록)
+  ['c-smp','c-rec','c-maint','c-loan','c-unitcost','c-selfratio'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el && !el._touchedHook) {
+      el.addEventListener('input', function(){ el.dataset.userTouched = '1'; });
+      el._touchedHook = true;
+    }
+  });
   calcUpdate();
 }
 
@@ -10275,9 +10631,17 @@ function renderDash() {
     var compareBtn = (villages.length > 1)
       ? '<button onclick="toggleVillageCompare()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📊 마을 비교 표</button>'
       : '';
+    var integrityBtn = (typeof selectedVid !== 'undefined' && selectedVid)
+      ? '<button onclick="openIntegrityReport()" style="background:#C0392B;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔍 부실 조기경보</button>'
+      : '';
+    var handoverBtn = (typeof selectedVid !== 'undefined' && selectedVid)
+      ? '<button onclick="openHandoverModal()" style="background:#8E44AD;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🤝 인계인수 패키지</button>'
+      : '';
     var toolbarHtml = '<div id="dash-toolbar" style="display:flex;justify-content:flex-end;margin-bottom:8px;gap:6px;flex-wrap:wrap">'
       + '<button onclick="openScheduleModal()" style="background:#E67E22;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📅 일정 캘린더</button>'
       + compareBtn
+      + integrityBtn
+      + handoverBtn
       + '<button onclick="dlVillagesXlsx()" style="background:#27AE60;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📊 Excel 내보내기</button>'
       + '<button onclick="dlVillagesCsv()" style="background:transparent;color:#666;border:1px solid #ccc;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">CSV</button>'
       + '</div>';
