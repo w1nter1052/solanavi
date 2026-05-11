@@ -795,13 +795,23 @@ textarea{resize:vertical;line-height:1.7}
 
 /* ── 모바일 전용 보강 ─────────────────────────────── */
 @media(max-width:600px){
-  /* 2단 → 1단 강제 (회의록·서류작업 결과 패널) */
-  .two,.f2{grid-template-columns:1fr !important}
-  .sec.main .two{grid-template-columns:1fr !important;gap:12px !important}
+  /* 2단 → 1단 강제 (특정 섹션만, tabbar 제외) */
+  #sec-minutes .two, #sec-minutes .f2,
+  #sec-workdocs .two, #sec-workdocs .f2,
+  #sec-law .two, #sec-law .f2,
+  #sec-chat .two, #sec-chat .f2,
+  #sec-revenue .two, #sec-revenue .f2,
+  #sec-dash .two, #sec-dash .f2,
+  .modal-body .two, .modal-body .f2,
+  .card > .two, .card > .f2,
+  .bx > .two, .bx > .f2 {
+    grid-template-columns:1fr !important;
+    gap:12px !important;
+  }
 
   /* 탭바 활성 탭 강조 */
-  #tabbar .tab.active{
-    background:var(--sun-l,#FFF8EC) !important;
+  #tabbar .tab.active,#tabbar .tab.on{
+    background:rgba(245,166,35,.15) !important;
     border-bottom:2px solid var(--sun,#F5A623) !important;
     font-weight:700 !important;
   }
@@ -821,11 +831,10 @@ textarea{resize:vertical;line-height:1.7}
     min-height:44px !important;
   }
 
-  /* 수익계산기 숫자 입력 키패드 */
-  input[type="number"]{inputmode:numeric}
-
-  /* 버튼 줄바꿈 방지 */
-  .btn{white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important}
+  /* 버튼 줄바꿈 방지 — 탭바·네비 버튼만 */
+  #tabbar .tab, .topbar-btn, #app-switcher .btn{
+    white-space:nowrap !important;
+  }
 
   /* 워터마크 — 본문 위 겹침 방지 */
   #watermark-text{
@@ -1295,7 +1304,7 @@ localStorage.setItem = function(k, v) {
   </div>
   <div id="vp-list" style="overflow-y:auto;padding:10px 12px;flex:1"></div>
   <div style="padding:10px 12px;border-top:1px solid #F0EDE4">
-    <button onclick="closeVillagePickerModal();switchApp('assistant');go('villages',document.querySelectorAll('.tab')[1])" style="width:100%;background:var(--sun);color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ 새 마을 추가 (업무도우미)</button>
+    <button onclick="closeVillagePickerModal();switchApp('assistant');go('villages',document.querySelector("#tabbar .tab[onclick*=\"'villages'\"]") || document.querySelector("#tabbar .tab[onclick*=\"'villages'\"]"))" style="width:100%;background:var(--sun);color:#fff;border:none;border-radius:8px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">+ 새 마을 추가 (업무도우미)</button>
   </div>
 </div>
 
@@ -1418,7 +1427,7 @@ localStorage.setItem = function(k, v) {
       <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
 
         <button onclick="manualGo('docs-main')" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);color:var(--sun);padding:9px 18px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">★ 서류 라이브러리</button>
-        <button onclick="manualGo('s1-what')" style="background:var(--s1);border:none;color:#fff;padding:9px 20px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">STEP 1 시작하기 →</button>
+        <button onclick="switchApp('manual');manualGo('s1-what')" style="background:var(--s1);border:none;color:#fff;padding:9px 20px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">STEP 1 시작하기 →</button>
       </div>
     </div>
   </div>
@@ -5337,7 +5346,7 @@ localStorage.setItem = function(k, v) {
       style="flex:1;min-width:180px;border:1.5px solid var(--sun);background:var(--sf);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:700;font-family:inherit;color:#1A1A1A;cursor:pointer">
       <option value="">-- 마을을 선택하세요 --</option>
     </select>
-    <button class="btn b-sm b-sun" onclick="go('villages',document.querySelectorAll('.tab')[1])" style="white-space:nowrap;flex-shrink:0">+ 마을 추가</button>
+    <button class="btn b-sm b-sun" onclick="go('villages',document.querySelector("#tabbar .tab[onclick*=\"'villages'\"]") || document.querySelector("#tabbar .tab[onclick*=\"'villages'\"]"))" style="white-space:nowrap;flex-shrink:0">+ 마을 추가</button>
     <div id="dash-village-stage" style="font-size:12px;color:var(--sft);flex-shrink:0"></div>
   </div>
   <div class="kpi-grid" id="kpi-grid">
@@ -5350,7 +5359,7 @@ localStorage.setItem = function(k, v) {
   <div class="two">
     <div class="card">
       <div class="ch">📊 마을별 진행 현황
-        <div class="ch-r"><button class="btn b-sm b-sun" onclick="go('villages',document.querySelectorAll('.tab')[1])">+ 마을 추가</button></div>
+        <div class="ch-r"><button class="btn b-sm b-sun" onclick="go('villages',document.querySelector("#tabbar .tab[onclick*=\"'villages'\"]") || document.querySelector("#tabbar .tab[onclick*=\"'villages'\"]"))">+ 마을 추가</button></div>
       </div>
       <div class="cb" id="dash-villages">
         <div class="ib sun"><span>☀</span><div>마을을 추가하면 여기에 진행 현황이 표시됩니다.</div></div>
@@ -5363,12 +5372,12 @@ localStorage.setItem = function(k, v) {
           <button class="btn b-sun" style="width:100%;justify-content:center;font-size:14px;padding:11px" onclick="switchApp('manual');manualGo('s1-what')">☀ STEP 1 — 첫 방문 컨설팅 시작하기 →</button>
         </div>
         <div class="two"  style="gap:8px">
-          <button class="btn b-sun" style="justify-content:center" onclick="go('docs',document.querySelectorAll('.tab')[2])">📝 회의록 작성</button>
-          <button class="btn b-blue" style="justify-content:center" onclick="go('review',document.querySelectorAll('.tab')[3])">📄 서류 검토</button>
-          <button class="btn b-green" style="justify-content:center" onclick="go('bizplan',document.querySelectorAll('.tab')[4])">📋 사업계획서</button>
-          <button class="btn b-org" style="justify-content:center" onclick="go('law',document.querySelectorAll('.tab')[5])">⚖️ 법령 검토</button>
-          <button class="btn b-teal" style="justify-content:center" onclick="go('revenue',document.querySelectorAll('.tab')[6])">💰 수익 분석</button>
-          <button class="btn b-pu" style="justify-content:center" onclick="go('chat',document.querySelectorAll('.tab')[8])">💬 AI 상담</button>
+          <button class="btn b-sun" style="justify-content:center" onclick="checkPaidTab('workdocs',document.querySelector('#tabbar .tab:nth-child(3)'))">📝 회의록 작성</button>
+          <button class="btn b-blue" style="justify-content:center" onclick="checkPaidTab('workdocs',document.querySelector('#tabbar .tab:nth-child(3)'))">📄 서류 검토</button>
+          <button class="btn b-green" style="justify-content:center" onclick="checkPaidTab('workdocs',document.querySelector('#tabbar .tab:nth-child(3)'))">📋 사업계획서</button>
+          <button class="btn b-org" style="justify-content:center" onclick="checkPaidTab('law',document.querySelector('#tabbar .tab:nth-child(5)'))">⚖️ 법령 검토</button>
+          <button class="btn b-teal" style="justify-content:center" onclick="go('revenue',document.querySelector('#tabbar .tab:nth-child(6)'))">💰 수익 분석</button>
+          <button class="btn b-pu" style="justify-content:center" onclick="checkPaidTab('chat',document.querySelector('#tabbar .tab:nth-child(8)'))">💬 AI 상담</button>
         </div>
         <div style="margin-top:12px">
           <div class="ib warn"><span>⚠️</span><div><strong>D-<span id="d-day2">?</span></strong> — 1차 마감까지 남은 시간. 지금 준비 안 된 마을은 2차(7.31)로 목표 변경 검토.</div></div>
@@ -6624,7 +6633,7 @@ async function saveApiKey() {
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:10,messages:[{role:'user',content:'hi'}]})
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'hi'}]})
     });
     if (r.ok || r.status===400) {
       localStorage.setItem('mh_api_key', key);
@@ -8959,13 +8968,22 @@ function go(id, tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
   const sec = document.getElementById('sec-' + id);
   if (sec) sec.classList.add('on');
-  if (tab) tab.classList.add('on');
-  else {
-    const tabs = document.querySelectorAll('.tab');
-    const map = {dash:0,villages:1,workdocs:2,minutes:3,law:4,revenue:5,checklist:6,chat:7,faqissue:8,community:9,
-      // 하위 호환: 기존 docs/review/bizplan → workdocs로 리다이렉트
-      docs:2,review:2,bizplan:2};
-    if (map[id] !== undefined) tabs[map[id]]?.classList.add('on');
+  // 탭 활성화 — 전달된 element 우선, 없으면 data-id로 찾기
+  if (tab) {
+    tab.classList.add('on');
+  } else {
+    // ID 기반 매핑 (인덱스 방식 완전 제거)
+    const idMap = {
+      dash:'dash', villages:'villages', workdocs:'workdocs',
+      minutes:'minutes', law:'law', revenue:'revenue',
+      checklist:'checklist', chat:'chat', faqissue:'faqissue', community:'community',
+      docs:'workdocs', review:'workdocs', bizplan:'workdocs'
+    };
+    const targetId = idMap[id];
+    if (targetId) {
+      const found = document.querySelector(`#tabbar .tab[onclick*="'${targetId}'"]`);
+      if (found) found.classList.add('on');
+    }
   }
   if (id === 'dash') renderDash();
   if (id === 'villages') renderVillages();
@@ -9001,7 +9019,7 @@ async function callAI(messages, targetId, spinId, sys, maxT, retrying=false) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: maxT || 2500, stream: true, system: sys || SYSTEM, messages })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxT || 2500, stream: true, system: sys || SYSTEM, messages })
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message || 'HTTP ' + res.status); }
     const reader = res.body.getReader();
@@ -9042,7 +9060,7 @@ async function callAIOnce(messages, sys, maxT) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: maxT || 1500, system: sys || SYSTEM, messages })
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxT || 1500, system: sys || SYSTEM, messages })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -9648,11 +9666,11 @@ async function aiFillVillage() {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': MH.getApiKey(),
-        'anthropic-version': '2023-06-01',
+        'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 1500,
         messages: [{role:'user', content: prompt}]
       })
@@ -9719,11 +9737,11 @@ ${text.substring(0, 6000)}
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': MH.getApiKey(),
-        'anthropic-version': '2023-06-01',
+        'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 2000,
         messages: [{role:'user', content: prompt}]
       })
@@ -11172,7 +11190,7 @@ async function genDocWd(step, type) {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000,
         system: '당신은 햇빛소득마을 공모사업 전문 컨설턴트입니다. 공식 행정문서 형식으로 정확하게 작성합니다.',
         messages: [{ role: 'user', content: prompt }] })
@@ -11221,7 +11239,7 @@ async function genMinutes() {
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2500,
         system:'당신은 햇빛소득마을 공모사업 전문 컨설턴트입니다. 공식 행정문서·회의록을 정확한 형식으로 작성합니다.',
         messages:[{role:'user',content:prompt}] })
@@ -11950,7 +11968,7 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
   try {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,
         system: systemPrompt,
         messages:[{role:'user',content:(villageCtx?'【마을정보】\n'+villageCtx+'\n\n':'')+userPrompt}]})
@@ -12062,7 +12080,7 @@ async function sendBpChat() {
   try {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,
         system:'당신은 햇빛소득마을 사업계획서 작성 전문가입니다. 수정 요청을 반영한 전체 HTML을 출력합니다. HTML만 출력, 마크다운 없이.',
         messages: messages})
