@@ -6886,9 +6886,31 @@ const HWP_URLS = {
   charter:      'https://www.coop.go.kr/home/boardView.do?menu_no=2086&brd_mgrno=110&brd_no=13794',
 };
 function dlHwp(key) {
-  const url = HWP_URLS[key];
-  if(url) { window.open(url,'_blank'); }
-  else { alert('공식 한글 서식은\n행안부 공고 첨부파일에서 다운받으세요.\nhttps://www.mois.go.kr'); }
+  // 1) 사전 등록 OOXML이 있으면 그것을 .docx로 제공 (한컴에서 .hwpx 1-클릭 변환 가능)
+  if (typeof DOCX !== 'undefined' && DOCX[key]) {
+    const d = DOCX[key];
+    const bin = atob(d.b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i=0; i<bin.length; i++) arr[i]=bin.charCodeAt(i);
+    const blob = new Blob([arr], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = (d.name || '서식').replace(/\.docx?$/i,'') + '.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+    if (typeof showToast === 'function') showToast('🇰🇷 한컴오피스에서 열어 「다른 이름으로 저장 → 한글 문서(*.hwpx)」 클릭 시 한글 파일로 변환됩니다', 5500);
+    return;
+  }
+  // 2) 폴백: HTML→.doc (구버전 호환)
+  if (typeof dlDoc === 'function') {
+    dlDoc(key);
+    if (typeof showToast === 'function') showToast('🇰🇷 한컴오피스에서 열어 「한글 문서(*.hwpx)」로 저장하면 변환됩니다', 5500);
+    return;
+  }
+  // 3) 최후 폴백: 행안부 공고 안내
+  const url = (typeof HWP_URLS !== 'undefined' && HWP_URLS[key]) || 'https://www.mois.go.kr';
+  if (typeof showToast === 'function') showToast('해당 서식의 공식 한글 파일을 새 탭에서 엽니다', 3000);
+  window.open(url,'_blank');
 }
   const d = DOCX[key];
   if (!d) { dlDoc(key); return; }
@@ -11324,15 +11346,233 @@ ${html}
 </body></html>`;
 }
 
-function downloadAsWordDoc(filename, md, title) {
-  const wordHtml = markdownToWordHtml(md, title || filename);
-  const blob = new Blob(['\uFEFF' + wordHtml], {type: 'application/msword'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename + '.doc';
-  a.click();
-  URL.revokeObjectURL(url);
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// \uACF5\uC6A9 .docx (OOXML) \uC0DD\uC131\uAE30 \u2014 \uD55C\uCEF4 \uC624\uD53C\uC2A4\uC5D0\uC11C .hwpx\uB85C 1-\uD074\uB9AD \uBCC0\uD658 \uAC00\uB2A5
+// markdown \u2192 \uC9C4\uC9DC OOXML \uC6CC\uB4DC \uBB38\uC11C (\uD589\uC815\uBB38\uC11C \uD45C\uC9C0 + \uB0A0\uC778\uB780 \uC635\uC158)
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+function _escXml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// markdown \uC904 \uB2E8\uC704\uB97C OOXML <w:p> \uC2DC\uD000\uC2A4\uB85C \uBCC0\uD658
+function markdownToDocxBody(md) {
+  if (!md) return '';
+  const lines = md.split('\n');
+  const out = [];
+  let i = 0;
+
+  // inline \uD3EC\uB9F7 \u2192 run XML (\uAD75\uAC8C, \uAE30\uC6B8\uC784)
+  const runs = (text) => {
+    const parts = [];
+    let buf = '';
+    let bold = false, italic = false;
+    let j = 0;
+    const flush = () => {
+      if (!buf) return;
+      const rPr = [];
+      if (bold) rPr.push('<w:b/>');
+      if (italic) rPr.push('<w:i/>');
+      rPr.push('<w:sz w:val="22"/>');
+      parts.push('<w:r><w:rPr>'+rPr.join('')+'</w:rPr><w:t xml:space="preserve">'+_escXml(buf)+'</w:t></w:r>');
+      buf = '';
+    };
+    while (j < text.length) {
+      if (text.substr(j, 2) === '**') { flush(); bold = !bold; j += 2; continue; }
+      if (text[j] === '*' && text[j+1] !== ' ') { flush(); italic = !italic; j += 1; continue; }
+      buf += text[j]; j += 1;
+    }
+    flush();
+    return parts.join('') || '<w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve"></w:t></w:r>';
+  };
+
+  const para = (text, pPr) => out.push('<w:p>'+(pPr||'')+runs(text)+'</w:p>');
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const t = line.trim();
+
+    // \uD45C (| ... | ... | \uD615\uC2DD)
+    if (t.startsWith('|') && t.endsWith('|')) {
+      const rows = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')) {
+        rows.push(lines[i].trim());
+        i++;
+      }
+      // \uD5E4\uB354/\uAD6C\uBD84\uC120/\uBCF8\uBB38 \uBD84\uB9AC
+      let headerCells = null;
+      const bodyRows = [];
+      for (let k = 0; k < rows.length; k++) {
+        const r = rows[k];
+        const cells = r.split('|').slice(1, -1).map(c => c.trim());
+        if (/^[\s|:\-]+$/.test(r.replace(/\|/g,''))) continue;
+        if (headerCells === null) headerCells = cells;
+        else bodyRows.push(cells);
+      }
+      if (headerCells) {
+        const colCount = headerCells.length;
+        const colW = Math.floor(9000 / colCount);
+        const grid = '<w:tblGrid>'+Array(colCount).fill('<w:gridCol w:w="'+colW+'"/>').join('')+'</w:tblGrid>';
+        const cellXml = (txt, isHeader) => {
+          const shd = isHeader ? '<w:shd w:val="clear" w:color="auto" w:fill="E8F0FE"/>' : '';
+          const rPr = isHeader ? '<w:b/><w:sz w:val="20"/>' : '<w:sz w:val="20"/>';
+          return '<w:tc><w:tcPr><w:tcW w:w="'+colW+'" w:type="dxa"/>'+shd+'<w:tcBorders><w:top w:val="single" w:sz="4" w:color="999999"/><w:left w:val="single" w:sz="4" w:color="999999"/><w:bottom w:val="single" w:sz="4" w:color="999999"/><w:right w:val="single" w:sz="4" w:color="999999"/></w:tcBorders></w:tcPr><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr>'+rPr+'</w:rPr><w:t xml:space="preserve">'+_escXml(txt)+'</w:t></w:r></w:p></w:tc>';
+        };
+        const headerRow = '<w:tr>'+headerCells.map(c => cellXml(c, true)).join('')+'</w:tr>';
+        const bodyRowsXml = bodyRows.map(row => {
+          const padded = row.concat(Array(Math.max(0, colCount - row.length)).fill(''));
+          return '<w:tr>'+padded.slice(0, colCount).map(c => cellXml(c, false)).join('')+'</w:tr>';
+        }).join('');
+        out.push('<w:tbl><w:tblPr><w:tblW w:w="9000" w:type="dxa"/><w:jc w:val="center"/></w:tblPr>'+grid+headerRow+bodyRowsXml+'</w:tbl>');
+        out.push('<w:p><w:pPr><w:spacing w:after="120"/></w:pPr></w:p>');
+        continue;
+      }
+    }
+
+    // \uC81C\uBAA9
+    if (t.startsWith('# ')) { para(t.slice(2), '<w:pPr><w:jc w:val="center"/><w:spacing w:before="240" w:after="160"/><w:pBdr><w:bottom w:val="single" w:sz="8" w:color="1A3A6B"/></w:pBdr></w:pPr>'); i++; continue; }
+    if (t.startsWith('## ')) { out.push('<w:p><w:pPr><w:spacing w:before="240" w:after="100"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="26"/><w:color w:val="1A3A6B"/></w:rPr><w:t xml:space="preserve">'+_escXml(t.slice(3))+'</w:t></w:r></w:p>'); i++; continue; }
+    if (t.startsWith('### ')) { out.push('<w:p><w:pPr><w:spacing w:before="180" w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="1E4D8C"/></w:rPr><w:t xml:space="preserve">'+_escXml(t.slice(4))+'</w:t></w:r></w:p>'); i++; continue; }
+    if (t.startsWith('#### ')) { out.push('<w:p><w:pPr><w:spacing w:before="140" w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">'+_escXml(t.slice(5))+'</w:t></w:r></w:p>'); i++; continue; }
+
+    // \uAD6C\uBD84\uC120
+    if (/^---+$/.test(t)) { out.push('<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:color="CCCCCC"/></w:pBdr></w:pPr></w:p>'); i++; continue; }
+
+    // \uC21C\uC11C\uC5C6\uB294 \uBAA9\uB85D
+    if (/^[-*\u2022] /.test(t)) {
+      para('\u2022  '+t.replace(/^[-*\u2022] /,''), '<w:pPr><w:ind w:left="360"/><w:spacing w:after="60"/></w:pPr>');
+      i++; continue;
+    }
+    // \uC21C\uC11C\uC788\uB294 \uBAA9\uB85D
+    const numMatch = t.match(/^(\d+)\. (.*)/);
+    if (numMatch) {
+      para(numMatch[1]+'.  '+numMatch[2], '<w:pPr><w:ind w:left="360"/><w:spacing w:after="60"/></w:pPr>');
+      i++; continue;
+    }
+
+    // \uBE48 \uC904
+    if (!t) { out.push('<w:p><w:pPr><w:spacing w:after="80"/></w:pPr></w:p>'); i++; continue; }
+
+    // \uC77C\uBC18 \uB2E8\uB77D
+    para(t, '<w:pPr><w:spacing w:after="80"/></w:pPr>');
+    i++;
+  }
+  return out.join('\n');
+}
+
+// \uC644\uC804\uD55C .docx Blob \uC0DD\uC131 (\uD55C\uCEF4 \uD638\uD658, A4, \uB9D1\uC740 \uACE0\uB515)
+async function buildDocxBlob(md, opts) {
+  opts = opts || {};
+  const title = opts.title || '\uBB38\uC11C';
+  const subtitle = opts.subtitle || '';
+  const signatureLines = opts.signatureLines || []; // ['\uC774\uC0AC\uC7A5 \uD64D\uAE38\uB3D9\u3000\u3000(\uC778)', ...]
+  const footerText = opts.footerText || '\u00A9 \uB9C8\uC744\uD56D\uD574 \u00B7 \uD587\uBE5B\uC18C\uB4DD\uB9C8\uC744 \uCEE8\uC124\uD305 \uD50C\uB7AB\uD3FC \u00B7 \uCC38\uACE0\uC6A9 \uB3C4\uAD6C';
+  const today = new Date();
+  const dateStr = today.getFullYear()+'\uB144 '+(today.getMonth()+1)+'\uC6D4 '+today.getDate()+'\uC77C';
+
+  const bodyXml = markdownToDocxBody(md || '');
+
+  const titleBlock = '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="0" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="36"/><w:color w:val="1A3A6B"/></w:rPr><w:t xml:space="preserve">'+_escXml(title)+'</w:t></w:r></w:p>';
+  const subtitleBlock = subtitle ? '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:sz w:val="20"/><w:color w:val="555555"/></w:rPr><w:t xml:space="preserve">'+_escXml(subtitle)+'</w:t></w:r></w:p>' : '';
+  const dateBlock = '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="240"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:color="1A3A6B"/></w:pBdr></w:pPr><w:r><w:rPr><w:sz w:val="18"/><w:color w:val="888888"/></w:rPr><w:t xml:space="preserve">\uC791\uC131\uC77C: '+dateStr+'</w:t></w:r></w:p>';
+
+  const sigXml = signatureLines.length ? (
+    '<w:p><w:pPr><w:spacing w:before="600"/></w:pPr></w:p>' +
+    '<w:p><w:pPr><w:jc w:val="right"/></w:pPr><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">'+_escXml(dateStr)+'</w:t></w:r></w:p>' +
+    signatureLines.map(s => '<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:after="160"/></w:pPr><w:r><w:rPr><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">'+_escXml(s)+'</w:t></w:r></w:p>').join('')
+  ) : '';
+
+  const docXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">\n'+
+'<w:body>\n'+
+titleBlock + subtitleBlock + dateBlock + bodyXml + sigXml +
+'<w:sectPr>\n'+
+'  <w:pgSz w:w="11906" w:h="16838"/>\n'+
+'  <w:pgMar w:top="1400" w:right="1200" w:bottom="1400" w:left="1200" w:header="708" w:footer="708" w:gutter="0"/>\n'+
+'</w:sectPr>\n'+
+'</w:body>\n'+
+'</w:document>';
+
+  const stylesXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+'<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">\n'+
+'<w:docDefaults><w:rPrDefault><w:rPr>\n'+
+'<w:rFonts w:ascii="\uB9D1\uC740 \uACE0\uB515" w:eastAsia="\uB9D1\uC740 \uACE0\uB515" w:hAnsi="\uB9D1\uC740 \uACE0\uB515" w:cs="\uB9D1\uC740 \uACE0\uB515"/>\n'+
+'<w:sz w:val="22"/><w:szCs w:val="22"/>\n'+
+'</w:rPr></w:rPrDefault>\n'+
+'<w:pPrDefault><w:pPr><w:spacing w:line="360" w:lineRule="auto"/></w:pPr></w:pPrDefault>\n'+
+'</w:docDefaults>\n'+
+'<w:style w:type="paragraph" w:styleId="Normal"><w:name w:val="Normal"/></w:style>\n'+
+'</w:styles>';
+
+  const contentTypesXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">\n'+
+'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>\n'+
+'<Default Extension="xml" ContentType="application/xml"/>\n'+
+'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>\n'+
+'<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>\n'+
+'</Types>';
+
+  const rootRelsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">\n'+
+'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>\n'+
+'</Relationships>';
+
+  const docRelsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">\n'+
+'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>\n'+
+'</Relationships>';
+
+  if (!window.JSZip) throw new Error('JSZip \uB77C\uC774\uBE0C\uB7EC\uB9AC\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4.');
+  const zip = new window.JSZip();
+  zip.file('[Content_Types].xml', contentTypesXml);
+  zip.file('_rels/.rels', rootRelsXml);
+  zip.file('word/document.xml', docXml);
+  zip.file('word/styles.xml', stylesXml);
+  zip.file('word/_rels/document.xml.rels', docRelsXml);
+  return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+}
+
+// \uACF5\uC6A9 \uB2E4\uC6B4\uB85C\uB4DC \uD568\uC218 \u2014 \uBAA8\uB4E0 AI \uC0DD\uC131 \uBB38\uC11C\uAC00 \uC774\uAC78 \uD638\uCD9C
+async function downloadAsWordDoc(filename, md, title, opts) {
+  try {
+    const blob = await buildDocxBlob(md, Object.assign({ title: title || filename }, opts||{}));
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename + '.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    console.warn('[docx]', e.message, '\u2014 HTML .doc\uB85C \uD3F4\uBC31');
+    // \uD3F4\uBC31: \uAE30\uC874 HTML .doc \uBC29\uC2DD
+    const wordHtml = markdownToWordHtml(md, title || filename);
+    const blob = new Blob(['\uFEFF' + wordHtml], {type: 'application/msword'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename + '.doc'; a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+// 문서 종류별 표지 부제 + 날인란 (마을 컨텍스트 자동 주입)
+function _docMetaFor(step) {
+  var v = (typeof selectedVid !== 'undefined' && selectedVid) ? (villages||[]).find(function(x){return x.id===selectedVid;}) : null;
+  var info = (v && v.info) || {};
+  var villageName = (v && v.name) || info['vi-name'] || '';
+  var coopName = info['vi-coop'] || (villageName ? villageName+' 햇빛소득협동조합' : '');
+  var leader = info['vi-leader'] || info['vi-chief'] || '';
+  var chief = info['vi-chief'] || leader || '';
+  var subtitle = villageName ? (villageName + (coopName && coopName !== villageName ? '　·　' + coopName : '')) : '';
+  var sig = [];
+  switch (step) {
+    case 'report':   sig = leader ? ['마을 이장 '+leader+'　　　　(인)'] : ['마을 이장 　　　　　　　　(인)']; break;
+    case 'official': sig = leader ? ['발신: '+villageName+'　　이장 '+leader+'　　(인)'] : ['발신: '+villageName+'　　이장 　　　　(인)']; break;
+    case 'notice':   sig = leader ? ['공고권자: '+villageName+' 이장 '+leader+'　　(인)'] : ['공고권자: '+villageName+' 이장 　　　　(인)']; break;
+    case 'assembly': sig = ['의장(이장) '+(leader||'　　　　')+'　　(인)', '서기 　　　　　　　　(인)']; break;
+    case 'consent':  sig = []; break; // 동의자 서명란은 본문 표에 포함
+    case 'founding': sig = ['창립총회 의장 　　　　　　(인)', '서기 　　　　　　　　(인)']; break;
+    case 'charter':  sig = coopName ? [coopName+'　이사장 '+(chief||'　　　　')+'　　(인)'] : ['이사장 　　　　　　(인)']; break;
+    case 'coop_bizplan': sig = coopName ? [coopName+'　이사장 '+(chief||'　　　　')+'　　(인)'] : ['이사장 　　　　　　(인)']; break;
+    default: sig = leader ? ['마을 이장 '+leader+'　　(인)'] : [];
+  }
+  return { subtitle: subtitle, signatureLines: sig };
 }
 
 function dlDocDocxWd(step) {
@@ -11341,7 +11581,8 @@ function dlDocDocxWd(step) {
   var title = '문서_' + step;
   var wdt = document.querySelector('#wdt-' + step);
   if (wdt) title = wdt.textContent.trim().replace(/AI.*$/,'').trim();
-  downloadAsWordDoc(title + '_' + new Date().toISOString().split('T')[0], el.value || el.textContent, title);
+  var meta = _docMetaFor(step);
+  downloadAsWordDoc(title + '_' + new Date().toISOString().split('T')[0], el.value || el.textContent, title, meta);
 }
 
 function dlDocTxtWd(step) {
@@ -11359,7 +11600,16 @@ function dlMinDocx() {
   var date = new Date().toISOString().split('T')[0];
   var typeEl = document.getElementById('min-type');
   var typeName = typeEl ? typeEl.value : '회의록';
-  downloadAsWordDoc(typeName + '_' + date, md, typeName);
+  // 회의록은 의장/서기 날인란 자동 주입
+  var v = (typeof selectedVid !== 'undefined' && selectedVid) ? (villages||[]).find(function(x){return x.id===selectedVid;}) : null;
+  var info = (v && v.info) || {};
+  var villageName = (v && v.name) || info['vi-name'] || '';
+  var leader = info['vi-leader'] || info['vi-chief'] || '';
+  var meta = {
+    subtitle: villageName,
+    signatureLines: ['의장 '+(leader||'　　　　　　')+'　　(인)', '서기 　　　　　　　　(인)']
+  };
+  downloadAsWordDoc(typeName + '_' + date, md, typeName, meta);
 }
 
 function dlMinTxt() {
