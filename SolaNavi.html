@@ -5290,7 +5290,7 @@ localStorage.setItem = function(k, v) {
   </div>
 
   <!-- API 키 모달 -->
-  <div id="api-modal-ov" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeApiModal()">
+  <div id="api-modal-ov" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto" onclick="if(event.target===this)closeApiModal()">
     <div style="background:var(--sf);border:1px solid var(--bd);border-radius:14px;width:100%;max-width:480px;overflow:hidden">
       <div style="background:var(--sf2);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd)">
         <div style="font-size:14px;font-weight:700">🔑 Anthropic API 키 설정</div>
@@ -6633,7 +6633,7 @@ async function saveApiKey() {
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:10,messages:[{role:'user',content:'hi'}]})
+      body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:10,messages:[{role:'user',content:'hi'}]})
     });
     if (r.ok || r.status===400) {
       localStorage.setItem('mh_api_key', key);
@@ -8988,6 +8988,12 @@ function go(id, tab) {
   if (id === 'dash') renderDash();
   if (id === 'villages') renderVillages();
   if (id === 'checklist') renderReadiness();
+  if (id === 'minutes') {
+    // 모바일이면 실시간 녹음 모드 기본 선택
+    if (window.innerWidth <= 600) {
+      setTimeout(function(){ if(typeof switchRecMode==='function') switchRecMode('live'); }, 100);
+    }
+  }
   if (id === 'faqissue') renderFaqIssue();
   // 문서 작성 탭 진입 시 현재 선택된 마을 자동 채움
   if (id === 'docs' && selectedVid) {
@@ -9019,7 +9025,7 @@ async function callAI(messages, targetId, spinId, sys, maxT, retrying=false) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxT || 2500, stream: true, system: sys || SYSTEM, messages })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: maxT || 2500, stream: true, system: sys || SYSTEM, messages })
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message || 'HTTP ' + res.status); }
     const reader = res.body.getReader();
@@ -9046,8 +9052,12 @@ async function callAI(messages, targetId, spinId, sys, maxT, retrying=false) {
       setTimeout(async function(){ await callAI(messages, targetId, spinId, sys, maxT, true); }, 1500);
       return '';
     }
-    const isNet = e.message.includes('fetch') || e.message.includes('Failed') || e.message.includes('network');
-    if (target) target.textContent = '⚠️ ' + (isNet ? '네트워크 연결을 확인해주세요.' : '오류: ' + e.message);
+    let errMsg = e.message || '알 수 없는 오류';
+    if (errMsg.includes('401')) errMsg = 'API 키가 잘못되었습니다. 🔑 API 키 버튼을 눌러 다시 확인해주세요.';
+    else if (errMsg.includes('403')) errMsg = 'API 접근 권한이 없습니다. 키를 다시 확인해주세요.';
+    else if (errMsg.includes('429')) errMsg = 'API 요청 한도 초과입니다. 잠시 후 다시 시도해주세요.';
+    else if (errMsg.includes('fetch') || errMsg.includes('Failed') || errMsg.includes('network') || errMsg.includes('Load')) errMsg = '네트워크 연결을 확인해주세요. (인터넷 연결 필요)';
+    if (target) target.textContent = '⚠️ ' + errMsg;
   }
   if (spin) spin.style.display = 'none';
   if (target) target.classList.remove('streaming');
@@ -9060,7 +9070,7 @@ async function callAIOnce(messages, sys, maxT) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxT || 1500, system: sys || SYSTEM, messages })
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: maxT || 1500, system: sys || SYSTEM, messages })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -9670,7 +9680,7 @@ async function aiFillVillage() {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1500,
         messages: [{role:'user', content: prompt}]
       })
@@ -9741,7 +9751,7 @@ ${text.substring(0, 6000)}
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 2000,
         messages: [{role:'user', content: prompt}]
       })
@@ -11191,7 +11201,7 @@ async function genDocWd(step, type) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 2000,
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 2000,
         system: '당신은 햇빛소득마을 공모사업 전문 컨설턴트입니다. 공식 행정문서 형식으로 정확하게 작성합니다.',
         messages: [{ role: 'user', content: prompt }] })
     });
@@ -11240,7 +11250,7 @@ async function genMinutes() {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2500,
+      body: JSON.stringify({ model:'claude-sonnet-4-5', max_tokens:2500,
         system:'당신은 햇빛소득마을 공모사업 전문 컨설턴트입니다. 공식 행정문서·회의록을 정확한 형식으로 작성합니다.',
         messages:[{role:'user',content:prompt}] })
     });
@@ -11969,7 +11979,7 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,
+      body: JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,
         system: systemPrompt,
         messages:[{role:'user',content:(villageCtx?'【마을정보】\n'+villageCtx+'\n\n':'')+userPrompt}]})
     });
@@ -12081,7 +12091,7 @@ async function sendBpChat() {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,
+      body: JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,
         system:'당신은 햇빛소득마을 사업계획서 작성 전문가입니다. 수정 요청을 반영한 전체 HTML을 출력합니다. HTML만 출력, 마크다운 없이.',
         messages: messages})
     });
