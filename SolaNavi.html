@@ -961,14 +961,30 @@ const CloudSync = {
       : null;
   },
 
+  _pushInFlight: false,
+  _pushQueued: null,
+
   async pushVillages(vList) {
     const uid = this.userId();
     if (!uid || !CLOUD_ENABLED) return;
-    await SB.upsert('villages', {
-      user_id: uid,
-      data: JSON.stringify(vList),
-      updated_at: new Date().toISOString(),
-    });
+    // 동일 user_id에 대한 동시 upsert는 Supabase 503을 유발 → 직렬화
+    if (this._pushInFlight) { this._pushQueued = vList; return; }
+    this._pushInFlight = true;
+    try {
+      await SB.upsert('villages', {
+        user_id: uid,
+        data: JSON.stringify(vList),
+        updated_at: new Date().toISOString(),
+      });
+    } finally {
+      this._pushInFlight = false;
+      if (this._pushQueued) {
+        const next = this._pushQueued;
+        this._pushQueued = null;
+        // 다음 push는 짧은 텀 두고 직렬 실행 (race 방지)
+        setTimeout(() => CloudSync.pushVillages(next), 300);
+      }
+    }
   },
 
   async pullVillages() {
