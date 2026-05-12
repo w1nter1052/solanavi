@@ -7348,10 +7348,96 @@ const MH = (function() {
     },
 
     getApiKey() {
-      if (!this.isPaid) return null;
-      return localStorage.getItem('mh_api_key') || null;
+      // 워커 프록시 사용: isPaid면 'managed-by-server' 반환 (실제 키는 워커가 보유)
+      // BYOK 폴백: localStorage에 직접 키 저장된 경우는 그것 사용
+      if (this.isPaid) return localStorage.getItem('mh_api_key') || 'managed-by-server';
+      return null;
     }
   };
+})();
+
+
+// ══════════════════════════════════════════════════════════════
+// 🛰️ SOLANAVI BACKEND PROXY (Phase 1)
+// Anthropic API 호출을 마을항해 워커로 자동 라우팅.
+// 워커가 라이선스 검증·사용량 측정·실제 키 주입을 처리합니다.
+// ══════════════════════════════════════════════════════════════
+(function() {
+  const SOLANAVI_API = 'https://solanavi-api.hnsane.workers.dev';
+  const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+  const _origFetch = window.fetch.bind(window);
+
+  window.fetch = function(input, init) {
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+
+    // Anthropic API 호출만 가로채기
+    if (url.indexOf(ANTHROPIC_URL) === 0 || url.indexOf('api.anthropic.com/v1/messages') !== -1) {
+      try {
+        var license = (typeof MH !== 'undefined' && MH.key) ? MH.key : '';
+
+        // 라이선스 키 없으면 즉시 에러
+        if (!license) {
+          var errBody = JSON.stringify({
+            error: { type: 'no_license', message: '로그인이 필요합니다. 라이선스 키로 로그인 후 다시 시도하세요.' }
+          });
+          return Promise.resolve(new Response(errBody, {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          }));
+        }
+
+        // 헤더 변환: x-api-key 제거 + x-license-key 추가
+        var newHeaders = new Headers();
+        if (init && init.headers) {
+          var src = init.headers;
+          if (src instanceof Headers) {
+            src.forEach(function(v, k) { newHeaders.set(k, v); });
+          } else if (Array.isArray(src)) {
+            src.forEach(function(p) { newHeaders.set(p[0], p[1]); });
+          } else {
+            Object.keys(src).forEach(function(k) { newHeaders.set(k, src[k]); });
+          }
+        }
+        // 클라이언트 노출 헤더 제거
+        newHeaders.delete('x-api-key');
+        newHeaders.delete('X-Api-Key');
+        newHeaders.delete('anthropic-version');
+        newHeaders.delete('anthropic-dangerous-direct-browser-access');
+        // 라이선스 키 헤더 주입
+        newHeaders.set('x-license-key', license);
+        newHeaders.set('Content-Type', 'application/json');
+
+        var newInit = Object.assign({}, init || {}, { headers: newHeaders });
+        return _origFetch(SOLANAVI_API + '/v1/chat', newInit).then(function(res) {
+          // 사용량 정보를 전역 캐시 (UI 표시용)
+          try {
+            window.__solanaviUsage = {
+              plan: res.headers.get('x-solanavi-plan'),
+              usage: parseInt(res.headers.get('x-solanavi-usage') || '0', 10),
+              limit: parseInt(res.headers.get('x-solanavi-limit') || '0', 10),
+              ts: Date.now()
+            };
+          } catch(e){}
+          return res;
+        });
+      } catch(e) {
+        console.error('[SolaNavi Proxy] error:', e);
+        return _origFetch(input, init);
+      }
+    }
+    return _origFetch(input, init);
+  };
+
+  // 사용량 조회 헬퍼 (선택적으로 호출 가능)
+  window.fetchSolanaviUsage = function() {
+    var license = (typeof MH !== 'undefined' && MH.key) ? MH.key : '';
+    if (!license) return Promise.resolve(null);
+    return _origFetch(SOLANAVI_API + '/usage', {
+      headers: { 'x-license-key': license }
+    }).then(function(r){ return r.json(); }).catch(function(){ return null; });
+  };
+
+  console.log('[SolaNavi] Backend proxy active →', SOLANAVI_API);
 })();
 
 
