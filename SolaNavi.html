@@ -567,6 +567,32 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   /* API 키 버튼: 워커 도입 후 BYOK 불필요. 모든 사용자 모바일에서 숨김 */
   #app-assistant #hdr #api-btn{display:none !important}
 
+  /* ─ s1-calc 시나리오 버튼 3개 (보수적/기준/낙관적) — flex-wrap ─ */
+  #page-s1-calc div[style*="display:flex"][style*="gap"]:has(button[id^="sc-btn"]),
+  #page-s1-calc > div > div:has(> button[id^="sc-btn"]){
+    flex-wrap:wrap !important;
+  }
+  button[id^="sc-btn"]{
+    flex:1 1 calc(50% - 4px) !important;
+    min-width:0 !important;
+    padding:9px 6px !important;
+    font-size:11.5px !important;
+  }
+  button[id^="sc-btn"] span{font-size:10px !important;line-height:1.4;display:inline-block;white-space:normal;word-break:keep-all}
+
+  /* ─ 커뮤니티 .comm-tab — 모바일에서 줄바꿈 허용 + 작게 ─ */
+  #sec-community .comm-tab,.comm-tab{
+    font-size:11px !important;
+    padding:7px 9px !important;
+    white-space:nowrap !important;
+  }
+  /* 커뮤니티 탭 컨테이너에 가로 스크롤 또는 flex-wrap */
+  #sec-community div:has(> .comm-tab){
+    flex-wrap:wrap !important;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
   /* ─ 상단 #app-switcher 모바일: 로그아웃 + PRO 배지 잘림 방지 ─ */
   #app-switcher{
     overflow-x:auto !important;
