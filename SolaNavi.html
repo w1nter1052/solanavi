@@ -570,6 +570,21 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   /* KPI 숫자 - 화면 더 좁으면 폰트 축소 */
   .kpi-n,.kpi-v{font-size:18px !important}
+
+  /* ─ .kpis 3+ 카드 모바일 좁은 화면 2열 wrap (긴 숫자 잘림 방지) ─ */
+  /* 예: STEP 1-5 기대효과 "2,000~5,000" 처럼 카드 폭보다 긴 케이스 */
+  .kpis{flex-wrap:wrap !important;gap:6px !important;justify-content:space-between}
+  .kpis > .kpi{
+    flex:0 0 calc(50% - 3px) !important;
+    width:calc(50% - 3px) !important;
+    min-width:0 !important;
+    max-width:none !important;
+    padding:10px 8px !important;
+  }
+  /* 카드 수가 홀수일 때 마지막 카드는 100% 폭 */
+  .kpis > .kpi:nth-child(odd):last-child{flex:0 0 100% !important;width:100% !important}
+  /* 그 안의 숫자 폰트는 카드 폭에 맞춰 적당히 */
+  .kpis .kpi-n,.kpis .kpi-v{font-size:17px !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
 
 .info-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
