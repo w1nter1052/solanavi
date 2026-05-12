@@ -7461,6 +7461,168 @@ const MH = (function() {
 
 
 // ══════════════════════════════════════════════════════════════
+// 📊 사용량 표시 UI (Phase 2)
+// 헤더에 "PLAN · 사용/한도" 칩 표시 + 90% 경고 + 초과 모달
+// ══════════════════════════════════════════════════════════════
+(function() {
+  var SOLANAVI_API = 'https://solanavi-api.hnsane.workers.dev';
+  var _origFetchU = (typeof fetch === 'function') ? fetch.bind(window) : null;
+
+  // 사용량 칩 DOM 생성 (업무도우미 헤더에 삽입)
+  function ensureUsageChip() {
+    var hdr = document.getElementById('hdr');
+    if (!hdr) return null;
+    var chip = document.getElementById('solanavi-usage-chip');
+    if (chip) return chip;
+    chip = document.createElement('button');
+    chip.id = 'solanavi-usage-chip';
+    chip.title = '클릭: 사용량 상세 보기';
+    chip.style.cssText = 'background:var(--sf2);border:1px solid var(--bd);color:var(--mid);padding:5px 11px;border-radius:14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;display:none;align-items:center;gap:5px;white-space:nowrap;margin-right:6px;transition:all .15s';
+    chip.onclick = openUsageDetail;
+    // hright 안의 첫 자리에 끼워넣기
+    var hright = hdr.querySelector('.hright');
+    if (hright) hright.insertBefore(chip, hright.firstChild);
+    else hdr.appendChild(chip);
+    return chip;
+  }
+
+  // 칩 색상 (잔여율 기반)
+  function chipColors(remRatio) {
+    if (remRatio > 0.3) return { bg: 'var(--gr3, rgba(34,197,94,.12))', fg: 'var(--gr2, #166534)', bd: 'var(--gr, #22c55e)' };
+    if (remRatio > 0.1) return { bg: 'rgba(245,158,11,.12)', fg: '#92400e', bd: 'var(--warn, #f59e0b)' };
+    return { bg: 'rgba(239,68,68,.12)', fg: '#991b1b', bd: 'var(--red, #ef4444)' };
+  }
+
+  // 칩 텍스트/색상 갱신
+  function refreshChip(plan, usage, limit) {
+    var chip = ensureUsageChip();
+    if (!chip) return;
+    if (!plan || plan === 'free' && typeof MH !== 'undefined' && !MH.isActive) {
+      chip.style.display = 'none';
+      return;
+    }
+    var rem = Math.max(0, limit - usage);
+    var ratio = limit > 0 ? rem / limit : 1;
+    var col = chipColors(ratio);
+    var planLabel = ({free:'무료', basic:'베이직', pro:'PRO', agency:'팀'})[plan] || plan;
+    chip.innerHTML = '<span style="opacity:.8">' + planLabel + '</span>·<b>' + usage + '/' + limit + '</b><span style="opacity:.6;margin-left:3px">잔여 ' + rem + '</span>';
+    chip.style.background = col.bg;
+    chip.style.color = col.fg;
+    chip.style.borderColor = col.bd;
+    chip.style.display = 'inline-flex';
+
+    // 90% 도달 시 경고 토스트 (한 번만)
+    if (ratio < 0.1 && ratio > 0 && !window.__usageWarnShown) {
+      window.__usageWarnShown = true;
+      if (typeof showToast === 'function') {
+        showToast('⚠️ AI 호출 한도의 90% 사용. 잔여 ' + rem + '회. 다음 달 1일 갱신 또는 플랜 업그레이드.', 7000);
+      }
+    }
+    // 초과 시 강조
+    if (rem === 0 && !window.__usageOverShown) {
+      window.__usageOverShown = true;
+      showQuotaExceededModal(plan, usage, limit);
+    }
+  }
+
+  // 한도 초과 모달
+  window.showQuotaExceededModal = function(plan, usage, limit) {
+    if (document.getElementById('quota-exceeded-modal')) return;
+    var nextBill = new Date();
+    nextBill.setMonth(nextBill.getMonth() + 1);
+    nextBill.setDate(1);
+    var html = '<div id="quota-exceeded-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+      + '<div style="background:#fff;border-radius:14px;max-width:480px;width:100%;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="font-size:34px">🚧</div><div><h2 style="margin:0;font-size:17px;color:#C0392B">AI 호출 한도 초과</h2><div style="font-size:11.5px;color:#666;margin-top:2px">이번 달 사용량이 한도에 도달했습니다.</div></div></div>'
+      + '<div style="background:#FDEDEC;border-left:4px solid #C0392B;border-radius:0 8px 8px 0;padding:11px 14px;font-size:12.5px;line-height:1.8;margin-bottom:14px"><b>현재 플랜:</b> ' + plan.toUpperCase() + '<br><b>사용:</b> ' + usage + ' / ' + limit + ' (월)<br><b>다음 갱신:</b> ' + nextBill.toLocaleDateString('ko-KR') + ' (자동)</div>'
+      + '<div style="font-size:12.5px;color:#444;line-height:1.8;margin-bottom:16px">이번 달은 더 이상 AI 기능을 사용할 수 없습니다. 다음 달 1일에 자동 갱신되며, 그 전까지 사용하시려면 플랜 업그레이드를 고려해주세요.</div>'
+      + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+      + '<button onclick="document.getElementById(\'quota-exceeded-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+      + '<button onclick="document.getElementById(\'quota-exceeded-modal\').remove();openPlanCenter()" style="background:#E67E22;color:#fff;border:none;border-radius:6px;padding:9px 16px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">💎 플랜 업그레이드</button>'
+      + '</div></div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+
+  // 사용량 상세 모달
+  window.openUsageDetail = async function() {
+    var data = await (window.fetchSolanaviUsage ? window.fetchSolanaviUsage() : Promise.resolve(null));
+    if (!data) { alert('사용량 정보를 가져올 수 없습니다. 로그인 상태를 확인해주세요.'); return; }
+    var html = '<div id="usage-detail-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+      + '<div style="background:#fff;border-radius:14px;max-width:440px;width:100%;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.25)">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px"><h2 style="margin:0;font-size:16px;color:#1A3A6B">📊 이번 달 사용량</h2><button onclick="document.getElementById(\'usage-detail-modal\').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888">×</button></div>'
+      + '<div style="font-size:12px;color:#888;margin-bottom:12px">' + data.period + ' · ' + (data.plan||'').toUpperCase() + ' 플랜</div>'
+      + '<div style="display:grid;gap:12px">'
+      +   '<div style="border:1px solid #eee;border-radius:10px;padding:14px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b style="font-size:13px">🤖 AI 호출</b><span style="font-size:13px;font-weight:700">' + data.usage.ai + ' / ' + data.limits.ai + '</span></div>'
+      +     '<div style="background:#eee;height:8px;border-radius:4px;overflow:hidden"><div style="background:' + (data.remaining.ai > 0 ? '#22c55e' : '#ef4444') + ';height:100%;width:' + Math.min(100, data.usage.ai/data.limits.ai*100) + '%"></div></div>'
+      +     '<div style="font-size:11px;color:#666;margin-top:4px">잔여: <b>' + data.remaining.ai + '회</b></div></div>'
+      +   '<div style="border:1px solid #eee;border-radius:10px;padding:14px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><b style="font-size:13px">🎙 회의록 STT (Whisper)</b><span style="font-size:13px;font-weight:700">' + Math.round(data.usage.whisper_sec/60) + ' / ' + Math.round(data.limits.whisper_sec/60) + ' 분</span></div>'
+      +     '<div style="background:#eee;height:8px;border-radius:4px;overflow:hidden"><div style="background:' + (data.remaining.whisper_sec > 0 ? '#22c55e' : '#ef4444') + ';height:100%;width:' + Math.min(100, data.usage.whisper_sec/data.limits.whisper_sec*100) + '%"></div></div>'
+      +     '<div style="font-size:11px;color:#666;margin-top:4px">잔여: <b>' + Math.round(data.remaining.whisper_sec/60) + '분</b></div></div>'
+      + '</div>'
+      + '<div style="background:#F5F5F5;padding:10px 14px;border-radius:8px;font-size:11px;color:#666;line-height:1.7;margin-top:14px">💡 사용량은 매월 1일 자동 갱신됩니다. 한도 초과 시 다음 달까지 대기 또는 플랜 업그레이드.</div>'
+      + '<div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end"><button onclick="document.getElementById(\'usage-detail-modal\').remove();openPlanCenter()" style="background:#1A3A6B;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">💎 플랜 변경</button><button onclick="document.getElementById(\'usage-detail-modal\').remove()" style="background:#666;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button></div>'
+      + '</div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+  };
+
+  // 칩 갱신: __solanaviUsage 캐시 사용 (fetch wrapper가 매 호출마다 업데이트)
+  function pollAndRefresh() {
+    var u = window.__solanaviUsage;
+    if (u && u.plan && u.limit > 0) {
+      refreshChip(u.plan, u.usage, u.limit);
+    }
+  }
+
+  // 페이지 로드 후: 로그인 상태면 사용량 1회 fetch
+  function initialLoad() {
+    if (typeof MH !== 'undefined' && MH.isPaid) {
+      if (window.fetchSolanaviUsage) {
+        window.fetchSolanaviUsage().then(function(data) {
+          if (data && data.plan) {
+            refreshChip(data.plan, data.usage.ai, data.limits.ai);
+          }
+        });
+      }
+    }
+  }
+
+  // setInterval로 매 5초 캐시 체크 (AI 호출 후 갱신 반영)
+  setInterval(pollAndRefresh, 5000);
+
+  // 페이지 로드 시 + MH 로그인 변경 시 초기 호출
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialLoad);
+  } else {
+    setTimeout(initialLoad, 500);
+  }
+
+  // 라이선스 키 활성화/로그아웃 후크 — MH.activate/logout 래핑
+  if (typeof MH !== 'undefined') {
+    var _origAct = MH.activate;
+    if (typeof _origAct === 'function') {
+      MH.activate = async function(key) {
+        var r = await _origAct.call(MH, key);
+        if (r.ok) setTimeout(initialLoad, 200);
+        return r;
+      };
+    }
+    var _origLogout = MH.logout;
+    if (typeof _origLogout === 'function') {
+      MH.logout = function() {
+        _origLogout.call(MH);
+        var chip = document.getElementById('solanavi-usage-chip');
+        if (chip) chip.style.display = 'none';
+        window.__usageWarnShown = false;
+        window.__usageOverShown = false;
+      };
+    }
+  }
+
+  console.log('[SolaNavi] Usage UI active');
+})();
+
+
+// ══════════════════════════════════════════════════════════════
 // 🗺️ 전국 시·군·구 일조시간 데이터 (h/일 평균)
 // 출처: 한국에너지공단 · 기상청 평년값 (2010~2020 평균)
 // ══════════════════════════════════════════════════════════════
