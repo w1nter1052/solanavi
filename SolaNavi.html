@@ -509,6 +509,44 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   div[style*="overflow-x: auto"] table tr > td:first-child{
     width:auto !important;max-width:none !important;white-space:nowrap !important;
   }
+
+  /* ─ 업무도우미 대시보드 "빠른 실행" 6버튼: 1열 → 2열 그리드 ─ */
+  #sec-dash .two[style*="gap:8px"]{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:6px !important;
+  }
+  #sec-dash .two .btn{font-size:11.5px !important;padding:9px 6px !important;justify-content:center;text-align:center;white-space:nowrap}
+
+  /* ─ 서류 작성 단계별 탭 (.wd-tab) — <br>줄바꿈 영역 모바일 압축 ─ */
+  .wd-tab{padding:8px 10px !important;font-size:11px !important;line-height:1.25 !important;min-width:88px}
+  .wd-tab span{font-size:9.5px !important;margin-top:1px !important}
+
+  /* ─ 서류 작성 3그리드 버튼 (.wd-doc-btn) — 라벨 줄바꿈 방지 ─ */
+  .wd-doc-btn{font-size:11px !important;padding:8px 4px !important;word-break:keep-all;line-height:1.3}
+
+  /* ─ 대시보드 마을 선택 헤더 (마을 칩 + select + 추가버튼) ─ */
+  #sec-dash > div[style*="background:linear-gradient"]:first-of-type{padding:10px 12px !important;gap:8px !important}
+  #dash-village-select{font-size:13px !important;padding:7px 9px !important;min-width:140px !important}
+  #dash-village-stage{font-size:11px !important;width:100%;margin-top:2px}
+
+  /* ─ AI 상담 / 챗 입력 영역 ─ */
+  #chat-input{font-size:13px !important;min-height:38px !important;padding:8px 10px !important}
+
+  /* ─ 마을 카드 그리드 (마을 관리 화면) ─ */
+  #village-cards{grid-template-columns:1fr !important}
+  .vc-add,.vc{padding:16px 14px !important;min-height:auto !important}
+
+  /* ─ 회의록 녹음 마이크 버튼 (모바일 큼지막) ─ */
+  #rec-mic-btn,button[id*="rec-mic"],button[id*="mic"]{
+    min-width:64px !important;min-height:64px !important;font-size:24px !important;border-radius:50% !important;
+  }
+
+  /* ─ 내부 wd-doc-btn 3-grid 좁을 때 2grid로 (선택적) ─ */
+  /* 화면 너무 좁으면 3개 버튼 줄바꿈 허용 */
+  div[style*="grid-template-columns:1fr 1fr 1fr"]:has(.wd-doc-btn){
+    grid-template-columns:1fr 1fr !important;
+  }
 }
 
 /* ── 더 작은 화면 (≤480px) — 추가 미세조정 ── */
@@ -2535,7 +2573,7 @@ if (CLOUD_ENABLED) {
         <div style="font-size:12px;font-weight:700;color:var(--sun);margin-bottom:8px">📖 사용 순서</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
           <div style="font-size:11px;color:#3A3A3A;display:flex;gap:7px"><span style="color:var(--sun);font-weight:900;flex-shrink:0">①</span><span><strong style="color:#2D7A4F">지역 선택</strong> — 시군 선택 시 일조시간 자동 입력</span></div>
-          <div style="font-size:11px;color:#3A3A3A;display:flex;gap:7px"><span style="color:var(--sun);font-weight:900;flex-shrink:0">②</span><span><strong style="color:#2D7A4F">설치 용량</strong> — 300~1,000kW (일반 500kW 권장)</span></div>
+          <div style="font-size:11px;color:#3A3A3A;display:flex;gap:7px"><span style="color:var(--sun);font-weight:900;flex-shrink:0">②</span><span><strong style="color:#2D7A4F">설치 용량</strong> — 100kW~5MW 지원 (일반 500kW 권장)</span></div>
           <div style="font-size:11px;color:#3A3A3A;display:flex;gap:7px"><span style="color:var(--sun);font-weight:900;flex-shrink:0">③</span><span><strong style="color:#2D7A4F">SMP</strong> — 전력 판매 단가, 유가 연동 월별 변동</span></div>
           <div style="font-size:11px;color:#3A3A3A;display:flex;gap:7px"><span style="color:var(--sun);font-weight:900;flex-shrink:0">④</span><span><strong style="color:#2D7A4F">REC</strong> — 재생에너지 인증서, 마을이익 70%↑ 시 ×1.2</span></div>
           <div style="font-size:11px;color:#3A3A3A;display:flex;gap:7px"><span style="color:var(--sun);font-weight:900;flex-shrink:0">⑤</span><span><strong style="color:#2D7A4F">배분 설정</strong> — 마을기금+취약계층 70%↑ 유지 필수</span></div>
