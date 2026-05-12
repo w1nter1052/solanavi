@@ -1473,7 +1473,7 @@ function openPlanCenter() {
   var planCards = Object.keys(SOLA_PLANS).map(function(key){
     var p = SOLA_PLANS[key];
     var isCurrent = curPlan === key;
-    return '<div style="border:2px solid '+(isCurrent?p.color:'#ddd')+';border-radius:12px;padding:18px;background:'+(isCurrent?p.color+'10':'#fff');+';position:relative">'
+    return '<div style="border:2px solid '+(isCurrent?p.color:'#ddd')+';border-radius:12px;padding:18px;background:'+(isCurrent?p.color+'10':'#fff')+';position:relative">'
       + (isCurrent ? '<div style="position:absolute;top:-12px;left:14px;background:'+p.color+';color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px">현재 플랜</div>' : '')
       + '<div style="font-size:13px;color:'+p.color+';font-weight:700;margin-bottom:4px">'+p.name+'</div>'
       + '<div style="margin-bottom:8px"><span style="font-size:24px;font-weight:900;color:'+p.color+'">'+(p.price?p.price.toLocaleString():'0')+'</span><span style="font-size:12px;color:#666"> '+p.unit+'</span></div>'
@@ -6740,20 +6740,39 @@ if (CLOUD_ENABLED) {
     <div class="card">
       <div class="ch">💰 수익성 계산기</div>
       <div class="cb">
-        <div class="f2">
-          <div class="field"><label>설치 용량 (kW)</label>
-            <select id="rv-kw"><option value="300">300kW</option><option value="500" selected>500kW</option><option value="700">700kW</option><option value="1000">1,000kW</option></select>
+        <div class="field"><label>설치 용량 (kW) <span style="font-size:11px;color:var(--mu);font-weight:400">— 100kW~5MW 지원</span></label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="range" id="rv-kw-range" min="100" max="5000" value="500" step="10" oninput="document.getElementById('rv-kw').value=this.value;document.getElementById('rv-kw-disp').textContent=Number(this.value).toLocaleString()+' kW'" style="flex:1;accent-color:var(--sun)">
+            <input type="number" id="rv-kw" min="50" max="20000" value="500" step="10" style="width:90px;border:1px solid var(--bd);border-radius:6px;padding:5px 8px;font-size:13px;text-align:right;font-family:inherit" oninput="document.getElementById('rv-kw-range').value=Math.min(5000,Math.max(100,this.value));document.getElementById('rv-kw-disp').textContent=Number(this.value).toLocaleString()+' kW'">
+            <span id="rv-kw-disp" style="font-size:12px;font-weight:700;color:var(--sun-d);min-width:70px;text-align:right">500 kW</span>
           </div>
-          <div class="field"><label>지역 (일조시간)</label>
-            <select id="rv-region">
-              <option value="3.95">해남군 (3.95h)</option>
-              <option value="3.90">진도군 (3.90h)</option>
-              <option value="3.88">완도군 (3.88h)</option>
-              <option value="3.85">신안군 (3.85h)</option>
-              <option value="3.82">고흥군 (3.82h)</option>
-              <option value="3.75">영암군 (3.75h)</option>
+        </div>
+        <div class="f2">
+          <div class="field"><label>시·도</label>
+            <select id="rv-sido" onchange="updateSigunDropdown()">
+              <option value="">-- 시·도 선택 --</option>
+              <option value="seoul">서울특별시</option>
+              <option value="busan">부산광역시</option>
+              <option value="daegu">대구광역시</option>
+              <option value="incheon">인천광역시</option>
+              <option value="gwangju">광주광역시</option>
+              <option value="daejeon">대전광역시</option>
+              <option value="ulsan">울산광역시</option>
+              <option value="sejong">세종특별자치시</option>
+              <option value="gyeonggi">경기도</option>
+              <option value="gangwon">강원특별자치도</option>
+              <option value="chungbuk">충청북도</option>
+              <option value="chungnam">충청남도</option>
+              <option value="jeonbuk">전북특별자치도</option>
+              <option value="jeonnam" selected>전라남도</option>
+              <option value="gyeongbuk">경상북도</option>
+              <option value="gyeongnam">경상남도</option>
+              <option value="jeju">제주특별자치도</option>
+            </select>
+          </div>
+          <div class="field"><label>시·군·구 <span id="rv-sun-badge" style="font-size:11px;background:var(--grn-l);color:var(--grn);padding:1px 8px;border-radius:8px;font-weight:700;margin-left:4px">3.68h</span></label>
+            <select id="rv-region" onchange="updateSunBadge()">
               <option value="3.68">나주시 (3.68h)</option>
-              <option value="3.58">순천시 (3.58h)</option>
             </select>
           </div>
         </div>
@@ -7439,6 +7458,73 @@ const MH = (function() {
 
   console.log('[SolaNavi] Backend proxy active →', SOLANAVI_API);
 })();
+
+
+// ══════════════════════════════════════════════════════════════
+// 🗺️ 전국 시·군·구 일조시간 데이터 (h/일 평균)
+// 출처: 한국에너지공단 · 기상청 평년값 (2010~2020 평균)
+// ══════════════════════════════════════════════════════════════
+const KOREA_SUN_HOURS = {
+  seoul: [['종로구',3.30],['중구',3.30],['용산구',3.30],['성동구',3.30],['광진구',3.32],['동대문구',3.30],['중랑구',3.32],['성북구',3.30],['강북구',3.30],['도봉구',3.30],['노원구',3.32],['은평구',3.28],['서대문구',3.28],['마포구',3.28],['양천구',3.28],['강서구',3.28],['구로구',3.30],['금천구',3.30],['영등포구',3.30],['동작구',3.30],['관악구',3.30],['서초구',3.32],['강남구',3.32],['송파구',3.34],['강동구',3.34]],
+  busan: [['중구',3.70],['서구',3.70],['동구',3.70],['영도구',3.72],['부산진구',3.70],['동래구',3.72],['남구',3.72],['북구',3.68],['해운대구',3.74],['사하구',3.68],['금정구',3.72],['강서구',3.66],['연제구',3.70],['수영구',3.74],['사상구',3.66],['기장군',3.74]],
+  daegu: [['중구',3.70],['동구',3.72],['서구',3.68],['남구',3.70],['북구',3.68],['수성구',3.72],['달서구',3.68],['달성군',3.68],['군위군',3.65]],
+  incheon: [['중구',3.40],['동구',3.40],['미추홀구',3.40],['연수구',3.42],['남동구',3.40],['부평구',3.38],['계양구',3.38],['서구',3.38],['강화군',3.45],['옹진군',3.55]],
+  gwangju: [['동구',3.60],['서구',3.60],['남구',3.60],['북구',3.58],['광산구',3.60]],
+  daejeon: [['동구',3.50],['중구',3.50],['서구',3.50],['유성구',3.50],['대덕구',3.50]],
+  ulsan: [['중구',3.70],['남구',3.70],['동구',3.72],['북구',3.68],['울주군',3.70]],
+  sejong: [['세종특별자치시',3.50]],
+  gyeonggi: [['수원시',3.40],['성남시',3.40],['고양시',3.38],['용인시',3.42],['부천시',3.38],['안산시',3.42],['안양시',3.40],['남양주시',3.40],['화성시',3.45],['평택시',3.48],['의정부시',3.38],['시흥시',3.42],['파주시',3.38],['김포시',3.40],['광명시',3.38],['광주시',3.42],['군포시',3.40],['하남시',3.42],['오산시',3.45],['양주시',3.40],['이천시',3.50],['구리시',3.40],['안성시',3.50],['포천시',3.42],['의왕시',3.40],['양평군',3.45],['여주시',3.50],['동두천시',3.42],['가평군',3.45],['과천시',3.40],['연천군',3.45]],
+  gangwon: [['춘천시',3.55],['원주시',3.55],['강릉시',3.55],['동해시',3.58],['태백시',3.50],['속초시',3.55],['삼척시',3.55],['홍천군',3.55],['횡성군',3.55],['영월군',3.50],['평창군',3.50],['정선군',3.50],['철원군',3.52],['화천군',3.52],['양구군',3.52],['인제군',3.52],['고성군',3.55],['양양군',3.55]],
+  chungbuk: [['청주시',3.50],['충주시',3.50],['제천시',3.48],['보은군',3.50],['옥천군',3.50],['영동군',3.52],['증평군',3.50],['진천군',3.50],['괴산군',3.50],['음성군',3.50],['단양군',3.48]],
+  chungnam: [['천안시',3.50],['공주시',3.52],['보령시',3.55],['아산시',3.50],['서산시',3.55],['논산시',3.52],['계룡시',3.50],['당진시',3.55],['금산군',3.52],['부여군',3.55],['서천군',3.55],['청양군',3.52],['홍성군',3.55],['예산군',3.52],['태안군',3.58]],
+  jeonbuk: [['전주시',3.45],['군산시',3.45],['익산시',3.45],['정읍시',3.48],['남원시',3.48],['김제시',3.48],['완주군',3.45],['진안군',3.50],['무주군',3.50],['장수군',3.50],['임실군',3.48],['순창군',3.48],['고창군',3.55],['부안군',3.55]],
+  jeonnam: [['목포시',3.50],['여수시',3.55],['순천시',3.58],['나주시',3.68],['광양시',3.55],['담양군',3.48],['곡성군',3.50],['구례군',3.42],['고흥군',3.82],['보성군',3.70],['화순군',3.45],['장흥군',3.72],['강진군',3.80],['해남군',3.95],['영암군',3.75],['무안군',3.60],['함평군',3.65],['영광군',3.63],['장성군',3.55],['완도군',3.88],['진도군',3.90],['신안군',3.85]],
+  gyeongbuk: [['포항시',3.70],['경주시',3.68],['김천시',3.65],['안동시',3.65],['구미시',3.65],['영주시',3.60],['영천시',3.68],['상주시',3.60],['문경시',3.58],['경산시',3.68],['의성군',3.62],['청송군',3.60],['영양군',3.58],['영덕군',3.65],['청도군',3.65],['고령군',3.65],['성주군',3.65],['칠곡군',3.65],['예천군',3.62],['봉화군',3.55],['울진군',3.62],['울릉군',3.60]],
+  gyeongnam: [['창원시',3.65],['진주시',3.65],['통영시',3.70],['사천시',3.65],['김해시',3.65],['밀양시',3.65],['거제시',3.72],['양산시',3.68],['의령군',3.62],['함안군',3.65],['창녕군',3.62],['고성군',3.68],['남해군',3.72],['하동군',3.62],['산청군',3.62],['함양군',3.60],['거창군',3.58],['합천군',3.60]],
+  jeju: [['제주시',3.78],['서귀포시',3.80]]
+};
+
+// 시·군 드롭다운 동적 갱신
+function updateSigunDropdown() {
+  var sido = document.getElementById('rv-sido');
+  var region = document.getElementById('rv-region');
+  if (!sido || !region) return;
+  var list = KOREA_SUN_HOURS[sido.value] || [];
+  region.innerHTML = list.map(function(p){
+    return '<option value="'+p[1]+'">'+p[0]+' ('+p[1].toFixed(2)+'h)</option>';
+  }).join('');
+  // 일조시간 평균값 정렬 (높은 순)
+  var sorted = list.slice().sort(function(a,b){ return b[1]-a[1]; });
+  region.innerHTML = sorted.map(function(p){
+    return '<option value="'+p[1]+'">'+p[0]+' ('+p[1].toFixed(2)+'h)</option>';
+  }).join('');
+  updateSunBadge();
+}
+
+// 일조시간 배지 갱신
+function updateSunBadge() {
+  var region = document.getElementById('rv-region');
+  var badge = document.getElementById('rv-sun-badge');
+  if (!region || !badge) return;
+  var v = parseFloat(region.value);
+  badge.textContent = v.toFixed(2) + 'h';
+  // 색상: 3.7+ 우수 / 3.5+ 양호 / 그 외 보통
+  if (v >= 3.7) { badge.style.background = 'var(--grn-l)'; badge.style.color = 'var(--grn)'; }
+  else if (v >= 3.5) { badge.style.background = 'var(--blu-l)'; badge.style.color = 'var(--blu)'; }
+  else { badge.style.background = 'var(--amb-l)'; badge.style.color = 'var(--amb)'; }
+}
+
+// 페이지 로드 시 자동 초기화 (기본값 전남 → 시·군 목록 표시)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function(){
+    if (document.getElementById('rv-sido')) updateSigunDropdown();
+  });
+} else {
+  // 이미 로드된 경우 즉시 실행
+  setTimeout(function(){
+    if (document.getElementById('rv-sido')) updateSigunDropdown();
+  }, 100);
+}
 
 
 // ══ 통합 앱 컨트롤러 ══
