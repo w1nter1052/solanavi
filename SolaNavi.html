@@ -547,6 +547,84 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   div[style*="grid-template-columns:1fr 1fr 1fr"]:has(.wd-doc-btn){
     grid-template-columns:1fr 1fr !important;
   }
+
+  /* ─ 업무도우미 탭바: 모바일에서 한 줄 가로스크롤 → 칩 형태 flex-wrap ─ */
+  #app-assistant #tabbar{
+    flex-wrap:wrap !important;
+    height:auto !important;
+    padding:6px 8px !important;
+    gap:4px !important;
+    overflow:visible !important;
+    overflow-x:visible !important;
+    border-bottom:1px solid var(--bd);
+    max-height:none !important;
+  }
+  /* 탭바 자체는 sticky 유지 (#hdr 바로 밑). top 좌표는 기존 모바일 css 따름 */
+  #app-assistant #tabbar .tab{
+    font-size:11px !important;
+    font-weight:700 !important;
+    padding:5px 9px !important;
+    line-height:1.4 !important;
+    height:auto !important;
+    border-bottom:none !important;
+    border:1px solid transparent !important;
+    border-radius:6px !important;
+    background:var(--sf2) !important;
+    color:var(--mu) !important;
+    flex:0 1 auto !important;
+    white-space:nowrap !important;
+  }
+  #app-assistant #tabbar .tab.on{
+    background:rgba(245,166,35,.15) !important;
+    color:var(--sun-d) !important;
+    border-color:var(--sun) !important;
+    border-bottom:1px solid var(--sun) !important;
+  }
+  #app-assistant #tabbar .tab .tbadge{font-size:9px !important;padding:0 4px !important;margin-left:2px}
+  /* sec.on 상단 패딩 자동 조정 (탭바가 2-3줄로 늘어남) */
+  #app-assistant.active{padding-top:auto !important}
+
+  /* ─ API 키 버튼: 워커 모드일 때 텍스트만 변경 (사용자 혼란 방지) ─ */
+  /* 표시는 유지하되 "관리자용"임을 명확히 */
+  #api-btn[data-managed="true"]{display:none !important}
+  /* 또는 헤더 hright 공간 확보를 위해 컴팩트하게 */
+  #api-btn{padding:3px 8px !important;font-size:10.5px !important}
+
+  /* ─ 대시보드 툴바 — 12+ 버튼 그리드 정렬 + 모바일 칩 ─ */
+  #dash-toolbar{
+    display:grid !important;
+    grid-template-columns:repeat(2, 1fr) !important;
+    gap:6px !important;
+    justify-content:stretch !important;
+    margin:8px 12px 12px !important;
+  }
+  #dash-toolbar button{
+    width:100% !important;
+    padding:8px 6px !important;
+    font-size:11.5px !important;
+    margin:0 !important;
+    text-align:center;
+    justify-content:center;
+    white-space:nowrap !important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
+
+/* ─ 데스크탑/태블릿 — 대시보드 툴바 더 균형 잡힌 그리드 ─ */
+@media(min-width:769px){
+  #dash-toolbar{
+    display:grid !important;
+    grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap:8px !important;
+    justify-content:flex-start !important;
+  }
+  #dash-toolbar button{
+    width:100%;
+    text-align:center;
+    justify-content:center;
+    margin:0 !important;
+  }
 }
 
 /* ── 더 작은 화면 (≤480px) — 추가 미세조정 ── */
@@ -7573,15 +7651,29 @@ const MH = (function() {
     }
   }
 
-  // 페이지 로드 후: 로그인 상태면 사용량 1회 fetch
+  // 페이지 로드 후: 로그인 상태면 사용량 1회 fetch + API 키 버튼 자동 숨김
   function initialLoad() {
     if (typeof MH !== 'undefined' && MH.isPaid) {
+      // 워커 모드 활성 → BYOK API 키 버튼 숨김 (사용자 혼란 방지)
+      var apiBtn = document.getElementById('api-btn');
+      if (apiBtn) {
+        apiBtn.style.display = 'none';
+        apiBtn.setAttribute('data-managed', 'true');
+      }
+      // 사용량 fetch
       if (window.fetchSolanaviUsage) {
         window.fetchSolanaviUsage().then(function(data) {
           if (data && data.plan) {
             refreshChip(data.plan, data.usage.ai, data.limits.ai);
           }
         });
+      }
+    } else {
+      // 무료/미로그인 사용자: API 키 모달 안에 안내 추가
+      var apiBtn = document.getElementById('api-btn');
+      if (apiBtn) {
+        apiBtn.style.display = '';
+        apiBtn.removeAttribute('data-managed');
       }
     }
   }
