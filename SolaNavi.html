@@ -7715,6 +7715,74 @@ const MH = (function() {
 
 
 // ══════════════════════════════════════════════════════════════
+// 📱 업무도우미 모바일 레이아웃 — 헤더 높이에 따라 탭바·본문 동적 조정
+// ══════════════════════════════════════════════════════════════
+(function() {
+  function adjustAssistantLayout() {
+    if (window.innerWidth > 768) return;
+    var app = document.getElementById('app-assistant');
+    if (!app || !app.classList.contains('active')) return;
+    var hdr = app.querySelector('#hdr');
+    var tabbar = app.querySelector('#tabbar');
+    if (!hdr || !tabbar) return;
+    // 헤더 실제 높이 측정
+    var headerH = Math.round(hdr.getBoundingClientRect().height);
+    // app-switcher(46px) + 헤더 = 탭바 top
+    var topPos = 46 + headerH;
+    // !important CSS 덮어쓰기 위해 setProperty 'important' 사용
+    tabbar.style.setProperty('top', topPos + 'px', 'important');
+    // 본문 padding-top = top + 탭바 높이
+    var tabbarH = Math.round(tabbar.getBoundingClientRect().height);
+    app.style.setProperty('padding-top', (topPos + tabbarH + 8) + 'px', 'important');
+  }
+
+  // 페이지 로드 + 리사이즈 + 앱 전환 시 호출
+  window.addEventListener('resize', function() { setTimeout(adjustAssistantLayout, 50); });
+  window.addEventListener('orientationchange', function() { setTimeout(adjustAssistantLayout, 100); });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(adjustAssistantLayout, 200); });
+  } else {
+    setTimeout(adjustAssistantLayout, 200);
+  }
+
+  // switchApp 함수 wrapping — 앱 전환 후 다시 조정
+  if (typeof window.switchApp === 'function') {
+    var _origSwitch = window.switchApp;
+    window.switchApp = function(app) {
+      var r = _origSwitch.apply(this, arguments);
+      setTimeout(adjustAssistantLayout, 100);
+      return r;
+    };
+  } else {
+    // switchApp 정의 후 wrapping
+    setTimeout(function() {
+      if (typeof window.switchApp === 'function') {
+        var _origSwitch = window.switchApp;
+        window.switchApp = function(app) {
+          var r = _origSwitch.apply(this, arguments);
+          setTimeout(adjustAssistantLayout, 100);
+          return r;
+        };
+      }
+    }, 500);
+  }
+
+  // 탭바 자체가 wrap되어 높이가 변할 수도 있으니 MutationObserver
+  if (typeof MutationObserver !== 'undefined') {
+    var mo = new MutationObserver(function() { setTimeout(adjustAssistantLayout, 50); });
+    document.addEventListener('DOMContentLoaded', function() {
+      var hdr = document.querySelector('#app-assistant #hdr');
+      if (hdr) mo.observe(hdr, { childList: true, subtree: true, attributes: true });
+    });
+  }
+
+  // 외부에서 명시적으로 호출 가능
+  window.__adjustAssistantLayout = adjustAssistantLayout;
+  console.log('[SolaNavi] Mobile layout adjuster active');
+})();
+
+
+// ══════════════════════════════════════════════════════════════
 // 🗺️ 전국 시·군·구 일조시간 데이터 (h/일 평균)
 // 출처: 한국에너지공단 · 기상청 평년값 (2010~2020 평균)
 // ══════════════════════════════════════════════════════════════
@@ -12448,6 +12516,21 @@ ${GONGGO}
 // ══════════════════════════════════════
 let villages = JSON.parse(localStorage.getItem('hsv_villages') || '[]');
 let selectedVid = null;
+
+// ── 마지막 선택 마을 자동 복원 / 1개일 때 자동 선택 ──
+(function autoSelectVillage(){
+  try {
+    if (!villages || villages.length === 0) return;
+    var lastVid = localStorage.getItem('mh_last_village_id');
+    // 마지막 선택 마을이 여전히 존재하면 복원
+    if (lastVid && villages.some(function(v){ return v.id === lastVid; })) {
+      selectedVid = lastVid;
+    } else if (villages.length === 1) {
+      // 마을이 1개뿐이면 자동 선택
+      selectedVid = villages[0].id;
+    }
+  } catch(e){}
+})();
 let chatHistory = [];
 let docCount = parseInt(localStorage.getItem('hsv_doccount') || '0');
 let stores = {}; // 파일 스토어
@@ -13006,6 +13089,8 @@ function loadSurveyInfo(vid) {
 // ══ 대시보드 마을 선택 → 전체 연동 핵심 함수 ══
 function onDashVillageSelect(vid) {
   selectedVid = vid;
+  // 마지막 선택 마을 저장 (다음 방문 시 자동 복원)
+  try { if (vid) localStorage.setItem('mh_last_village_id', vid); } catch(e){}
 
   var stageColors = ['var(--sun)','var(--gr)','var(--ac)','var(--org)','var(--pu)','var(--teal)'];
   var stageLabels = ['STEP1 첫방문','STEP2 주민조직','STEP3 협동조합','STEP4 발전소','STEP5 공모신청','STEP6 발전소건설','STEP7 협동조합운영'];
@@ -13088,6 +13173,10 @@ function refreshDashVillageSelect() {
     if (v.id === selectedVid) opt.selected = true;
     sel.appendChild(opt);
   });
+  // selectedVid 자동 복원되었으면 onDashVillageSelect 호출 (마을 칩·KPI 등 업데이트)
+  if (selectedVid && villages.some(function(v){ return v.id === selectedVid; })) {
+    try { onDashVillageSelect(selectedVid); } catch(e){}
+  }
 }
 function exportVillages() {
   if (!villages || villages.length === 0) { alert('저장된 마을이 없습니다.'); return; }
