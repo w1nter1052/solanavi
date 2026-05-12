@@ -9621,6 +9621,32 @@ function _exportVillagesData() {
   return { headers: headers, rows: rows };
 }
 
+// ── 다운로드 wrapper: 사전 안내 토스트 + 빈 데이터 가드 ──
+function dlVillagesXlsxWithToast() {
+  var count = (typeof villages !== 'undefined' && villages) ? villages.length : 0;
+  if (count === 0) {
+    alert('등록된 마을이 없습니다.\n먼저 "마을" 탭에서 마을을 추가해주세요.');
+    return;
+  }
+  if (typeof showToast === 'function') {
+    showToast('📊 마을 ' + count + '개 데이터를 Excel(.xlsx)로 저장 중...\n파일명: 솔라나비_마을현황_' + new Date().toISOString().split('T')[0] + '.xlsx', 4000);
+  }
+  setTimeout(function(){ dlVillagesXlsx(); }, 100);
+}
+function dlVillagesCsvWithToast() {
+  var count = (typeof villages !== 'undefined' && villages) ? villages.length : 0;
+  if (count === 0) {
+    alert('등록된 마을이 없습니다.\n먼저 "마을" 탭에서 마을을 추가해주세요.');
+    return;
+  }
+  if (confirm('CSV는 텍스트 형식 데이터 파일입니다.\n• 노션·구글 시트·다른 프로그램으로 가져갈 때 사용\n• 일반 사용은 "Excel 마을 목록"을 추천합니다\n\n그래도 CSV로 받으시겠어요?')) {
+    if (typeof showToast === 'function') {
+      showToast('📄 마을 ' + count + '개 데이터를 CSV(텍스트)로 저장 중...', 3000);
+    }
+    setTimeout(function(){ dlVillagesCsv(); }, 100);
+  }
+}
+
 function dlVillagesCsv() {
   var data = _exportVillagesData();
   function esc(s){ s = String(s == null ? '' : s); if (/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"'; return s; }
@@ -12797,8 +12823,8 @@ function renderDash() {
       + handoverBtn
       + handbookBtn
       + '<button onclick="openSelfcheckModal()" style="background:#1A5276;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📋 자가진단</button>'
-      + '<button onclick="dlVillagesXlsx()" style="background:#27AE60;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📊 Excel 내보내기</button>'
-      + '<button onclick="dlVillagesCsv()" style="background:transparent;color:#666;border:1px solid #ccc;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">CSV</button>'
+      + '<button onclick="dlVillagesXlsxWithToast()" title="등록된 마을 전체 목록(이름·단계·담당자·연락처·진행률 등)을 Excel 파일(.xlsx)로 저장합니다" style="background:#27AE60;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📊 마을 목록 Excel</button>'
+      + '<button onclick="dlVillagesCsvWithToast()" title="텍스트 형식(CSV). 다른 프로그램이나 노션·구글시트로 가져갈 때 사용" style="background:transparent;color:#666;border:1px solid #ccc;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">📄 CSV (텍스트)</button>'
       + auditBtn
       + planBtn
       + '</div>';
