@@ -560,6 +560,27 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     max-height:none !important;
   }
   /* 탭바 자체는 sticky 유지 (#hdr 바로 밑). top 좌표는 기존 모바일 css 따름 */
+
+  /* ─ 모바일 헤더 단순화 — 중복 매뉴얼 버튼 + API 키 버튼 모두 숨김 ─ */
+  /* 컨설팅 매뉴얼은 상단 #app-switcher에 이미 있음 → 헤더의 .manual-link 중복 */
+  #app-assistant #hdr .manual-link{display:none !important}
+  /* API 키 버튼: 워커 도입 후 BYOK 불필요. 모든 사용자 모바일에서 숨김 */
+  #app-assistant #hdr #api-btn{display:none !important}
+
+  /* ─ 상단 #app-switcher 모바일: 로그아웃 + PRO 배지 잘림 방지 ─ */
+  #app-switcher{
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+    flex-wrap:nowrap !important;
+    padding:0 8px !important;
+    gap:4px !important;
+  }
+  #app-switcher::-webkit-scrollbar{display:none}
+  .sw-logo{flex-shrink:0;font-size:12px !important}
+  .sw-btn{flex-shrink:0;font-size:11px !important;padding:4px 8px !important}
+  .sw-right{flex-shrink:0;display:flex;align-items:center;gap:4px;margin-left:auto}
+  .sw-logout{flex-shrink:0;font-size:10.5px !important;padding:3px 8px !important;white-space:nowrap}
+  #sw-badge{flex-shrink:0}
   #app-assistant #tabbar .tab{
     font-size:11px !important;
     font-weight:700 !important;
@@ -7731,9 +7752,12 @@ const MH = (function() {
     var topPos = 46 + headerH;
     // !important CSS 덮어쓰기 위해 setProperty 'important' 사용
     tabbar.style.setProperty('top', topPos + 'px', 'important');
-    // 본문 padding-top = top + 탭바 높이
+    // 본문 padding-top = top + 탭바 높이 (탭바 바로 밑에 본문 시작, gap 최소)
     var tabbarH = Math.round(tabbar.getBoundingClientRect().height);
-    app.style.setProperty('padding-top', (topPos + tabbarH + 8) + 'px', 'important');
+    app.style.setProperty('padding-top', (topPos + tabbarH) + 'px', 'important');
+    // 본문 첫 sec의 margin-top 제거 (공백 추가 방지)
+    var firstSec = app.querySelector('.sec.on');
+    if (firstSec) firstSec.style.setProperty('margin-top', '0', 'important');
   }
 
   // 페이지 로드 + 리사이즈 + 앱 전환 시 호출
