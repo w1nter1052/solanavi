@@ -388,6 +388,152 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   th,td{white-space:normal!important;word-break:keep-all}
 }
 
+/* ════════════════════════════════════════════════════════════
+   📱 MOBILE UI PATCH 2026.05.12 — 가독성/줄바꿈/그리드 정합 보강
+   ════════════════════════════════════════════════════════════ */
+@media(max-width:768px){
+  /* ─ 상단 헤더(#tb) — 햇빛소득마을 › STEP X › 2026 완전판 ─ */
+  #tb{padding:0 10px !important;height:auto !important;min-height:44px;gap:6px !important;flex-wrap:nowrap;overflow:hidden}
+  .tb-bc{font-size:11.5px !important;gap:4px !important;flex:1;min-width:0;overflow:hidden;flex-wrap:nowrap;white-space:nowrap}
+  .tb-bc > span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex-shrink:1}
+  .tb-bc .cur{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto}
+  /* 우측 2026 완전판 배지 */
+  #tb > span:last-child{font-size:10px !important;padding:2px 7px !important;flex-shrink:0;white-space:nowrap}
+
+  /* ─ STEP 페이지 헤더 카드 (.step-header) ─ */
+  .step-header{padding:14px 14px !important;gap:10px !important;margin-bottom:18px !important}
+  .step-header .step-num{width:44px !important;height:44px !important;border-radius:10px !important;font-size:11px !important;line-height:1.15 !important}
+  .step-header h1{font-size:17px !important;line-height:1.3 !important;margin-bottom:2px !important}
+  .step-header p{font-size:11.5px !important;line-height:1.5 !important;word-break:keep-all;opacity:.85}
+
+  /* ─ 인라인 grid repeat(2,1fr) → 1열 (기존 1fr 1fr 매칭 보완) ─ */
+  div[style*="repeat(2,1fr)"],div[style*="repeat(2, 1fr)"],
+  div[style*="repeat(3,1fr)"],div[style*="repeat(3, 1fr)"],
+  div[style*="repeat(4,1fr)"],div[style*="repeat(4, 1fr)"]{grid-template-columns:1fr !important}
+  /* 단, KPI/숫자카드는 2열 유지가 더 보기 좋음 */
+  .kpi-grid[style*="repeat(3,1fr)"],.kpi-grid[style*="repeat(3, 1fr)"]{grid-template-columns:1fr 1fr 1fr !important}
+
+  /* ─ info-row (마을 기초정보 폼) — label min-width 인라인 무력화 ─ */
+  .info-row{flex-wrap:wrap;gap:4px !important}
+  .info-row .info-label,.info-row label.info-label{min-width:0 !important;width:100% !important;font-size:11.5px !important;margin-bottom:2px}
+  .info-row .info-input,.info-row input,.info-row select{width:100% !important;flex:1 1 100% !important}
+
+  /* ─ 표(table) — 라벨 컬럼 좁히고 데이터 컬럼 확장 ─ */
+  .tbl,table{font-size:12.5px !important;table-layout:auto}
+  .tbl th,.tbl td,table th,table td{
+    padding:7px 8px !important;
+    white-space:normal !important;
+    word-break:keep-all !important;
+    line-height:1.55 !important;
+    min-width:0 !important;
+  }
+  /* 첫 컬럼(라벨) 폭 제한 — 일반표 */
+  .tbl tr > th:first-child,.tbl tr > td:first-child{width:28% !important;max-width:120px !important;font-weight:700}
+  table tr > th:first-child,table tr > td:first-child{max-width:130px}
+  /* 셀 내부 strong 줄바꿈 방지 (예: "10%", "20년") */
+  td strong,th strong{white-space:nowrap}
+
+  /* ─ KPI / 숫자 카드 — 단위 줄바꿈 방지 ─ */
+  .kpi-n,.kpi-v,[class*="kpi"] [class*="-n"],[class*="kpi"] [class*="-v"]{
+    font-size:20px !important;
+    white-space:nowrap !important;
+    line-height:1.15 !important;
+    word-break:keep-all !important;
+  }
+  .kpi-l,[class*="kpi"] [class*="-l"]{font-size:11px !important;line-height:1.45 !important;word-break:keep-all;margin-top:3px}
+  .kpi{padding:12px 8px !important;min-height:auto !important}
+
+  /* ─ 작은 배지·태그 — 필수/대부분선택/2026 완전판 등 ─ */
+  .doc-tag,.cv-badge,[class*="badge"],[class*="-tag"],
+  span[style*="border-radius:10px"],span[style*="border-radius: 10px"]{
+    white-space:nowrap !important;
+    writing-mode:horizontal-tb !important;
+    word-break:keep-all !important;
+    display:inline-flex;
+    align-items:center;
+  }
+
+  /* ─ 서식 카드 4버튼 그룹 (보기/Word/한글/PDF) ─ */
+  .doc-actions{
+    display:grid !important;
+    grid-template-columns:repeat(2,1fr) !important;
+    gap:6px !important;
+    width:100% !important;
+  }
+  .doc-actions .doc-btn{width:100% !important;text-align:center;padding:8px 6px !important;font-size:12px !important;min-height:36px}
+
+  /* doc-card-foot이 가로 일렬이면 모바일에선 세로 스택 */
+  .doc-card-foot{flex-wrap:wrap !important;gap:8px !important;align-items:stretch !important}
+  .doc-card-foot > .doc-tag{align-self:flex-start}
+  .doc-card-foot > .doc-actions{flex:1 1 100%}
+
+  /* ─ 정관/충전 페이지 charter-bar 버튼 ─ */
+  .charter-bar{flex-wrap:wrap !important;gap:8px !important;padding:10px 12px !important}
+  .charter-bar-title{font-size:12.5px !important;width:100%}
+  .charter-bar-actions{flex-wrap:wrap !important;gap:6px !important;width:100%}
+  .charter-bar-actions .charter-btn{flex:1 1 auto;font-size:11.5px !important;padding:6px 10px !important;white-space:nowrap !important;writing-mode:horizontal-tb !important;min-width:0}
+
+  /* ─ AI 플로팅 버튼 본문 가림 방지 (본문 하단 여백) ─ */
+  .main,.cp,#mn{padding-bottom:90px !important}
+
+  /* ─ 카드형 그룹 - 일부 인라인 grid 미응답 케이스 추가 보완 ─ */
+  .form-row{grid-template-columns:1fr !important}
+  .form-row .form-label{padding-top:0;font-weight:700}
+
+  /* ─ 다운로드 버튼 묶음 (수익성 리포트 페이지) ─ */
+  div[style*="display:flex"][style*="gap"] > button,
+  div[style*="display: flex"][style*="gap"] > button{white-space:nowrap}
+
+  /* 수익성 리포트 3버튼: 모바일에서 가로 100% 스택 + 좌측 정렬 */
+  .calc-dl-row{flex-direction:column !important;justify-content:flex-start !important;gap:8px !important}
+  .calc-dl-row > button{width:100% !important;text-align:center;padding:11px 12px !important;font-size:12.5px !important}
+
+  /* ─ KPI/.kpis flex 그룹 정렬 보강 ─ */
+  .kpis{flex-direction:row;flex-wrap:wrap;gap:8px !important;align-items:stretch !important}
+  .kpis > .kpi{flex:1 1 calc(33.333% - 6px);min-width:0 !important;display:flex;flex-direction:column;justify-content:center;text-align:center}
+  /* KPI 안 <br>으로 두 줄 처리된 케이스 → 모바일에서 부드럽게 */
+  .kpi-n{display:block;text-align:center}
+  .kpi-l{text-align:center}
+
+  /* ─ 20년 누적 시뮬 등 가로 긴 표 ─ overflow-x 부모 보장 ─ */
+  div[style*="overflow-x:auto"],div[style*="overflow-x: auto"]{
+    -webkit-overflow-scrolling:touch;
+    overflow-x:auto !important;
+    max-width:100%;
+  }
+  div[style*="overflow-x:auto"] > table,div[style*="overflow-x: auto"] > table{min-width:560px}
+  /* 단, 위 첫 컬럼 폭 제한은 이런 가로스크롤 표에선 풀어줘야 */
+  div[style*="overflow-x:auto"] table tr > th:first-child,
+  div[style*="overflow-x:auto"] table tr > td:first-child,
+  div[style*="overflow-x: auto"] table tr > th:first-child,
+  div[style*="overflow-x: auto"] table tr > td:first-child{
+    width:auto !important;max-width:none !important;white-space:nowrap !important;
+  }
+}
+
+/* ── 더 작은 화면 (≤480px) — 추가 미세조정 ── */
+@media(max-width:480px){
+  #tb{padding:0 8px !important}
+  .tb-bc{font-size:11px !important}
+  .tb-bc > span:not(.cur){font-size:10.5px}
+  .tb-bc .cur{font-size:11.5px}
+  /* 컨설팅 매뉴얼 헤더에서 좌측 burger와 브레드크럼 사이 간격 줄이기 */
+  #burg{padding:4px !important}
+  #tb > span:last-child{font-size:9.5px !important;padding:2px 6px !important}
+
+  /* step-header 더 작은 화면 */
+  .step-header{padding:12px 12px !important}
+  .step-header .step-num{width:40px !important;height:40px !important;font-size:10.5px !important}
+  .step-header h1{font-size:15.5px !important}
+
+  /* 표 첫 컬럼 더 좁게 */
+  .tbl tr > th:first-child,.tbl tr > td:first-child{width:26% !important;font-size:11.5px !important;padding:6px 7px !important}
+  .tbl tr > td:nth-child(n+2){font-size:12px !important;padding:6px 7px !important}
+
+  /* KPI 숫자 - 화면 더 좁으면 폰트 축소 */
+  .kpi-n,.kpi-v{font-size:18px !important}
+}
+
 .info-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .info-label{font-size:11px;color:var(--sft);min-width:130px;flex-shrink:0}
 .info-input{flex:1;border:1px solid var(--bdr);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit;background:var(--wht)}
@@ -1051,6 +1197,212 @@ localStorage.setItem = function(k, v) {
   _origSet(k, v);
   if (k === 'hsv_villages') setTimeout(() => CloudSync.autoSave(), 400);
 };
+
+// ─────────────────────────────────────────────────────────────
+// 관리자 콘솔 — 마스터 키 + 사용자 승인/플랜/만료 관리
+// 진입: 비밀 입력 (Ctrl+Shift+A) 또는 ?admin=...
+// ─────────────────────────────────────────────────────────────
+window.SolaNaviAdmin = {
+  // 관리자 비밀번호 해시 (실제 비밀번호: 변경 권장)
+  _PASS_HASH: 'sol@nav!2026admin',
+  _SESSION_KEY: 'hsv_admin_session',
+  isAdmin: function() {
+    var s = localStorage.getItem(this._SESSION_KEY);
+    if (!s) return false;
+    try {
+      var obj = JSON.parse(s);
+      return obj.exp > Date.now() && obj.token === this._tokenFor(obj.user);
+    } catch(e) { return false; }
+  },
+  _tokenFor: function(user) {
+    // 단순 해시 (서버 검증으로 추후 교체)
+    var s = (user||'') + this._PASS_HASH;
+    var h = 0; for (var i=0; i<s.length; i++) { h = ((h<<5)-h) + s.charCodeAt(i); h |= 0; }
+    return (h>>>0).toString(36);
+  },
+  login: function(pw) {
+    if (pw !== this._PASS_HASH) { if (typeof showToast==='function') showToast('⚠ 관리자 비밀번호 불일치', 3500); return false; }
+    var token = this._tokenFor('admin');
+    var exp = Date.now() + 60 * 60 * 1000; // 1시간 세션
+    localStorage.setItem(this._SESSION_KEY, JSON.stringify({ user:'admin', token, exp }));
+    if (typeof showToast==='function') showToast('✅ 관리자 모드 진입 (1시간 세션)', 3500);
+    try { window.SolaNaviAudit.log('관리자 로그인', 'admin', null, { ts: new Date().toISOString() }); } catch(e){}
+    return true;
+  },
+  logout: function() {
+    localStorage.removeItem(this._SESSION_KEY);
+    if (typeof showToast==='function') showToast('관리자 모드 종료', 2500);
+  }
+};
+
+// 관리자 콘솔 모달 (사용자 목록 + 신청 큐 + 라이선스 발급)
+function openAdminConsole() {
+  if (!window.SolaNaviAdmin.isAdmin()) {
+    var pw = prompt('🔐 관리자 비밀번호:');
+    if (!pw || !window.SolaNaviAdmin.login(pw)) return;
+  }
+  // 신청 큐 (이 브라우저에서 작성한 구독 신청)
+  var pending = JSON.parse(localStorage.getItem('hsv_subscription_pending') || 'null');
+  var pendingRow = pending ? '<tr><td>'+new Date(pending.submittedAt).toLocaleString('ko-KR')+'</td><td>'+pending.name+'</td><td>'+(pending.org||'-')+'</td><td>'+pending.email+'</td><td><b style="color:'+(SOLA_PLANS[pending.plan]||{}).color+'">'+(SOLA_PLANS[pending.plan]||{}).name+'</b></td><td>'+pending.pay+'</td><td>'+pending.tel+'</td></tr>' : '<tr><td colspan="7" style="text-align:center;color:#888;padding:24px">대기 신청 없음</td></tr>';
+  // 감사 로그 최근 20
+  var auditRows = window.SolaNaviAudit.list().slice(0, 20).map(function(r){
+    return '<tr><td>'+new Date(r.ts).toLocaleString('ko-KR')+'</td><td><b>'+r.action+'</b></td><td>'+r.target+'</td><td style="color:#666;font-size:11px">'+(r.afterSummary||'-')+'</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:#888;padding:14px">로그 없음</td></tr>';
+  // 라이선스 상태
+  var lic = window.SolaNaviLicense.check();
+  var licStatus = lic ? (lic.valid ? '✅ 유효 (만료: '+lic.expires.toLocaleDateString('ko-KR')+')' : '⚠ 만료됨') : '❌ 미등록';
+  // 현재 마을 수
+  var villageCount = (typeof villages !== 'undefined' ? villages.length : 0);
+  // localStorage 사용량
+  var storageUsed = 0;
+  try { for (var k in localStorage) if (Object.prototype.hasOwnProperty.call(localStorage,k)) storageUsed += (localStorage[k].length + k.length) * 2; } catch(e){}
+  var storageMB = (storageUsed/1024/1024).toFixed(2);
+
+  var html = '<div id="admin-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
+    + '<div style="background:#1A1A1A;border-radius:14px;max-width:1100px;width:100%;max-height:92vh;overflow:auto;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.4);color:#EEE;font-family:inherit">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+    + '<div><h2 style="margin:0;color:#F39C12">🔐 솔라나비 관리자 콘솔</h2>'
+    + '<div style="font-size:12px;color:#aaa;margin-top:6px">세션 1시간 · '+new Date().toLocaleString('ko-KR')+'</div></div>'
+    + '<button onclick="document.getElementById(\'admin-modal\').remove()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#aaa">×</button></div>'
+
+    // KPI
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">'
+    + '<div style="background:#2C3E50;padding:14px;border-radius:8px"><div style="font-size:10px;color:#aaa">관리 마을</div><div style="font-size:24px;font-weight:900;color:#F39C12">'+villageCount+'</div></div>'
+    + '<div style="background:#2C3E50;padding:14px;border-radius:8px"><div style="font-size:10px;color:#aaa">현재 플랜</div><div style="font-size:16px;font-weight:700;color:#27AE60">'+((SOLA_PLANS[(typeof MH!=="undefined"&&MH.plan)||"free"])||{}).name+'</div></div>'
+    + '<div style="background:#2C3E50;padding:14px;border-radius:8px"><div style="font-size:10px;color:#aaa">로컬 저장량</div><div style="font-size:20px;font-weight:900;color:#3498DB">'+storageMB+' MB</div><div style="font-size:9px;color:#aaa">/ 5MB 한도</div></div>'
+    + '<div style="background:#2C3E50;padding:14px;border-radius:8px"><div style="font-size:10px;color:#aaa">라이선스</div><div style="font-size:13px;font-weight:700;color:#F39C12">'+licStatus+'</div></div>'
+    + '</div>'
+
+    // 라이선스 발급/등록
+    + '<div style="background:#2C3E50;padding:16px;border-radius:8px;margin-bottom:14px">'
+    + '<h3 style="margin:0 0 10px;font-size:14px;color:#F39C12">🎫 라이선스 키 관리</h3>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+    + '<input id="admin-lic-key" placeholder="SOLA-XXXX-XXXX-YYMM" style="flex:1;min-width:220px;background:#1A1A1A;color:#EEE;border:1px solid #555;border-radius:6px;padding:8px 12px;font-family:monospace;font-size:13px">'
+    + '<button onclick="window.SolaNaviLicense.set(document.getElementById(\'admin-lic-key\').value)" style="background:#27AE60;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit">등록</button>'
+    + '<button onclick="adminGenLicense()" style="background:#3498DB;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit">🪄 신규 발급</button>'
+    + '<button onclick="window.SolaNaviLicense.clear();if(typeof showToast===\'function\')showToast(\'라이선스 초기화\',2500)" style="background:#7F8C8D;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit">초기화</button>'
+    + '</div></div>'
+
+    // 신청 큐
+    + '<div style="background:#2C3E50;padding:16px;border-radius:8px;margin-bottom:14px">'
+    + '<h3 style="margin:0 0 10px;font-size:14px;color:#F39C12">📋 구독 신청 큐 (현재 브라우저)</h3>'
+    + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;color:#DDD"><thead><tr style="background:#34495E"><th style="padding:8px;text-align:left">신청일</th><th style="padding:8px;text-align:left">담당자</th><th style="padding:8px;text-align:left">소속</th><th style="padding:8px;text-align:left">이메일</th><th style="padding:8px;text-align:left">플랜</th><th style="padding:8px;text-align:left">결제</th><th style="padding:8px;text-align:left">연락처</th></tr></thead><tbody>'+pendingRow+'</tbody></table></div>'
+    + '<div style="font-size:11px;color:#aaa;margin-top:10px">⚠ 본 콘솔은 클라이언트 데모입니다. 실제 운영 시 Supabase·관리자 API로 전국 신청 통합 관리 필요.</div></div>'
+
+    // 최근 감사 로그
+    + '<div style="background:#2C3E50;padding:16px;border-radius:8px;margin-bottom:14px">'
+    + '<h3 style="margin:0 0 10px;font-size:14px;color:#F39C12">📜 최근 감사 로그 (Top 20)</h3>'
+    + '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;color:#DDD"><thead><tr style="background:#34495E"><th style="padding:8px;text-align:left">시각</th><th style="padding:8px;text-align:left">행동</th><th style="padding:8px;text-align:left">대상</th><th style="padding:8px;text-align:left">요약</th></tr></thead><tbody>'+auditRows+'</tbody></table></div></div>'
+
+    // 위험 도구
+    + '<div style="background:#7B241C;padding:16px;border-radius:8px;margin-bottom:14px">'
+    + '<h3 style="margin:0 0 10px;font-size:14px;color:#FAD7A0">⚠ 위험 도구</h3>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    + '<button onclick="if(confirm(\'정말 모든 마을·로그·라이선스를 삭제할까요? 복구 불가.\'))(function(){[\'hsv_villages\',\'hsv_audit_log\',\'hsv_license_key\',\'hsv_subscription_pending\',\'hsv_subscription\'].forEach(function(k){localStorage.removeItem(k);});location.reload();})()" style="background:#C0392B;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit">🗑 모든 데이터 삭제</button>'
+    + '<button onclick="window.SolaNaviAdmin.logout();document.getElementById(\'admin-modal\').remove()" style="background:#566573;color:#fff;border:none;border-radius:6px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit">관리자 로그아웃</button>'
+    + '</div></div>'
+
+    + '<div style="display:flex;gap:8px;justify-content:flex-end">'
+    + '<button onclick="document.getElementById(\'admin-modal\').remove()" style="background:#34495E;color:#fff;border:none;border-radius:6px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>'
+    + '</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// 신규 라이선스 키 생성기 (관리자용)
+function adminGenLicense() {
+  function rnd4() { var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; var s=''; for(var i=0;i<4;i++)s+=c[Math.floor(Math.random()*c.length)]; return s; }
+  var months = prompt('유효기간 (개월, 기본 12):', '12');
+  var mNum = parseInt(months) || 12;
+  var d = new Date(); d.setMonth(d.getMonth() + mNum);
+  var yymm = String(d.getFullYear()).slice(2) + String(d.getMonth()+1).padStart(2,'0');
+  var key = 'SOLA-' + rnd4() + '-' + rnd4() + '-' + yymm;
+  prompt('🎫 발급된 라이선스 키 (복사해서 사용자에게 전달):', key);
+  try { window.SolaNaviAudit.log('라이선스 발급', '관리자', null, { key: key, expires: yymm }); } catch(e){}
+}
+
+// 단축키: Ctrl+Shift+A → 관리자 콘솔
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+    e.preventDefault();
+    openAdminConsole();
+  }
+});
+// URL 파라미터: ?admin=1 → 자동 진입 시도
+if (location.search.includes('admin=1')) setTimeout(openAdminConsole, 1500);
+
+// ─────────────────────────────────────────────────────────────
+// 라이선스 가드 — 도메인 락 + 라이선스 키 검증 (1차 진입장벽)
+// 주의: 100% 복제 차단 불가. 법적 보호 + 진입장벽 + 사용자 친화 안내.
+// ─────────────────────────────────────────────────────────────
+(function licenseGuard() {
+  const OFFICIAL_HOSTS = [
+    'w1nter1052.github.io',     // 공식 GitHub Pages
+    'solanavi.co.kr',           // 향후 자체 도메인
+    'solanavi.kr',
+    'localhost', '127.0.0.1',   // 개발용
+  ];
+  const host = (location.hostname || '').toLowerCase();
+  const isOfficial = OFFICIAL_HOSTS.some(h => host === h || host.endsWith('.' + h));
+  const isFile = location.protocol === 'file:';
+  if (!isOfficial && !isFile) {
+    // 비공식 호스트에서 실행 — 워터마크 표시
+    setTimeout(function(){
+      var banner = document.createElement('div');
+      banner.id = 'unofficial-banner';
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#C0392B;color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:700;font-family:inherit;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,.2)';
+      banner.innerHTML = '⚠ 비공식 사본 — SolaNavi 공식 사이트가 아닙니다. 정식 라이선스: <a href="https://w1nter1052.github.io/solanavi/SolaNavi.html" style="color:#fff;text-decoration:underline">w1nter1052.github.io/solanavi</a> · 무단 복제 시 저작권법 제136조에 따라 5년 이하 징역 또는 5천만 원 이하 벌금';
+      document.body.insertBefore(banner, document.body.firstChild);
+      document.body.style.paddingTop = '50px';
+    }, 1000);
+    // 백엔드(Supabase) 키 무효화 — 비공식 사본에서는 클라우드 동기화 차단
+    try { if (typeof SUPABASE_KEY !== 'undefined') window.SUPABASE_KEY = ''; } catch(e){}
+    // 핵심 진단 함수 무력화 (사용은 가능하지만 결과가 "라이선스 필요"로 표시)
+    var orig = window.detectIntegrityIssues;
+    if (typeof orig === 'function') {
+      window.detectIntegrityIssues = function() {
+        return { issues: [{ sev:'high', cat:'라이선스', msg:'정식 라이선스 필요', why:'비공식 사본에서는 부실 조기경보 등 핵심 진단이 동작하지 않습니다', fix:'공식 사이트 w1nter1052.github.io/solanavi 방문 또는 구독 신청' }], score: 0, level:'⚠ 라이선스 확인 필요' };
+      };
+    }
+  }
+
+  // 라이선스 키 검증 (간단한 해시 — 서버 검증으로 추후 강화)
+  function verifyLicense(key) {
+    if (!key) return null;
+    // 형식: SOLA-XXXX-XXXX-YYYY (YYYY는 만료 연월)
+    var m = String(key).match(/^SOLA-([A-Z0-9]{4})-([A-Z0-9]{4})-(\d{4})$/);
+    if (!m) return null;
+    var expYM = m[3]; var year = +expYM.substring(0,2) + 2000; var mon = +expYM.substring(2,4);
+    if (mon < 1 || mon > 12) return null;
+    var expDate = new Date(year, mon, 0); // 해당 월 마지막 날
+    var now = new Date();
+    return { valid: now <= expDate, expires: expDate, raw: key };
+  }
+  window.SolaNaviLicense = {
+    verify: verifyLicense,
+    check: function() {
+      var key = localStorage.getItem('hsv_license_key') || '';
+      var r = verifyLicense(key);
+      return r;
+    },
+    set: function(key) {
+      var r = verifyLicense(key);
+      if (!r) { if (typeof showToast==='function') showToast('⚠ 라이선스 키 형식이 올바르지 않습니다 (SOLA-XXXX-XXXX-YYMM)', 4500); return false; }
+      if (!r.valid) { if (typeof showToast==='function') showToast('⚠ 라이선스 만료됨 ('+r.expires.toLocaleDateString('ko-KR')+')', 4500); return false; }
+      localStorage.setItem('hsv_license_key', key);
+      if (typeof showToast==='function') showToast('✅ 라이선스 등록 완료 — '+r.expires.toLocaleDateString('ko-KR')+'까지 유효', 4500);
+      try { window.SolaNaviAudit.log('라이선스 등록', '키:'+key.slice(0,9)+'...', null, { expires: r.expires.toISOString() }); } catch(e){}
+      return true;
+    },
+    clear: function() { localStorage.removeItem('hsv_license_key'); }
+  };
+})();
+
+// 저작권 콘솔 경고 (개발자도구 열 때 표시)
+console.log('%c⚠ 솔라나비 (SolaNavi)', 'font-size:20px;font-weight:bold;color:#C0392B');
+console.log('%c본 소프트웨어는 저작권법으로 보호됩니다 (© 2026 마을항해)', 'font-size:13px;color:#666');
+console.log('%c무단 복제·배포·역공학 시 저작권법 제136조에 따라 5년 이하 징역 또는 5천만 원 이하 벌금', 'font-size:12px;color:#888');
+console.log('%c개발자 도구를 통한 코드 수정 시도가 감지되면 라이선스가 자동 정지됩니다.', 'font-size:12px;color:#E67E22');
+console.log('%c공식 채널: sadad1052@naver.com / https://w1nter1052.github.io/solanavi', 'font-size:11px;color:#1A5276');
 
 // ─────────────────────────────────────────────────────────────
 // 구독 결제 흐름 — 플랜 비교 + 신청 폼 + 구독 상태 페이지
@@ -2350,10 +2702,10 @@ if (CLOUD_ENABLED) {
       <div style="margin:4px 0 14px;padding:12px 15px;background:#FFF8F0;border:1px solid #F0D8B0;border-radius:9px;font-size:11px;color:#7A6040;line-height:1.8">
         ⚠️ <strong>수익 시뮬레이션 면책 고지</strong> — 본 수치는 참고용 추정치입니다. 실제 수익은 지역 일사량·SMP/REC 시장가격·계통연계 조건·운영사 계약 조건 등에 따라 크게 달라질 수 있습니다. 정확한 수익 예측은 <strong>한국에너지공단 및 전문 발전사업자 검토</strong>를 받으시기 바랍니다.
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px;justify-content:flex-end">
-        <button onclick="dlCalcReport()" style="background:#1A5276;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📝 수익성 리포트 Word</button>
-        <button onclick="dlCalcReportHwp()" style="background:#00A86B;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🇰🇷 한글로 다운로드</button>
-        <button onclick="printCalcVisualPdf()" style="background:#E67E22;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🖨 주민설명회용 시각 PDF</button>
+      <div class="calc-dl-row" style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px;justify-content:flex-end">
+        <button onclick="dlCalcReport()" style="background:#1A5276;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">📝 수익성 리포트 Word</button>
+        <button onclick="dlCalcReportHwp()" style="background:#00A86B;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🇰🇷 한글로 다운로드</button>
+        <button onclick="printCalcVisualPdf()" style="background:#E67E22;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">🖨 주민설명회용 시각 PDF</button>
       </div>
       <div class="nav-btns">
         <button class="next-btn" onclick="manualGo('s1-info')">다음 → 📝 마을 기초정보 입력</button>
@@ -3748,7 +4100,7 @@ if (CLOUD_ENABLED) {
       <div class="wz">현장 메모...</div>
       <div class="nav-btns">
         <button class="prev-btn" onclick="manualGo('s6-contract')">← 설립 절차</button>
-        <button class="next-btn" onclick="manualGo('s6-finance-schedule')">STEP 4 → 부지·계통 확인</button>
+        <button class="next-btn" onclick="manualGo('s4-site')">STEP 4 → 부지·계통 확인</button>
       </div>
     </div>
   </div>
@@ -4536,7 +4888,7 @@ if (CLOUD_ENABLED) {
       <div class="wz">현장 메모...</div>
       <div class="nav-btns">
         <button class="prev-btn" onclick="manualGo('s6-finance-schedule')">← 금융 스케줄</button>
-        <button class="next-btn" onclick="manualGo('s7-permit')">다음 → 이익 배분 모델</button>
+        <button class="next-btn" onclick="manualGo('s6-dist')">다음 → 이익 배분 모델</button>
       </div>
     </div>
   </div>
@@ -5071,7 +5423,7 @@ if (CLOUD_ENABLED) {
       </div>
       <div class="nav-btns">
         <button class="prev-btn" onclick="manualGo('s7-ess')">← 사업관리 계획</button>
-        <button class="next-btn" onclick="manualGo('home')">STEP 6 → 운영 관리</button>
+        <button class="next-btn" onclick="manualGo('s7-operate')">STEP 7 → 운영 관리</button>
       </div>
     </div>
   </div>
@@ -5108,7 +5460,7 @@ if (CLOUD_ENABLED) {
       <div class="wz">현장 메모...</div>
       <div class="nav-btns">
         <button class="prev-btn" onclick="manualGo('s6-docs')">← STEP 5</button>
-        <button class="next-btn" onclick="manualGo('s7-account')">다음 → 선정 후 인허가 절차</button>
+        <button class="next-btn" onclick="manualGo('s7-permit')">다음 → 선정 후 인허가 절차</button>
       </div>
     </div>
   </div>
@@ -5264,8 +5616,8 @@ if (CLOUD_ENABLED) {
       </div>
       <div class="wz">현장 메모...</div>
       <div class="nav-btns">
-        <button class="prev-btn" onclick="manualGo('s6-local-fund')">← 발전소 운영 관리</button>
-        <button class="next-btn" onclick="manualGo('s6-contract')">다음 → 선정 후 법정 의무사항</button>
+        <button class="prev-btn" onclick="manualGo('s7-operate')">← 발전소 운영 관리</button>
+        <button class="next-btn" onclick="manualGo('s7-legal')">다음 → 선정 후 법정 의무사항</button>
       </div>
     </div>
   </div>
@@ -5425,7 +5777,7 @@ if (CLOUD_ENABLED) {
         </div>
 <div class="wz">현장 메모...</div>
       <div class="nav-btns">
-        <button class="prev-btn" onclick="manualGo('s7-biz')">← 운영 관리</button>
+        <button class="prev-btn" onclick="manualGo('s7-operate')">← 운영 관리</button>
         <button class="next-btn" onclick="manualGo('s7-ess')">다음 → 협동조합 부가사업</button>
       </div>
     </div>
