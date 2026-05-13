@@ -275,8 +275,9 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
 
 /* ── COVER / HOME ── */
 #cv{min-height:100vh;background:linear-gradient(160deg,#FFFDF8 0%,#F4FAF4 50%,#FFFDF8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:50px 32px;position:relative;overflow:hidden}
-#cv::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(245,166,35,.1),transparent 65%);border-radius:50%}
-#cv::after{content:'';position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(45,122,79,.12),transparent 65%);border-radius:50%}
+#cv::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(245,166,35,.1),transparent 65%);border-radius:50%;pointer-events:none;z-index:0}
+#cv::after{content:'';position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(45,122,79,.12),transparent 65%);border-radius:50%;pointer-events:none;z-index:0}
+#cv > *{position:relative;z-index:1}
 .cv-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);color:var(--sun);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;margin-bottom:22px}
 .cv-sun{font-size:60px;margin-bottom:16px;animation:pulse 3s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
@@ -488,6 +489,13 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
   .form-row{grid-template-columns:1fr;gap:6px}
   .doc-grid{grid-template-columns:1fr}
   #cv{padding:24px 14px}
+  /* 부지점검 4탭 모바일 — 가로 스크롤 + 압축 패딩 */
+  .s4-tabs{position:relative}
+  .s4-tabs::-webkit-scrollbar{display:none}
+  .s4-tab{padding:9px 11px !important;font-size:12px !important}
+  /* 우측 그라데이션으로 "→ 스크롤 가능" 힌트 */
+  .s4-tabs-wrap{position:relative}
+  .s4-tabs-wrap::after{content:'›';position:absolute;right:0;top:0;bottom:2px;width:24px;background:linear-gradient(to right,transparent,#FDFAF5 60%);display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font-size:18px;color:var(--sun-d);pointer-events:none;font-weight:900}
   .login-box{padding:24px 16px;border-radius:16px;max-width:100%;margin:10px auto}
   #login-screen{padding:10px 12px}
   .login-brand{font-size:25px;margin-bottom:3px}
@@ -761,20 +769,22 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
     -webkit-overflow-scrolling:touch;
   }
 
-  /* ─ 상단 #app-switcher 모바일: 로그아웃 + PRO 배지 잘림 방지 ─ */
+  /* ─ 상단 #app-switcher 모바일: 4개 요소 모두 화면에 들어오도록 ─ */
   #app-switcher{
-    overflow-x:auto !important;
-    -webkit-overflow-scrolling:touch;
     flex-wrap:nowrap !important;
-    padding:0 8px !important;
-    gap:4px !important;
+    padding:0 6px !important;
+    gap:2px !important;
+    overflow:hidden !important;
   }
-  #app-switcher::-webkit-scrollbar{display:none}
-  .sw-logo{flex-shrink:0;font-size:12px !important}
-  .sw-btn{flex-shrink:0;font-size:11px !important;padding:4px 8px !important}
-  .sw-right{flex-shrink:0;display:flex;align-items:center;gap:4px;margin-left:auto}
-  .sw-logout{flex-shrink:0;font-size:10.5px !important;padding:3px 8px !important;white-space:nowrap}
-  #sw-badge{flex-shrink:0}
+  /* 좁은 모바일에선 ☀ SolaNavi 로고 숨김 (탭 두 개에 공간 양보) */
+  .sw-logo{display:none !important}
+  .sw-div{display:none !important}
+  .sw-btn{flex-shrink:1 !important;min-width:0;font-size:11.5px !important;padding:4px 6px !important;gap:3px !important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.02em}
+  .sw-right{flex-shrink:0;display:flex;align-items:center;gap:3px;margin-left:auto}
+  /* 로그아웃 → 아이콘만 표시 (글자 숨김) */
+  .sw-logout{flex-shrink:0;font-size:11px !important;padding:3px 6px !important;white-space:nowrap;color:transparent !important;width:30px;min-width:30px;position:relative;border-color:#E5E2DA !important}
+  .sw-logout::before{content:'🚪';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#6A6A6A;font-size:14px}
+  #sw-badge{flex-shrink:0;font-size:10px}
   #app-assistant #tabbar .tab{
     font-size:11px !important;
     font-weight:700 !important;
@@ -4533,12 +4543,12 @@ if (CLOUD_ENABLED) {
         </div>
       </div>
 
-      <!-- 탭 -->
-      <div style="display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--bdr)">
-        <button id="tab-site" onclick="showTab('site')" style="padding:10px 20px;border:none;background:var(--s4);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:8px 8px 0 0">🗺 부지 정보 입력</button>
-        <button id="tab-grid" onclick="showTab('grid')" style="padding:10px 20px;border:none;background:#F0F0EA;color:var(--sft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:8px 8px 0 0;margin-left:4px">⚡ 계통 연계 확인</button>
-        <button id="tab-dist" onclick="showTab('dist')" style="padding:10px 20px;border:none;background:#F0F0EA;color:var(--sft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:8px 8px 0 0;margin-left:4px">📏 이격거리·인허가</button>
-        <button id="tab-jijatche" onclick="showTab('jijatche')" style="padding:10px 20px;border:none;background:#F0F0EA;color:var(--sft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:8px 8px 0 0;margin-left:4px">🏛 지자체 협력 요청</button>
+      <!-- 탭 (모바일에서 가로 스크롤 가능) -->
+      <div class="s4-tabs" style="display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--bdr);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
+        <button id="tab-site" onclick="showTab('site')" class="s4-tab" style="padding:10px 18px;border:none;background:var(--s4);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:8px 8px 0 0;flex-shrink:0;white-space:nowrap">🗺 부지 정보 입력</button>
+        <button id="tab-grid" onclick="showTab('grid')" class="s4-tab" style="padding:10px 18px;border:none;background:#F0F0EA;color:var(--sft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:8px 8px 0 0;margin-left:4px;flex-shrink:0;white-space:nowrap">⚡ 계통 연계 확인</button>
+        <button id="tab-dist" onclick="showTab('dist')" class="s4-tab" style="padding:10px 18px;border:none;background:#F0F0EA;color:var(--sft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:8px 8px 0 0;margin-left:4px;flex-shrink:0;white-space:nowrap">📏 이격거리·인허가</button>
+        <button id="tab-jijatche" onclick="showTab('jijatche')" class="s4-tab" style="padding:10px 18px;border:none;background:#F0F0EA;color:var(--sft);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-radius:8px 8px 0 0;margin-left:4px;flex-shrink:0;white-space:nowrap">🏛 지자체 협력 요청</button>
       </div>
 
       <!-- 탭 1: 부지 정보 입력 -->
