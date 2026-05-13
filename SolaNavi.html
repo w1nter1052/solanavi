@@ -66,8 +66,10 @@
   --s1:#E67E22;
   --warn:#D68910;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--bg);color:var(--drk);line-height:1.8;min-height:100vh}
+*{box-sizing:border-box;margin:0;padding:0;word-break:keep-all}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--bg);color:var(--drk);line-height:1.8;min-height:100vh;word-break:keep-all}
+/* 버튼 안 텍스트 단어 깨짐 방지 (글로벌) */
+button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
 
 /* ── SIDEBAR ── */
 #sb{width:var(--sb);min-width:var(--sb);background:#FFFFFF;border-right:1px solid #E8E4DC;position:fixed;top:46px;left:0;bottom:0;overflow-y:auto;z-index:300;transition:transform .3s}
@@ -2035,7 +2037,10 @@ if (CLOUD_ENABLED) {
           🔒 커뮤니티·네트워크
         </div>
       </div>
-      <button class="l-btn" onclick="doFreeLogin()" style="background:var(--grn-l);color:var(--grn);border:2px solid var(--grn);margin-top:8px;font-size:14px;font-weight:700;padding:14px">🆓 무료 체험 입장하기<span style="font-size:11px;font-weight:400;margin-left:6px;opacity:.8">STEP 1 전체 이용 가능</span></button>
+      <button class="l-btn" onclick="doFreeLogin()" style="background:var(--grn-l);color:var(--grn);border:2px solid var(--grn);margin-top:8px;font-size:15px;font-weight:700;padding:14px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.3">
+        <span style="white-space:nowrap">🆓 무료 체험 입장하기</span>
+        <span style="font-size:11px;font-weight:400;opacity:.85;white-space:nowrap">STEP 1 전체 이용 가능</span>
+      </button>
     </div>
 
     <div id="lt-about" style="display:none">
@@ -2084,11 +2089,12 @@ if (CLOUD_ENABLED) {
 </div>
 <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="onImportFile(this)">
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;justify-content:center;margin-top:14px;font-size:11.5px;max-width:340px;margin-left:auto;margin-right:auto">
-        <a href="SolaNavi_소개서.html" style="color:var(--sft);text-decoration:none;white-space:nowrap;text-align:right">☀ 솔라나비 소개</a>
-        <a href="SolaNavi_사용가이드북.html" style="color:var(--sft);text-decoration:none;white-space:nowrap;text-align:left">📖 사용 가이드</a>
-        <a href="SolaNavi_이용약관.html" style="color:var(--sft);text-decoration:none;white-space:nowrap;text-align:right">📋 이용약관</a>
-        <a href="SolaNavi_개인정보처리방침.html" style="color:var(--sft);text-decoration:none;white-space:nowrap;text-align:left">🔒 개인정보처리방침</a>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin-top:14px;font-size:11px;line-height:1.6">
+        <a href="SolaNavi_소개서.html" style="color:var(--sft);text-decoration:none;white-space:nowrap">☀ 소개</a>
+        <a href="SolaNavi_사용가이드북.html" style="color:var(--sft);text-decoration:none;white-space:nowrap">📖 가이드</a>
+        <a href="SolaNavi_이용약관.html" style="color:var(--sft);text-decoration:none;white-space:nowrap">📋 이용약관</a>
+        <a href="SolaNavi_개인정보처리방침.html" style="color:var(--sft);text-decoration:none;white-space:nowrap">🔒 개인정보</a>
+        <a href="SolaNavi_기관협의.html" style="color:#16A085;text-decoration:none;white-space:nowrap;font-weight:700">🏛 기관 협의</a>
       </div>
       <div style="margin-top:10px;font-size:11px;color:var(--sft)">
         <a href="mailto:sadad1052@naver.com?subject=SolaNavi 키 발급 문의" style="color:var(--sft);text-decoration:none">✉ 키 발급 문의하기</a>
