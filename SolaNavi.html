@@ -1026,9 +1026,9 @@ textarea{resize:vertical;line-height:1.7}
 .login-sun{font-size:60px;margin-bottom:14px;animation:lp 3s infinite}
 @keyframes lp{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .login-brand{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:30px;font-weight:900;color:#1A1A1A;margin-bottom:6px;letter-spacing:-0.01em}
-.login-sub{font-size:14px;color:#4A4A4A;margin-bottom:28px;font-weight:500;line-height:1.6}
-.lpt-wrap{display:flex;gap:6px;margin-bottom:24px;background:#F7F3EA;border-radius:10px;padding:5px}
-.lpt{flex:1;padding:10px 4px;border-radius:7px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:transparent;color:#5A5A5A;transition:all .2s}
+.login-sub{font-size:14px;color:#4A4A4A;margin-bottom:28px;font-weight:500;line-height:1.6;word-break:keep-all}
+.lpt-wrap{display:flex;gap:4px;margin-bottom:24px;background:#F7F3EA;border-radius:10px;padding:4px}
+.lpt{flex:1;padding:9px 2px;border-radius:7px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:transparent;color:#5A5A5A;transition:all .2s;white-space:nowrap;letter-spacing:-0.02em}
 .lpt.active{background:var(--sun-d);color:#fff}
 .l-input-wrap{position:relative;margin-bottom:14px}
 .l-input{width:100%;background:#ffffff;border:1.5px solid #E8E4DC;color:#1A1A1A;padding:14px 48px 14px 16px;border-radius:10px;font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;letter-spacing:.05em}
@@ -1999,7 +1999,7 @@ if (CLOUD_ENABLED) {
   <div class="login-box">
     <div class="login-sun">☀</div>
     <div class="login-brand">SolaNavi</div>
-    <div class="login-sub">햇빛소득마을 컨설팅 플레이북 · by 마을항해</div>
+    <div class="login-sub">햇빛소득마을 컨설팅 플레이북<br><span style="font-size:12.5px;color:#888">by 마을항해</span></div>
     <div class="lpt-wrap">
       <button class="lpt active" onclick="setLTab('key',this)">🔑 라이선스 키</button>
       <button class="lpt" onclick="setLTab('free',this)">🆓 무료 체험</button>
@@ -2072,14 +2072,11 @@ if (CLOUD_ENABLED) {
 </div>
 <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="onImportFile(this)">
 
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:11.5px">
-        <a href="SolaNavi_소개서.html" style="color:var(--sft);text-decoration:none">☀ 솔라나비 소개</a>
-        <span style="color:#DDD">·</span>
-        <a href="SolaNavi_사용가이드북.html" style="color:var(--sft);text-decoration:none">📖 사용 가이드</a>
-        <span style="color:#DDD">·</span>
-        <a href="SolaNavi_이용약관.html" style="color:var(--sft);text-decoration:none">📋 이용약관</a>
-        <span style="color:#DDD">·</span>
-        <a href="SolaNavi_개인정보처리방침.html" style="color:var(--sft);text-decoration:none">🔒 개인정보처리방침</a>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;justify-content:center;margin-top:14px;font-size:11.5px;max-width:340px;margin-left:auto;margin-right:auto">
+        <a href="SolaNavi_소개서.html" style="color:var(--sft);text-decoration:none;white-space:nowrap;text-align:right">☀ 솔라나비 소개</a>
+        <a href="SolaNavi_사용가이드북.html" style="color:var(--sft);text-decoration:none;white-space:nowrap;text-align:left">📖 사용 가이드</a>
+        <a href="SolaNavi_이용약관.html" style="color:var(--sft);text-decoration:none;white-space:nowrap;text-align:right">📋 이용약관</a>
+        <a href="SolaNavi_개인정보처리방침.html" style="color:var(--sft);text-decoration:none;white-space:nowrap;text-align:left">🔒 개인정보처리방침</a>
       </div>
       <div style="margin-top:10px;font-size:11px;color:var(--sft)">
         <a href="mailto:sadad1052@naver.com?subject=SolaNavi 키 발급 문의" style="color:var(--sft);text-decoration:none">✉ 키 발급 문의하기</a>
