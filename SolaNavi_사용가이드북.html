@@ -88,6 +88,10 @@
     .mobile-toggle{display:flex;position:fixed;top:14px;right:14px;background:#fff;border:1px solid var(--bdr);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;z-index:201;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.08)}
     .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150}
     .ov.show{display:block}
+    /* 표 모바일 — 가로 스크롤 */
+    table{font-size:12px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    table thead, table tbody{display:table;width:100%;min-width:520px}
+    th,td{padding:7px 9px}
   }
   @media(min-width:881px){.mobile-toggle{display:none}}
 </style>
