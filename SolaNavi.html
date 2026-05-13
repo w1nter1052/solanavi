@@ -216,6 +216,133 @@ window.showInstallGuide = function() {
   --s1:#E67E22;
   --warn:#D68910;
 }
+
+/* ──────────────────────────────────────────────
+   🎨 SolaNavi Design System (Typography + Spacing)
+   ────────────────────────────────────────────── */
+:root{
+  /* 타이포 스케일 (8px base) */
+  --fs-xxs:10.5px;
+  --fs-xs:11.5px;
+  --fs-sm:12.5px;
+  --fs-md:13.5px;
+  --fs-lg:15px;
+  --fs-xl:18px;
+  --fs-2xl:22px;
+  --fs-3xl:28px;
+  /* 행간 */
+  --lh-tight:1.3;
+  --lh-base:1.55;
+  --lh-relax:1.75;
+  /* 간격 (4px base) */
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-8:32px;--sp-10:40px;
+  /* 반경 */
+  --rad-sm:6px;--rad-md:9px;--rad-lg:14px;--rad-xl:18px;
+  /* 그림자 */
+  --shd-sm:0 1px 3px rgba(0,0,0,.06);
+  --shd-md:0 4px 12px rgba(0,0,0,.08);
+  --shd-lg:0 12px 32px rgba(0,0,0,.12);
+  --shd-xl:0 24px 60px rgba(0,0,0,.18);
+  /* 트랜지션 */
+  --tr-fast:.12s ease;
+  --tr-base:.2s ease;
+  --tr-slow:.4s ease;
+}
+html[data-theme="dark"]{
+  --shd-sm:0 1px 3px rgba(0,0,0,.4);
+  --shd-md:0 4px 12px rgba(0,0,0,.5);
+  --shd-lg:0 12px 32px rgba(0,0,0,.6);
+  --shd-xl:0 24px 60px rgba(0,0,0,.7);
+}
+
+/* 페이지 타이포 위계 표준 (h1/h2/h3) */
+.page h1{font-size:var(--fs-2xl);font-weight:900;color:var(--tx);letter-spacing:-.02em;line-height:var(--lh-tight);margin:var(--sp-4) 0 var(--sp-3)}
+.page h2{font-size:var(--fs-xl);font-weight:800;color:var(--tx);letter-spacing:-.01em;line-height:var(--lh-tight);margin:var(--sp-6) 0 var(--sp-3)}
+.page h3{font-size:var(--fs-lg);font-weight:700;color:var(--tx);line-height:var(--lh-tight);margin:var(--sp-4) 0 var(--sp-2)}
+.page p{font-size:var(--fs-md);color:var(--mid);line-height:var(--lh-relax);word-break:keep-all}
+
+/* 다크모드 STEP 카드 가독성 보강 */
+html[data-theme="dark"] .step-card{background:#221E16;border-color:#3A3530;color:#E0E0E0}
+html[data-theme="dark"] .step-card .sc-title{color:#F0F0F0}
+html[data-theme="dark"] .step-card .sc-sub{color:#A0A0A0}
+html[data-theme="dark"] .step-card .sc-items span{background:rgba(255,255,255,.04);color:#B0B0B0}
+html[data-theme="dark"] .doc-card{background:#221E16;border-color:#3A3530;color:#E0E0E0}
+html[data-theme="dark"] .btn{background:#26221A;color:#E0E0E0;border-color:#3A3530}
+html[data-theme="dark"] .btn:hover{background:#322D24;border-color:var(--sun)}
+html[data-theme="dark"] input,html[data-theme="dark"] textarea,html[data-theme="dark"] select{background:#26221A;color:#F0F0F0;border-color:#3A3530}
+html[data-theme="dark"] input::placeholder,html[data-theme="dark"] textarea::placeholder{color:#7A7A7A}
+html[data-theme="dark"] .cl{background:#221E16;border-color:#3A3530;color:#D0D0D0}
+html[data-theme="dark"] .cv-badge{background:rgba(245,176,67,.12);color:var(--sun);border-color:rgba(245,176,67,.25)}
+html[data-theme="dark"] .vc-box{background:#1E1B14;color:#F0F0F0}
+html[data-theme="dark"] .vc-head{border-bottom-color:#3A3530}
+html[data-theme="dark"] .vc-head h2{color:#F0F0F0}
+html[data-theme="dark"] .vc-summary{background:#16140E;border-bottom-color:#3A3530}
+html[data-theme="dark"] .vc-summary .vc-stat{background:#221E16;border-color:#3A3530}
+html[data-theme="dark"] .vc-table thead th{background:#26221A;color:#B0B0B0;border-bottom-color:#3A3530}
+html[data-theme="dark"] .vc-table tbody td{color:#D0D0D0;border-bottom-color:#2A251D}
+html[data-theme="dark"] .vc-table tbody tr:hover{background:rgba(245,176,67,.06)}
+html[data-theme="dark"] .vc-table .vc-vname{color:#F0F0F0}
+
+/* ── 다크모드 ── */
+html[data-theme="dark"]{
+  --sun:#F5B043;--sun-l:#3A2D14;--sun-d:#E89F26;
+  --grn:#5BC98F;--grn-l:#1B3527;--grn-m:#6DD49E;
+  --nvy:#4A7BD4;--nvy-l:#1A2740;
+  --red:#E55F4F;--red-l:#3A1F1B;
+  --blu:#5BA3D4;--blu-l:#1B2C3A;
+  --amb:#F0B541;--amb-l:#3A2D10;
+  --drk:#F0F0F0;--mid:#D0D0D0;--sft:#A0A0A0;
+  --bdr:#3A3530;--bg:#16140E;--wht:#1E1B14;
+  --mu:#A0A0A0;
+  --sun2:#F5B043;
+  --sun3:rgba(245,176,67,.18);
+  --sf:#1E1B14;
+  --sf2:#26221A;
+  --bd:#3A3530;
+  --tx:#F0F0F0;
+}
+html[data-theme="dark"] body{background:var(--bg);color:var(--tx)}
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .doc-card,
+html[data-theme="dark"] .step-card{background:#221E16;border-color:#3A3530}
+html[data-theme="dark"] table{color:#E0E0E0}
+html[data-theme="dark"] th,html[data-theme="dark"] td{border-color:#3A3530}
+html[data-theme="dark"] .ni{color:#B0B0B0}
+html[data-theme="dark"] .ni:hover{background:#26221A;color:var(--sun)}
+html[data-theme="dark"] .nh{color:#A0A0A0}
+html[data-theme="dark"] .nc{color:#E0E0E0}
+html[data-theme="dark"] #sb{background:#1E1B14;border-right-color:#3A3530}
+html[data-theme="dark"] .sb-logo{color:var(--sun)}
+html[data-theme="dark"] #app-switcher{background:#1E1B14;border-bottom-color:#3A3530}
+html[data-theme="dark"] .sw-btn{color:#B0B0B0}
+html[data-theme="dark"] .sw-btn.active{background:rgba(245,176,67,.18);color:var(--sun)}
+html[data-theme="dark"] .sw-logout{border-color:#3A3530;color:#A0A0A0}
+html[data-theme="dark"] #cv{background:linear-gradient(160deg,#16140E 0%,#1A1814 50%,#16140E 100%)}
+html[data-theme="dark"] .cv-title{color:#F5F5F5}
+html[data-theme="dark"] .cv-sub{color:#B0B0B0}
+html[data-theme="dark"] .empty-state{background:#221E16;border-color:#3A3530}
+html[data-theme="dark"] .empty-state .es-title{color:#F0F0F0}
+html[data-theme="dark"] .page-meta{background:#221E16;border-color:#3A3530;color:#B0B0B0}
+html[data-theme="dark"] .search-box{background:#1E1B14;color:#F0F0F0}
+html[data-theme="dark"] .search-input-wrap input{color:#F0F0F0}
+html[data-theme="dark"] .search-result{color:#F0F0F0}
+html[data-theme="dark"] .search-result:hover,html[data-theme="dark"] .search-result.active{background:rgba(245,176,67,.12)}
+html[data-theme="dark"] .search-result .sr-title{color:#F0F0F0}
+html[data-theme="dark"] .onb-box{background:#1E1B14}
+html[data-theme="dark"] .onb-title{color:#F0F0F0}
+html[data-theme="dark"] .l-input{background:#26221A;border-color:#3A3530;color:#F0F0F0}
+html[data-theme="dark"] .login-box{background:#1E1B14;border-color:#3A3530}
+html[data-theme="dark"] .login-brand,html[data-theme="dark"] .login-sub{color:#F0F0F0}
+html[data-theme="dark"] #login-screen{background:linear-gradient(160deg,#16140E 0%,#1A1814 50%,#16140E 100%)}
+
+/* 테마 토글 버튼 */
+.theme-toggle{position:fixed;top:9px;right:60px;z-index:1001;background:transparent;border:1.5px solid #E8E4DC;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:inherit}
+.theme-toggle:hover{background:#F7F3EA;border-color:var(--sun)}
+html[data-theme="dark"] .theme-toggle{border-color:#3A3530;background:#26221A;color:#F0F0F0}
+html[data-theme="dark"] .theme-toggle:hover{background:#322D24}
+@media(max-width:600px){
+  .theme-toggle{display:none}
+}
 *{box-sizing:border-box;margin:0;padding:0;word-break:keep-all}
 body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--bg);color:var(--drk);line-height:1.8;min-height:100vh;word-break:keep-all}
 /* 버튼 안 텍스트 단어 깨짐 방지 (글로벌) */
@@ -378,6 +505,100 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
 @media(max-width:600px){
   .chklist li{padding:10px 6px;gap:12px}
   .chk{width:24px;height:24px}
+}
+
+/* ── 마을 비교 대시보드 ── */
+.vc-modal{position:fixed;inset:0;background:rgba(20,15,5,.5);z-index:9300;display:none;align-items:flex-start;justify-content:center;padding:30px 16px;font-family:inherit;overflow-y:auto}
+.vc-modal.show{display:flex}
+.vc-box{background:#fff;border-radius:16px;max-width:920px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 60px)}
+.vc-head{padding:18px 22px;border-bottom:1px solid #F0EDE4;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.vc-head h2{margin:0;font-size:17px;font-weight:900;color:#1A1A1A;letter-spacing:-.02em}
+.vc-head .vc-sub{font-size:11.5px;color:#6A6A6A;margin-top:4px}
+.vc-close{background:#F3F4F6;border:none;width:32px;height:32px;border-radius:8px;cursor:pointer;color:#6A6A6A;font-size:14px;font-weight:700;flex-shrink:0}
+.vc-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 22px;background:#FAFAF7;border-bottom:1px solid #F0EDE4}
+.vc-summary .vc-stat{background:#fff;border:1px solid #EFEAE0;border-radius:10px;padding:12px;text-align:center}
+.vc-summary .vc-stat-v{font-size:22px;font-weight:900;color:var(--sun);letter-spacing:-.02em;line-height:1}
+.vc-summary .vc-stat-l{font-size:10.5px;color:#7A7A7A;font-weight:700;margin-top:6px;letter-spacing:.02em}
+.vc-body{flex:1;overflow:auto;padding:0}
+.vc-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.vc-table thead th{position:sticky;top:0;background:#F7F3EA;padding:10px 14px;font-size:11px;font-weight:700;color:#5A5A5A;text-align:left;letter-spacing:.04em;border-bottom:1.5px solid #E5E0D5;z-index:1;white-space:nowrap}
+.vc-table tbody td{padding:11px 14px;border-bottom:1px solid #F0EDE4;color:#3A3A3A;vertical-align:middle}
+.vc-table tbody tr{cursor:pointer;transition:background .12s}
+.vc-table tbody tr:hover{background:rgba(245,166,35,.05)}
+.vc-table .vc-vname{font-weight:700;color:#1A1A1A}
+.vc-table .vc-region{font-size:10.5px;color:#7A7A7A;display:block;margin-top:2px}
+.vc-step-bar{display:flex;gap:2px;align-items:center}
+.vc-step-bar span{width:14px;height:6px;border-radius:2px;background:#E8E4DC}
+.vc-step-bar span.done{background:linear-gradient(90deg,var(--sun),var(--sun-d))}
+.vc-step-bar span.current{background:var(--sun);box-shadow:0 0 0 2px rgba(245,166,35,.25)}
+.vc-risk{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.vc-risk.low{background:rgba(34,197,94,.12);color:#16A34A}
+.vc-risk.mid{background:rgba(245,166,35,.15);color:#C47D0A}
+.vc-risk.high{background:rgba(192,57,43,.12);color:#C0392B}
+.vc-empty{padding:48px 20px;text-align:center;color:#9A9A9A}
+
+@media(max-width:680px){
+  .vc-modal{padding:16px 8px}
+  .vc-summary{grid-template-columns:1fr 1fr;padding:12px 14px}
+  .vc-summary .vc-stat-v{font-size:18px}
+  .vc-table thead th,.vc-table tbody td{padding:9px 10px;font-size:11.5px}
+  .vc-step-bar span{width:9px;height:5px}
+}
+
+/* ── 온보딩 (첫 로그인 4단계 가이드) ── */
+.onb-overlay{position:fixed;inset:0;background:rgba(20,15,5,.55);z-index:9800;display:none;align-items:center;justify-content:center;padding:16px;font-family:inherit;backdrop-filter:blur(3px)}
+.onb-overlay.show{display:flex}
+.onb-box{background:#fff;border-radius:18px;max-width:440px;width:100%;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.3);position:relative}
+.onb-skip{position:absolute;top:14px;right:14px;background:transparent;border:none;color:#9A9A9A;font-size:12px;cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:6px}
+.onb-skip:hover{background:#F3F4F6;color:#5A5A5A}
+.onb-progress{display:flex;gap:6px;padding:14px 24px 0}
+.onb-progress span{flex:1;height:4px;background:#F0EDE4;border-radius:2px;transition:background .25s}
+.onb-progress span.done{background:var(--sun)}
+.onb-progress span.active{background:var(--sun);animation:onbPulse 1.5s ease-in-out infinite}
+@keyframes onbPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.onb-body{padding:30px 28px 20px;text-align:center}
+.onb-icon{font-size:46px;margin-bottom:14px;display:block;line-height:1;animation:onbBounce .6s ease-out}
+@keyframes onbBounce{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}
+.onb-title{font-size:19px;font-weight:900;color:#1A1A1A;margin-bottom:8px;letter-spacing:-.02em;word-break:keep-all}
+.onb-desc{font-size:13px;color:#5A5A5A;line-height:1.7;margin-bottom:18px;word-break:keep-all}
+.onb-highlight{background:linear-gradient(135deg,#FFF8EC,#FFFCF5);border:1.5px solid rgba(245,166,35,.25);border-radius:10px;padding:12px 14px;font-size:12px;color:#5A5A5A;text-align:left;line-height:1.7;margin-bottom:8px}
+.onb-highlight strong{color:#C47D0A}
+.onb-actions{display:flex;gap:8px;padding:0 24px 24px}
+.onb-actions button{flex:1;padding:11px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .12s}
+.onb-actions button:hover{transform:translateY(-1px)}
+.onb-actions .onb-prev{background:#F3F4F6;color:#5A5A5A}
+.onb-actions .onb-next{background:linear-gradient(135deg,var(--sun),var(--sun-d));color:#fff;box-shadow:0 4px 12px rgba(245,166,35,.3)}
+.onb-actions .onb-done{background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;box-shadow:0 4px 12px rgba(34,197,94,.3)}
+
+/* ── 글로벌 검색 (Cmd+K) ── */
+.search-trigger{display:flex;align-items:center;gap:8px;width:calc(100% - 28px);margin:8px 14px 12px;padding:8px 12px;background:#fff;border:1.5px solid #E8E4DC;border-radius:9px;color:#9A9A9A;font-size:12px;cursor:pointer;transition:border-color .15s;font-family:inherit}
+.search-trigger:hover{border-color:var(--sun)}
+.search-trigger .st-icon{font-size:13px}
+.search-trigger .st-text{flex:1;text-align:left}
+.search-trigger .st-shortcut{font-size:10px;background:#F0EDE4;padding:2px 6px;border-radius:4px;color:#7A7A7A;font-weight:700}
+
+.search-modal{position:fixed;inset:0;background:rgba(20,15,5,.45);backdrop-filter:blur(4px);z-index:9500;display:none;align-items:flex-start;justify-content:center;padding:60px 16px 16px;font-family:inherit}
+.search-modal.show{display:flex}
+.search-box{width:100%;max-width:520px;background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 80px)}
+.search-input-wrap{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid #F0EDE4}
+.search-input-wrap input{flex:1;border:none;outline:none;font-size:15px;font-family:inherit;color:#1A1A1A;background:transparent}
+.search-input-wrap input::placeholder{color:#A0A0A0}
+.search-input-wrap .si-icon{font-size:17px;color:var(--sun-d)}
+.search-input-wrap .si-close{background:#F3F4F6;border:none;width:26px;height:26px;border-radius:6px;cursor:pointer;color:#6A6A6A;font-size:12px;font-weight:700;flex-shrink:0}
+.search-results{flex:1;overflow-y:auto;padding:6px}
+.search-empty{text-align:center;padding:30px 20px;color:#9A9A9A;font-size:12.5px}
+.search-result{display:block;padding:10px 14px;border-radius:8px;cursor:pointer;text-decoration:none;color:#1A1A1A;transition:background .12s}
+.search-result:hover,.search-result.active{background:rgba(245,166,35,.08)}
+.search-result .sr-title{font-size:13px;font-weight:700;color:#1A1A1A;display:flex;align-items:center;gap:6px}
+.search-result .sr-badge{font-size:10px;background:#F0EDE4;color:#7A7A7A;padding:2px 6px;border-radius:5px;font-weight:700;letter-spacing:-.02em}
+.search-result .sr-snippet{font-size:11.5px;color:#6A6A6A;margin-top:3px;line-height:1.55;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.search-result mark{background:rgba(245,166,35,.3);color:#1A1A1A;padding:0 2px;border-radius:3px}
+.search-footer{padding:8px 16px;border-top:1px solid #F0EDE4;font-size:10.5px;color:#9A9A9A;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.search-footer kbd{background:#F0EDE4;padding:2px 5px;border-radius:4px;font-family:inherit;font-size:10px;font-weight:700;color:#5A5A5A}
+
+@media(max-width:600px){
+  .search-modal{padding:40px 8px 8px}
+  .search-box{max-height:calc(100vh - 50px)}
 }
 
 /* ── 페이지 메타 (출처·발행일) ── */
@@ -2421,6 +2642,7 @@ if (CLOUD_ENABLED) {
   </button>
   <div class="sw-right">
     <div id="sw-badge"></div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="다크 모드 전환" aria-label="다크모드 전환" style="position:static;margin:0">🌙</button>
     <button class="sw-logout" onclick="doLogout()">로그아웃</button>
   </div>
 </div>
@@ -2452,6 +2674,12 @@ if (CLOUD_ENABLED) {
   </div>
     <div class="sb-sub">단계별 컨설팅 가이드 · 2026 완전판</div>
   </div>
+  <!-- 글로벌 검색 트리거 -->
+  <button class="search-trigger" onclick="openSearch()" aria-label="페이지 검색">
+    <span class="st-icon">🔎</span>
+    <span class="st-text">페이지·내용 검색</span>
+    <span class="st-shortcut">Ctrl K</span>
+  </button>
   <nav>
     <span class="nh" onclick="manualGo('home')">🏠 홈 대시보드</span>
     <div class="sb-divider"></div>
@@ -2585,6 +2813,49 @@ if (CLOUD_ENABLED) {
   </nav>
 </aside>
 
+<!-- ══ 마을 비교 대시보드 모달 ══ -->
+<div id="vc-modal" class="vc-modal" onclick="if(event.target===this)closeVillageCompare()">
+  <div class="vc-box">
+    <div class="vc-head">
+      <div>
+        <h2>🏘 마을 비교 대시보드</h2>
+        <div class="vc-sub">컨설팅 중인 마을별 STEP 진행도·위험도·체크리스트 진척률을 한눈에</div>
+      </div>
+      <button class="vc-close" onclick="closeVillageCompare()" aria-label="닫기">✕</button>
+    </div>
+    <div class="vc-summary" id="vc-summary"></div>
+    <div class="vc-body" id="vc-body"></div>
+  </div>
+</div>
+
+<!-- ══ 온보딩 모달 (첫 로그인 시) ══ -->
+<div id="onb-overlay" class="onb-overlay">
+  <div class="onb-box">
+    <button class="onb-skip" onclick="onbSkip()">건너뛰기</button>
+    <div class="onb-progress" id="onb-progress"></div>
+    <div class="onb-body" id="onb-body"></div>
+    <div class="onb-actions" id="onb-actions"></div>
+  </div>
+</div>
+
+<!-- ══ 글로벌 검색 모달 ══ -->
+<div id="search-modal" class="search-modal" onclick="if(event.target===this)closeSearch()">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <span class="si-icon">🔎</span>
+      <input type="search" id="search-input" placeholder="페이지 제목·본문에서 검색... (예: 자부담, 인허가, 정관)" autocomplete="off" oninput="doSearch(this.value)" onkeydown="searchKey(event)">
+      <button class="si-close" onclick="closeSearch()" aria-label="닫기">ESC</button>
+    </div>
+    <div class="search-results" id="search-results">
+      <div class="search-empty">단어를 입력하면 43개 페이지에서 즉시 검색됩니다</div>
+    </div>
+    <div class="search-footer">
+      <span><kbd>↑↓</kbd> 이동 · <kbd>Enter</kbd> 이동 · <kbd>ESC</kbd> 닫기</span>
+      <span>43개 페이지 + 본문 풀텍스트</span>
+    </div>
+  </div>
+</div>
+
 <!-- ══ 마을 선택 모달 (매뉴얼북용) ══ -->
 <div id="vp-modal-ov" onclick="closeVillagePickerModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center"></div>
 <div id="vp-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9001;background:#fff;border-radius:16px;width:min(420px,92vw);max-height:80vh;overflow:hidden;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.18)">
@@ -2639,6 +2910,14 @@ if (CLOUD_ENABLED) {
         <button class="ht-btn" onclick="openCoopCompare()" style="background:#2E86C1;box-shadow:0 4px 12px rgba(46,134,193,.2)">⚖ 조합 형태 비교</button>
         <button class="ht-btn" onclick="openPermitGantt()" style="background:#5B2C6F;box-shadow:0 4px 12px rgba(91,44,111,.2)">⏱ 인허가 타임라인</button>
         <button class="ht-btn" onclick="openHandbookModal('gov')" style="background:#8E44AD;box-shadow:0 4px 12px rgba(142,68,173,.2)">📚 운영 핸드북</button>
+      </div>
+
+      <!-- 마을 비교 대시보드 진입 (컨설팅사·다수 마을 관리용) -->
+      <div style="margin:0 auto 18px;max-width:880px;width:100%;padding:0 8px">
+        <button onclick="openVillageCompare()" style="width:100%;background:linear-gradient(135deg,#1A5276 0%,#0F2B5B 100%);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(15,43,91,.25);transition:transform .15s">
+          🏘 마을 비교 대시보드
+          <span style="font-size:11px;font-weight:500;opacity:.85;background:rgba(255,255,255,.18);padding:2px 8px;border-radius:8px">컨설팅 중인 모든 마을 한눈에</span>
+        </button>
       </div>
 
       <div class="step-grid">
@@ -8692,6 +8971,282 @@ function _renderProgress(){
 setTimeout(function(){ try{ _renderProgress(); }catch(e){} }, 400);
 // 진행률 초기화 헬퍼 (관리자용)
 window.resetProgress = function(){ if(confirm('진행 기록을 초기화할까요?')){ localStorage.removeItem('mh_visited_pages'); _renderProgress(); } };
+
+// ── 글로벌 검색 (Ctrl+K / 사이드바 검색 트리거) ──
+window._searchIndex = null;
+window._buildSearchIndex = function(){
+  var idx = [];
+  document.querySelectorAll('.page').forEach(function(p){
+    var pid = p.id.replace('page-','');
+    var title = titles[pid] || pid;
+    // 본문 텍스트 추출 (스크립트 제외, 메타 박스 제외, 정규화)
+    var clone = p.cloneNode(true);
+    clone.querySelectorAll('script, style, .page-meta').forEach(function(s){s.remove();});
+    var text = (clone.textContent||'').replace(/\s+/g,' ').trim();
+    idx.push({id:pid, title:title, body:text, bodyLower: text.toLowerCase(), titleLower: title.toLowerCase()});
+  });
+  return idx;
+};
+window.openSearch = function(){
+  if (!window._searchIndex) window._searchIndex = window._buildSearchIndex();
+  var m = document.getElementById('search-modal');
+  if (!m) return;
+  m.classList.add('show');
+  setTimeout(function(){ var i = document.getElementById('search-input'); if (i) { i.value=''; i.focus(); } doSearch(''); }, 50);
+};
+window.closeSearch = function(){
+  var m = document.getElementById('search-modal');
+  if (m) m.classList.remove('show');
+};
+function _escapeReg(s){ return s.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&'); }
+function _escapeHtml(s){ return s.replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function _highlight(text, q){
+  if (!q) return _escapeHtml(text);
+  var re = new RegExp('('+_escapeReg(q)+')', 'gi');
+  return _escapeHtml(text).replace(re, '<mark>$1</mark>');
+}
+function _snippet(body, q){
+  if (!q) return body.substring(0, 80);
+  var lo = body.toLowerCase().indexOf(q.toLowerCase());
+  if (lo < 0) return body.substring(0, 80);
+  var start = Math.max(0, lo - 30);
+  var end = Math.min(body.length, lo + q.length + 60);
+  var snip = (start>0?'…':'') + body.substring(start, end) + (end<body.length?'…':'');
+  return snip;
+}
+window.doSearch = function(q){
+  q = (q||'').trim();
+  var resultsEl = document.getElementById('search-results');
+  if (!resultsEl) return;
+  if (!window._searchIndex) window._searchIndex = window._buildSearchIndex();
+  if (!q) {
+    // 빈 검색 — 추천 페이지 (방문 안 한 STEP 페이지 중 처음 5개)
+    var v = _getVisited();
+    var suggest = window._searchIndex.filter(function(it){ return !v[it.id] && it.id !== 'home' && it.id.indexOf('docs-')!==0; }).slice(0, 5);
+    if (suggest.length === 0) suggest = window._searchIndex.slice(0, 5);
+    resultsEl.innerHTML = '<div style="padding:8px 12px;font-size:10.5px;font-weight:700;color:#9A9A9A;letter-spacing:.06em">아직 보지 않은 페이지</div>'
+      + suggest.map(function(it,i){
+        return '<a class="search-result'+(i===0?' active':'')+'" onclick="goSearch(\''+it.id+'\')"><div class="sr-title">'+_escapeHtml(it.title)+'<span class="sr-badge">'+it.id+'</span></div></a>';
+      }).join('');
+    return;
+  }
+  var ql = q.toLowerCase();
+  // 점수: 제목 매치 우선 + 본문 빈도
+  var hits = window._searchIndex.map(function(it){
+    var score = 0;
+    if (it.titleLower.indexOf(ql) >= 0) score += 100;
+    var bi = it.bodyLower.indexOf(ql);
+    if (bi >= 0) score += 10 + Math.max(0, 50 - bi/100);
+    return {it:it, score:score};
+  }).filter(function(r){ return r.score > 0; }).sort(function(a,b){ return b.score - a.score; }).slice(0, 12);
+
+  if (hits.length === 0) {
+    resultsEl.innerHTML = '<div class="search-empty">"<strong>'+_escapeHtml(q)+'</strong>" 검색 결과가 없습니다<div style="margin-top:8px;font-size:11px;color:#B0B0B0">다른 단어로 시도해보세요</div></div>';
+    return;
+  }
+  resultsEl.innerHTML = hits.map(function(r,i){
+    var snip = _snippet(r.it.body, q);
+    return '<a class="search-result'+(i===0?' active':'')+'" onclick="goSearch(\''+r.it.id+'\')">'
+      + '<div class="sr-title">'+_highlight(r.it.title, q)+'<span class="sr-badge">'+r.it.id+'</span></div>'
+      + '<div class="sr-snippet">'+_highlight(snip, q)+'</div>'
+      + '</a>';
+  }).join('');
+};
+window.goSearch = function(pid){
+  closeSearch();
+  manualGo(pid);
+  // 모바일에선 사이드바 닫기
+  var sb = document.getElementById('sb');
+  if (sb && innerWidth <= 800) {
+    sb.classList.remove('open');
+    var ov = document.getElementById('ov');
+    if (ov) ov.style.display='none';
+  }
+  window.scrollTo(0, 0);
+};
+window.searchKey = function(e){
+  var items = document.querySelectorAll('.search-result');
+  if (!items.length) return;
+  var idx = -1;
+  items.forEach(function(el,i){ if (el.classList.contains('active')) idx = i; });
+  if (e.key === 'ArrowDown'){ e.preventDefault(); if (idx<items.length-1) idx++; items.forEach(function(el){el.classList.remove('active')}); items[idx].classList.add('active'); items[idx].scrollIntoView({block:'nearest'}); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); if (idx>0) idx--; items.forEach(function(el){el.classList.remove('active')}); items[idx].classList.add('active'); items[idx].scrollIntoView({block:'nearest'}); }
+  else if (e.key === 'Enter'){ e.preventDefault(); if (idx>=0) items[idx].click(); else if (items[0]) items[0].click(); }
+  else if (e.key === 'Escape'){ closeSearch(); }
+};
+// 글로벌 단축키 Ctrl/Cmd+K
+document.addEventListener('keydown', function(e){
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    openSearch();
+  }
+});
+
+// ── 마을 비교 대시보드 (컨설팅사 핵심 가치) ──
+window.openVillageCompare = function(){
+  var modal = document.getElementById('vc-modal');
+  if (!modal) return;
+  // 마을 데이터 로드
+  var villagesMap = {};
+  try { villagesMap = JSON.parse(localStorage.getItem('mh_villages')||'{}'); } catch(e){}
+  var list = Object.values(villagesMap);
+  // 요약 통계
+  var totalVillages = list.length;
+  var stepCounts = list.map(function(v){ return v.step||1; });
+  var avgStep = stepCounts.length ? (stepCounts.reduce(function(a,b){return a+b;},0) / stepCounts.length) : 0;
+  var visited = _getVisited();
+  var totalDone = Object.keys(visited).length;
+  // 위험도: STEP 진행이 1~2이고 마을 추가된 지 30일 이상이면 high
+  var nowMs = Date.now();
+  var highRisk = list.filter(function(v){
+    var ageDays = (nowMs - (v.createdAt||nowMs))/(86400000);
+    return ageDays > 30 && (v.step||1) <= 2;
+  }).length;
+
+  document.getElementById('vc-summary').innerHTML =
+    '<div class="vc-stat"><div class="vc-stat-v">'+totalVillages+'</div><div class="vc-stat-l">컨설팅 마을</div></div>'
+    + '<div class="vc-stat"><div class="vc-stat-v">'+avgStep.toFixed(1)+'</div><div class="vc-stat-l">평균 STEP</div></div>'
+    + '<div class="vc-stat"><div class="vc-stat-v" style="color:#16A085">'+totalDone+'</div><div class="vc-stat-l">완료 페이지</div></div>'
+    + '<div class="vc-stat"><div class="vc-stat-v" style="color:'+(highRisk>0?'#C0392B':'#22C55E')+'">'+highRisk+'</div><div class="vc-stat-l">⚠ 지연 위험</div></div>';
+
+  if (list.length === 0) {
+    document.getElementById('vc-body').innerHTML = '<div class="vc-empty"><div style="font-size:36px;margin-bottom:10px">📋</div><div style="font-size:14px;font-weight:700;color:#5A5A5A">아직 등록된 마을이 없어요</div><div style="font-size:12px;color:#9A9A9A;margin-top:6px">사이드바의 "컨설팅 마을 선택"에서 추가하세요</div></div>';
+  } else {
+    var rows = list.sort(function(a,b){ return (b.step||1) - (a.step||1); }).map(function(v){
+      var step = v.step || 1;
+      var ageDays = Math.floor((nowMs - (v.createdAt||nowMs))/86400000);
+      var risk = (ageDays > 30 && step <= 2) ? 'high' : (step >= 5 ? 'low' : 'mid');
+      var riskLabel = risk==='high'?'⚠ 지연':(risk==='low'?'✅ 양호':'🟡 진행');
+      // STEP 바
+      var bar = '';
+      for (var i=1; i<=7; i++) {
+        var cls = i < step ? 'done' : (i === step ? 'current' : '');
+        bar += '<span class="'+cls+'"></span>';
+      }
+      return '<tr onclick="goToVillage(\''+v.id+'\')">'
+        + '<td><div class="vc-vname">'+(v.name||'(이름 없음)')+'</div><div class="vc-region">'+(v.region||'-')+' · '+(v.households||0)+'세대</div></td>'
+        + '<td><div class="vc-step-bar">'+bar+'</div><div style="font-size:10px;color:#7A7A7A;margin-top:4px">STEP '+step+'/7</div></td>'
+        + '<td><span class="vc-risk '+risk+'">'+riskLabel+'</span></td>'
+        + '<td style="font-size:11px;color:#7A7A7A">'+(ageDays>=0?ageDays+'일':'-')+'</td>'
+        + '</tr>';
+    }).join('');
+    document.getElementById('vc-body').innerHTML =
+      '<table class="vc-table"><thead><tr><th>마을</th><th>STEP 진행</th><th>상태</th><th>경과</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  }
+  modal.classList.add('show');
+};
+window.closeVillageCompare = function(){
+  var m = document.getElementById('vc-modal'); if (m) m.classList.remove('show');
+};
+window.goToVillage = function(vid){
+  try {
+    localStorage.setItem('mh_selected_vid', vid);
+    window.selectedVid = vid;
+    if (typeof refreshAllVillageDependents === 'function') refreshAllVillageDependents();
+  } catch(e){}
+  closeVillageCompare();
+  manualGo('home');
+};
+
+// ── 다크모드 토글 ──
+(function(){
+  // 저장된 테마 또는 OS 설정에 따라 초기 적용
+  var saved = localStorage.getItem('mh_theme');
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var theme = saved || (prefersDark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+})();
+window.toggleTheme = function(){
+  var cur = document.documentElement.getAttribute('data-theme') || 'light';
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('mh_theme', next); } catch(e){}
+  // 토글 버튼 아이콘 업데이트
+  document.querySelectorAll('.theme-toggle').forEach(function(b){
+    b.textContent = next === 'dark' ? '☀' : '🌙';
+    b.title = next === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환';
+  });
+  return next;
+};
+// 페이지 로드 시 버튼 아이콘 동기화
+setTimeout(function(){
+  var cur = document.documentElement.getAttribute('data-theme') || 'light';
+  document.querySelectorAll('.theme-toggle').forEach(function(b){
+    b.textContent = cur === 'dark' ? '☀' : '🌙';
+  });
+}, 100);
+
+// ── 온보딩 (첫 로그인 시 1분 가이드) ──
+window._onbSteps = [
+  {
+    icon: '☀',
+    title: 'SolaNavi에 오신 걸 환영합니다',
+    desc: '햇빛소득마을 공모 컨설팅을 처음부터 끝까지 따라가는 도구입니다. 1분만 투자해서 핵심 기능을 살펴보세요.',
+    highlight: '✨ <strong>컨설턴트 1명이 1마을 컨설팅하는 데</strong><br>기존 38시간 → SolaNavi로 약 <strong>6시간</strong>'
+  },
+  {
+    icon: '🏘',
+    title: '먼저 마을을 추가하세요',
+    desc: '컨설팅하실 마을을 등록하면 모든 진단 도구·서류 작성·AI 기능이 해당 마을 데이터를 기반으로 작동합니다.',
+    highlight: '👈 사이드바 상단의 <strong>"+ 컨설팅 마을 선택"</strong> 카드에서 시작하세요'
+  },
+  {
+    icon: '📚',
+    title: '단계별 매뉴얼 + 진단 도구',
+    desc: 'STEP 1~7 매뉴얼로 절차를 익히고, 홈 대시보드의 8가지 진단 도구로 마을 상태를 측정하세요.',
+    highlight: '🔍 자가진단 · 부실 조기경보 · 갈등 매트릭스 · 시나리오 시뮬 · 조합 형태 비교 등'
+  },
+  {
+    icon: '⚡',
+    title: '필요할 땐 검색 (Ctrl+K)',
+    desc: '43개 페이지·매뉴얼 본문을 즉시 검색할 수 있습니다. 자주 쓰는 기능이라 단축키로 익혀두세요.',
+    highlight: '💡 사이드바 상단 <strong>"🔎 페이지·내용 검색"</strong> 또는 <strong>Ctrl + K</strong>'
+  }
+];
+window._onbIdx = 0;
+function _renderOnb(){
+  var step = window._onbSteps[window._onbIdx];
+  if (!step) return onbDone();
+  var prog = window._onbSteps.map(function(_,i){
+    var cls = i < window._onbIdx ? 'done' : (i === window._onbIdx ? 'active' : '');
+    return '<span class="'+cls+'"></span>';
+  }).join('');
+  document.getElementById('onb-progress').innerHTML = prog;
+  document.getElementById('onb-body').innerHTML =
+    '<span class="onb-icon">'+step.icon+'</span>'
+    + '<div class="onb-title">'+step.title+'</div>'
+    + '<div class="onb-desc">'+step.desc+'</div>'
+    + (step.highlight ? '<div class="onb-highlight">'+step.highlight+'</div>' : '');
+  var isFirst = window._onbIdx === 0;
+  var isLast = window._onbIdx === window._onbSteps.length - 1;
+  var actions = '';
+  if (!isFirst) actions += '<button class="onb-prev" onclick="onbPrev()">이전</button>';
+  if (isLast) actions += '<button class="onb-done" onclick="onbDone()">🚀 시작하기</button>';
+  else actions += '<button class="onb-next" onclick="onbNext()">다음 →</button>';
+  document.getElementById('onb-actions').innerHTML = actions;
+}
+window.onbNext = function(){ window._onbIdx = Math.min(window._onbSteps.length-1, window._onbIdx+1); _renderOnb(); };
+window.onbPrev = function(){ window._onbIdx = Math.max(0, window._onbIdx-1); _renderOnb(); };
+window.onbSkip = function(){ try{localStorage.setItem('mh_onb_done','1');}catch(e){} document.getElementById('onb-overlay').classList.remove('show'); };
+window.onbDone = function(){ try{localStorage.setItem('mh_onb_done','1');}catch(e){} document.getElementById('onb-overlay').classList.remove('show'); };
+window.startOnboarding = function(force){
+  try {
+    if (!force && localStorage.getItem('mh_onb_done') === '1') return;
+  } catch(e){}
+  window._onbIdx = 0;
+  _renderOnb();
+  document.getElementById('onb-overlay').classList.add('show');
+};
+// 로그인 직후 자동 실행
+(function(){
+  var _origOnLoginOK = window.onLoginOK;
+  if (typeof _origOnLoginOK === 'function') {
+    window.onLoginOK = function(){
+      _origOnLoginOK.apply(this, arguments);
+      setTimeout(function(){ try{ startOnboarding(); }catch(e){} }, 800);
+    };
+  }
+})();
 
 function manualBack() {
   if (_pageHistory.length < 2) return;
