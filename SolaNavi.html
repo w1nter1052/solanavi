@@ -7455,11 +7455,28 @@ const MH = (function() {
         _startSessionTimer(t);
         return { ok: true, plan };
       };
+      // 1차: 임베드된 정적 라이선스 (28개)
       try {
         const hash = await _h(clean);
         if (VALID_HASHES[hash]) return save(VALID_HASHES[hash]);
       } catch(e) {
         console.warn('crypto.subtle 사용 불가. Chrome에서 파일을 열어주세요.');
+      }
+      // 2차: 워커 KV 동적 발급 라이선스 확인 (Phase 3a)
+      try {
+        const res = await fetch('https://solanavi-api.hnsane.workers.dev/usage', {
+          headers: { 'x-license-key': clean }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.plan) {
+            console.log('[SolaNavi] Dynamic license accepted:', data.plan);
+            return save(data.plan);
+          }
+        }
+        // 401이면 키가 KV에도 없음. 200이지만 plan 없으면 응답 이상.
+      } catch(e) {
+        console.warn('[SolaNavi] Worker verification failed:', e.message);
       }
       return { ok: false };
     },
