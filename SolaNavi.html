@@ -42,6 +42,70 @@ window.installSolaNavi = function() {
     alert('이미 설치되어 있거나, 이 브라우저는 자동 설치를 지원하지 않습니다.\n\n수동 설치:\n• 안드로이드 Chrome: 우측 상단 ⋮ → 홈 화면에 추가\n• iOS Safari: 하단 공유 → 홈 화면에 추가');
   }
 };
+
+// 모바일 + standalone 아닐 때만 설치 버튼 노출 + 안내 모달
+window.addEventListener('DOMContentLoaded', function() {
+  try {
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isMobile && !isStandalone) {
+      var btn = document.getElementById('pwa-install-btn');
+      if (btn) btn.style.display = 'block';
+    }
+  } catch(e){}
+});
+
+window.showInstallGuide = function() {
+  var ua = navigator.userAgent;
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  var isAndroid = /Android/i.test(ua);
+  // 1) 자동 설치 가능하면 바로 트리거
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
+    return;
+  }
+  // 2) 수동 안내 모달
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,Pretendard,sans-serif';
+  var iosBody = '<div style="font-size:14px;line-height:1.7;color:#1A1A1A;text-align:left">' +
+    '<div style="font-weight:700;font-size:15px;margin-bottom:10px;color:#F5A623">📱 iPhone / iPad (Safari)</div>' +
+    '<ol style="padding-left:22px;margin:0">' +
+    '<li>Safari 하단 가운데 <strong>공유 버튼 (□↑)</strong> 탭</li>' +
+    '<li>메뉴를 아래로 스크롤 → <strong>"홈 화면에 추가"</strong></li>' +
+    '<li>이름 확인 후 우측 상단 <strong>"추가"</strong></li>' +
+    '<li>홈 화면에 ☀ SolaNavi 아이콘 생성!</li>' +
+    '</ol>' +
+    '<div style="font-size:12px;color:#C0392B;margin-top:10px;padding:8px;background:#FDF2F2;border-radius:6px">⚠ 반드시 <strong>Safari</strong>로 접속해야 합니다 (Chrome/네이버 앱 ❌)</div>' +
+    '</div>';
+  var androidBody = '<div style="font-size:14px;line-height:1.7;color:#1A1A1A;text-align:left">' +
+    '<div style="font-weight:700;font-size:15px;margin-bottom:10px;color:#F5A623">📱 안드로이드 (Chrome)</div>' +
+    '<ol style="padding-left:22px;margin:0">' +
+    '<li>Chrome 우측 상단 <strong>⋮ (점 3개)</strong> 탭</li>' +
+    '<li>메뉴에서 <strong>"앱 설치"</strong> 또는 <strong>"홈 화면에 추가"</strong></li>' +
+    '<li>확인 팝업 → <strong>"설치"</strong> 탭</li>' +
+    '<li>홈 화면에 ☀ SolaNavi 아이콘 생성!</li>' +
+    '</ol>' +
+    '<div style="font-size:12px;color:#C0392B;margin-top:10px;padding:8px;background:#FDF2F2;border-radius:6px">⚠ 반드시 <strong>Chrome</strong>으로 접속해야 합니다 (삼성인터넷·네이버앱은 메뉴가 다릅니다)</div>' +
+    '</div>';
+  var pcBody = '<div style="font-size:14px;line-height:1.7;color:#1A1A1A;text-align:left">' +
+    '<div style="font-weight:700;font-size:15px;margin-bottom:10px;color:#F5A623">💻 PC (Chrome / Edge)</div>' +
+    '<ol style="padding-left:22px;margin:0">' +
+    '<li>주소창 오른쪽 <strong>⊕ 아이콘</strong> 클릭</li>' +
+    '<li>"SolaNavi 설치" 팝업 → <strong>"설치"</strong></li>' +
+    '<li>바탕화면 / 작업표시줄에 앱 생성!</li>' +
+    '</ol>' +
+    '<div style="font-size:12px;color:#5A5A5A;margin-top:10px">💡 모바일에서 사용하시려면 휴대폰으로 접속해주세요</div>' +
+    '</div>';
+  var body = isIOS ? iosBody : (isAndroid ? androidBody : pcBody);
+  modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;max-width:380px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)">' +
+    '<div style="text-align:center;margin-bottom:14px"><div style="font-size:36px">📲</div><div style="font-size:17px;font-weight:900;color:#1A1A1A;margin-top:6px">SolaNavi 앱 설치</div><div style="font-size:12px;color:#5A5A5A;margin-top:4px">홈 화면에 추가하면 앱처럼 빠르게 사용!</div></div>' +
+    body +
+    '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="width:100%;margin-top:16px;padding:11px;background:#1A1A1A;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">확인</button>' +
+    '</div>';
+  modal.addEventListener('click', function(e){ if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+};
 </script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="%23F5A623"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="%23fff">☀</text></svg>">
 <meta name="description" content="햇빛소득마을 공모 컨설팅 플레이북 — 마을 태양광 협동조합 설립부터 사업계획서 작성, AI 문서 생성까지 한 번에. 컨설턴트·중간지원조직 전용 업무 도구.">
@@ -363,11 +427,11 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
   .form-row{grid-template-columns:1fr;gap:6px}
   .doc-grid{grid-template-columns:1fr}
   #cv{padding:24px 14px}
-  .login-box{padding:28px 18px;border-radius:16px;max-width:100%;margin:12px auto}
-  #login-screen{padding:12px 12px}
-  .login-brand{font-size:28px}
-  .login-sun{font-size:44px}
-  .login-sub{font-size:13px;margin-bottom:24px}
+  .login-box{padding:24px 16px;border-radius:16px;max-width:100%;margin:10px auto}
+  #login-screen{padding:10px 12px}
+  .login-brand{font-size:25px;margin-bottom:3px}
+  .login-sun{font-size:42px;margin-bottom:7px}
+  .login-sub{font-size:12.5px;margin-bottom:18px}
   .lpt{font-size:12px;padding:8px 6px}
   .l-input{font-size:14px;padding:12px 44px 12px 14px}
   .l-btn{padding:13px;font-size:15px}
@@ -807,10 +871,12 @@ body{font-family:'Pretendard',-apple-system,'Noto Sans KR',sans-serif;background
 .four{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
 @media(max-width:900px){.two,.three,.four{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){#tabbar{top:88px !important}
-  .login-box{padding:24px 16px;border-radius:14px;margin:8px auto}
-  .login-brand{font-size:26px}
-  .login-sun{font-size:48px;margin-bottom:10px}
-  #login-screen{padding:8px 10px}
+  .login-box{padding:20px 14px;border-radius:14px;margin:6px auto}
+  .login-brand{font-size:24px;margin-bottom:2px}
+  .login-sun{font-size:40px;margin-bottom:6px}
+  .login-sub{font-size:12px;margin-bottom:14px}
+  .lpt-wrap{margin-bottom:16px}
+  #login-screen{padding:6px 8px}
   .two,.three,.four{grid-template-columns:1fr}
   .f2,.f3{grid-template-columns:1fr}
   .brow{flex-direction:column}
@@ -1069,10 +1135,10 @@ textarea{resize:vertical;line-height:1.7}
   text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.08);
   margin:20px auto;  /* 위아래 여백 + 가운데 정렬 */
 }
-.login-sun{font-size:60px;margin-bottom:14px;animation:lp 3s infinite}
+.login-sun{font-size:46px;margin-bottom:8px;animation:lp 3s infinite}
 @keyframes lp{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-.login-brand{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:30px;font-weight:900;color:#1A1A1A;margin-bottom:6px;letter-spacing:-0.01em}
-.login-sub{font-size:14px;color:#4A4A4A;margin-bottom:28px;font-weight:500;line-height:1.6;word-break:keep-all}
+.login-brand{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:26px;font-weight:900;color:#1A1A1A;margin-bottom:4px;letter-spacing:-0.01em}
+.login-sub{font-size:13px;color:#5A5A5A;margin-bottom:20px;font-weight:500;line-height:1.5;word-break:keep-all}
 .lpt-wrap{display:flex;gap:4px;margin-bottom:24px;background:#F7F3EA;border-radius:10px;padding:4px}
 .lpt{flex:1;padding:9px 2px;border-radius:7px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:transparent;color:#5A5A5A;transition:all .2s;white-space:nowrap;letter-spacing:-0.02em}
 .lpt.active{background:var(--sun-d);color:#fff}
@@ -2045,7 +2111,7 @@ if (CLOUD_ENABLED) {
   <div class="login-box">
     <div class="login-sun">☀</div>
     <div class="login-brand">SolaNavi</div>
-    <div class="login-sub">햇빛소득마을 컨설팅 플레이북<br><span style="font-size:12.5px;color:#888">by 마을항해</span></div>
+    <div class="login-sub">햇빛소득마을 컨설팅 플레이북</div>
     <div class="lpt-wrap">
       <button class="lpt active" onclick="setLTab('key',this)">🔑 라이선스 키</button>
       <button class="lpt" onclick="setLTab('free',this)">🆓 무료 체험</button>
@@ -2067,7 +2133,7 @@ if (CLOUD_ENABLED) {
       </div>
       <button class="l-btn" id="l-btn" onclick="doLogin()"><span id="l-btn-txt">🔓 입장하기</span></button>
       <div class="l-err" id="l-err">❌ 유효하지 않은 키입니다.</div>
-      <div style="font-size:11px;color:var(--sft);text-align:center;margin-top:8px">✅ 로그인 시 이 기기에 자동 저장 — 다음 방문 시 자동 로그인</div>
+      <div style="font-size:11px;color:var(--sft);text-align:center;margin-top:8px">✅ 이 기기에서 자동 로그인 유지</div>
     </div>
 
     <div id="lt-free" style="display:none">
@@ -2129,10 +2195,11 @@ if (CLOUD_ENABLED) {
       <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center">
   <button onclick="exportAllData()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--sft);cursor:pointer">⬇ 데이터 백업</button>
   <button onclick="importAllData()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--sft);cursor:pointer">⬆ 데이터 복원</button>
-  <button onclick="try{localStorage.removeItem('mh_session');sessionStorage.clear();}catch(e){}location.reload();" style="background:none;border:1px solid #EEE;border-radius:6px;padding:3px 9px;font-size:11px;color:#AAA;cursor:pointer">🗑 세션</button>
+  <button onclick="if(confirm('저장된 로그인 정보를 삭제합니다.\n다음 방문 시 키를 다시 입력해야 합니다.\n진행할까요?')){try{localStorage.removeItem('mh_session');sessionStorage.clear();}catch(e){}location.reload();}" title="저장된 로그인 정보 삭제" style="background:none;border:1px solid #EEE;border-radius:6px;padding:3px 9px;font-size:11px;color:#AAA;cursor:pointer">🚪 로그아웃</button>
 </div>
 <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="onImportFile(this)">
 
+      <button id="pwa-install-btn" onclick="showInstallGuide()" style="display:none;width:100%;margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,#22C55E 0%,#16A34A 100%);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(34,197,94,.25)">📱 모바일 앱으로 설치하기</button>
       <div style="display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:center;margin-top:14px;font-size:11.5px;line-height:1.6">
         <a href="SolaNavi_소개서.html" style="color:var(--sft);text-decoration:none;white-space:nowrap">☀ 소개</a>
         <a href="SolaNavi_사용가이드북.html" style="color:var(--sft);text-decoration:none;white-space:nowrap">📖 가이드</a>
@@ -2142,7 +2209,7 @@ if (CLOUD_ENABLED) {
       <div style="margin-top:10px;font-size:11px;color:var(--sft)">
         <a href="mailto:sadad1052@naver.com?subject=SolaNavi 키 발급 문의" style="color:var(--sft);text-decoration:none">✉ 키 발급 문의하기</a>
       </div>
-      <div style="margin-top:6px;font-size:12px;color:#5A5A5A">© 2026 <strong style="color:#1A1A1A">마을항해</strong> · 무단 복제 및 재배포 금지<br><span style="font-size:11.5px;color:#7A7A7A;letter-spacing:.02em">협력: 사회혁신교육원 사회적협동조합</span></div>
+      <div style="margin-top:6px;font-size:12px;color:#5A5A5A">© 2026 <strong style="color:#1A1A1A">마을항해</strong> · 무단 복제 및 재배포 금지<br><span style="font-size:11.5px;color:#7A7A7A;letter-spacing:.02em">협업사: 사회혁신교육원 사회적협동조합</span></div>
     </div>
   </div>
 </div>
@@ -7453,7 +7520,7 @@ if (CLOUD_ENABLED) {
 </div>
 
 <!-- 워터마크 -->
-<div class="watermark" id="watermark">© 2026 SolaNavi by <b>마을항해</b> <span style="opacity:.75">· 협력 사회혁신교육원</span></div>
+<div class="watermark" id="watermark">© 2026 SolaNavi by <b>마을항해</b> <span style="opacity:.75">· 협업사 사회혁신교육원</span></div>
 
 <script>const WD_DOC_BTN_MAP = {
   report:'wdb-report', official:'wdb-official', notice:'wdb-notice', notice2:'wdb-notice2',
@@ -8046,7 +8113,7 @@ function updateBadge() {
   else if (p === 'basic') { b.innerHTML = '<span class="plan-badge pb-basic">💙 BASIC</span>'; }
   else if (window._isFreeTest) { b.innerHTML = '<span class="plan-badge" style="background:#FFF3CD;color:#856404;border:1px solid #FFC107">🧪 체험 중</span>'; }
   else { b.innerHTML = '<span class="plan-badge pb-free">🆓 무료</span>'; }
-  if (wm && MH.key) wm.textContent = '© 마을항해 · ' + MH.key.slice(0,14) + '***  |  무단복제금지  · 협력 사회혁신교육원';
+  if (wm && MH.key) wm.textContent = '© 마을항해 · ' + MH.key.slice(0,14) + '***  |  무단복제금지  · 협업사 사회혁신교육원';
 }
 
 function applyLocks() {
