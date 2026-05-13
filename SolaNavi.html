@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<meta name="robots" content="index, follow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="%23F5A623"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="%23fff">☀</text></svg>">
 <meta name="description" content="햇빛소득마을 공모 컨설팅 플레이북 — 마을 태양광 협동조합 설립부터 사업계획서 작성, AI 문서 생성까지 한 번에. 컨설턴트·중간지원조직 전용 업무 도구.">
 <meta property="og:title" content="SolaNavi | 햇빛소득마을 컨설팅 플레이북">
@@ -1577,7 +1580,12 @@ if (location.search.includes('admin=1')) setTimeout(openAdminConsole, 1500);
 
 // 저작권 콘솔 경고 (개발자도구 열 때 표시)
 console.log('%c⚠ 솔라나비 (SolaNavi)', 'font-size:20px;font-weight:bold;color:#C0392B');
+console.log('%c⚠️ 보안 경고', 'font-size:24px;color:#C0392B;font-weight:bold;');
+console.log('%c이 화면은 SolaNavi 개발자 도구입니다.', 'font-size:14px;color:#1A1A1A;');
+console.log('%c누군가 "이 코드를 붙여넣으세요" 라고 한다면 절대 따라하지 마세요.', 'font-size:13px;color:#C0392B;');
+console.log('%c라이선스 키 도용·자동화 봇·무단 복제는 형사 처벌 대상입니다.', 'font-size:12px;color:#666;');
 console.log('%c본 소프트웨어는 저작권법으로 보호됩니다 (© 2026 마을항해)', 'font-size:13px;color:#666');
+console.log('%c문의: sadad1052@naver.com', 'font-size:12px;color:#888;');
 console.log('%c무단 복제·배포·역공학 시 저작권법 제136조에 따라 5년 이하 징역 또는 5천만 원 이하 벌금', 'font-size:12px;color:#888');
 console.log('%c개발자 도구를 통한 코드 수정 시도가 감지되면 라이선스가 자동 정지됩니다.', 'font-size:12px;color:#E67E22');
 console.log('%c공식 채널: sadad1052@naver.com / https://w1nter1052.github.io/solanavi', 'font-size:11px;color:#1A5276');
@@ -2048,8 +2056,19 @@ if (CLOUD_ENABLED) {
 </div>
 <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="onImportFile(this)">
 
-      <a href="mailto:sadad1052@naver.com?subject=SolaNavi 키 발급 문의" style="color:var(--sft);font-size:11px;text-decoration:none">✉ 키 발급 문의하기</a><br>
-      © 2026 마을항해 · 무단 복제 및 재배포 금지 <span style="opacity:.5;font-size:10px">· 협력: 사회혁신교육원 사회적협동조합</span>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;font-size:11.5px">
+        <a href="SolaNavi_소개서.html" style="color:var(--sft);text-decoration:none">☀ 솔라나비 소개</a>
+        <span style="color:#DDD">·</span>
+        <a href="SolaNavi_사용가이드북.html" style="color:var(--sft);text-decoration:none">📖 사용 가이드</a>
+        <span style="color:#DDD">·</span>
+        <a href="SolaNavi_이용약관.html" style="color:var(--sft);text-decoration:none">📋 이용약관</a>
+        <span style="color:#DDD">·</span>
+        <a href="SolaNavi_개인정보처리방침.html" style="color:var(--sft);text-decoration:none">🔒 개인정보처리방침</a>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--sft)">
+        <a href="mailto:sadad1052@naver.com?subject=SolaNavi 키 발급 문의" style="color:var(--sft);text-decoration:none">✉ 키 발급 문의하기</a>
+      </div>
+      <div style="margin-top:6px">© 2026 마을항해 · 무단 복제 및 재배포 금지 <span style="opacity:.5;font-size:10px">· 협력: 사회혁신교육원 사회적협동조합</span></div>
     </div>
   </div>
 </div>
