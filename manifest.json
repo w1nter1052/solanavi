@@ -1,0 +1,35 @@
+{
+  "name": "SolaNavi · 햇빛소득마을 컨설팅",
+  "short_name": "SolaNavi",
+  "description": "햇빛소득마을 공모 컨설팅 플랫폼 by 마을항해",
+  "start_url": "/SolaNavi.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDFAF5",
+  "theme_color": "#F5A623",
+  "lang": "ko",
+  "categories": ["business", "productivity", "education"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "업무도우미",
+      "short_name": "도우미",
+      "description": "AI 컨설팅 어시스턴트",
+      "url": "/SolaNavi.html#assistant"
+    },
+    {
+      "name": "수익성 계산기",
+      "short_name": "수익 계산",
+      "description": "발전소 수익 시뮬레이션",
+      "url": "/SolaNavi.html#calc"
+    }
+  ]
+}
