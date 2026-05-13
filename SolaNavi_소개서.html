@@ -3,381 +3,556 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="SolaNavi — 햇빛소득마을 공모 컨설팅 플랫폼. 마을 첫 방문부터 협동조합 설립, 사업계획서 AI 작성, 발전소 운영까지 한 번에.">
-<meta property="og:title" content="SolaNavi · 햇빛소득마을 컨설팅 플랫폼">
-<meta property="og:description" content="컨설턴트·중간지원조직을 위한 AI 컨설팅 어시스턴트. STEP 1~7 매뉴얼 + AI 서류 작성 + 250개 시군구 일조 데이터.">
-<meta property="og:type" content="website">
-<title>SolaNavi · 햇빛소득마을 컨설팅 플랫폼</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23F5A623'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='%23fff'>☀</text></svg>">
-<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<title>SolaNavi | 햇빛소득마을 컨설팅 플레이북</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --sun:#F5A623; --sun-d:#C47D0A; --sun-l:#FFF8EC;
-    --grn:#2D7A4F; --grn-l:#E6F4EC;
-    --nvy:#0F2B5B; --nvy-l:#EBF5FB;
-    --red:#C0392B;
-    --drk:#1A1A1A; --mid:#3A3A3A; --sft:#6A6A6A;
-    --bdr:#E8E4DC; --bg:#FDFAF5;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--bg);color:var(--drk);line-height:1.7;overflow-x:hidden}
-  a{color:inherit;text-decoration:none}
-  img{max-width:100%;display:block}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --sun:#F5A623;--sun-d:#C47D0A;--grn:#2D7A4F;--grn-l:#E8F5EE;
+  --navy:#0F2B5B;--blue:#1E4D8C;--sky:#EBF4FF;
+  --bg:#FAFAF8;--wht:#ffffff;--txt:#1A1A1A;--mu:#6B7280;
+  --bd:#E5E7EB;--r:14px;--r-sm:8px;
+}
+body{overflow-x:hidden;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);line-height:1.7}
 
-  /* ── HEADER ── */
-  .nav{position:fixed;top:0;left:0;right:0;background:rgba(253,250,245,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--bdr);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;z-index:100}
-  .nav-logo{display:flex;align-items:center;gap:9px;font-weight:900;font-size:18px;color:var(--drk)}
-  .nav-logo .icon{width:32px;height:32px;background:linear-gradient(135deg,var(--sun),var(--sun-d));border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;box-shadow:0 0 14px rgba(245,166,35,.3)}
-  .nav-links{display:flex;gap:24px;font-size:14px;color:var(--mid);align-items:center}
-  .nav-links a:hover{color:var(--sun-d)}
-  .nav-cta{background:linear-gradient(135deg,var(--sun),var(--sun-d));color:#fff;padding:10px 22px;border-radius:8px;font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(245,166,35,.3);transition:transform .15s}
-  .nav-cta:hover{transform:translateY(-1px)}
+/* ── 공통 ── */
+.container{max-width:960px;margin:0 auto;padding:0 24px}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.8px;padding:4px 12px;border-radius:20px;text-transform:uppercase}
+.tag.sun{background:#FFF3D6;color:var(--sun-d)}
+.tag.grn{background:var(--grn-l);color:var(--grn)}
+.tag.navy{background:#EEF2FF;color:var(--navy)}
+.section{padding:72px 0}
+.section-label{font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--sun-d);text-transform:uppercase;margin-bottom:12px}
+.section-title{font-family:'Noto Serif KR',serif;font-size:clamp(26px,4vw,38px);font-weight:700;color:var(--navy);line-height:1.3;margin-bottom:16px}
+.section-desc{font-size:16px;color:var(--mu);line-height:1.9;max-width:640px}
+.divider{height:1px;background:var(--bd);margin:0}
 
-  /* ── HERO ── */
-  .hero{padding:120px 24px 80px;background:linear-gradient(160deg,#FFFDF8 0%,#F4FAF4 50%,#FFFDF8 100%);position:relative;overflow:hidden}
-  .hero::before{content:'';position:absolute;top:-120px;right:-100px;width:520px;height:520px;background:radial-gradient(circle,rgba(245,166,35,.15),transparent 65%);border-radius:50%}
-  .hero::after{content:'';position:absolute;bottom:-100px;left:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(45,122,79,.12),transparent 65%);border-radius:50%}
-  .hero-inner{max-width:1100px;margin:0 auto;text-align:center;position:relative;z-index:2}
-  .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);color:var(--sun-d);padding:6px 16px;border-radius:24px;font-size:12.5px;font-weight:700;letter-spacing:.04em;margin-bottom:22px}
-  .hero-sun{font-size:64px;margin-bottom:18px;animation:pulse 3s infinite}
-  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-  .hero-title{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(28px,5vw,52px);font-weight:900;line-height:1.2;margin-bottom:18px;letter-spacing:-0.02em}
-  .hero-title em{font-style:normal;background:linear-gradient(135deg,var(--sun),var(--sun-d));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .hero-sub{font-size:clamp(15px,2vw,19px);color:var(--sft);max-width:680px;margin:0 auto 36px;line-height:1.7}
-  .hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-  .btn{padding:14px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-  .btn-primary{background:linear-gradient(135deg,var(--sun),var(--sun-d));color:#fff;box-shadow:0 6px 24px rgba(245,166,35,.35)}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(245,166,35,.45)}
-  .btn-ghost{background:#fff;color:var(--drk);border:1.5px solid var(--bdr)}
-  .btn-ghost:hover{border-color:var(--sun);color:var(--sun-d)}
-  .hero-stats{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;margin-top:50px;padding-top:36px;border-top:1px solid var(--bdr)}
-  .stat{text-align:center}
-  .stat-n{font-size:32px;font-weight:900;color:var(--sun-d);font-family:'Pretendard Variable',sans-serif}
-  .stat-l{font-size:12px;color:var(--sft);margin-top:2px;letter-spacing:.04em}
+/* ── HERO ── */
+#hero{
+  background:linear-gradient(135deg,#0F2B5B 0%,#1E4D8C 60%,#0D3B2E 100%);
+  padding:80px 0 72px;color:#fff;position:relative;overflow:hidden
+}
+#hero::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,166,35,.15) 0%,transparent 70%);
+}
+#hero::after{
+  content:'';position:absolute;bottom:-60px;left:30%;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,122,79,.2) 0%,transparent 70%);
+}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:6px 16px;
+  font-size:12px;font-weight:500;margin-bottom:28px}
+.hero-sun{font-size:16px}
+.hero-title{font-family:'Noto Serif KR',serif;font-size:clamp(32px,5vw,54px);font-weight:700;line-height:1.2;margin-bottom:16px}
+.hero-title .accent{color:var(--sun)}
+.hero-sub{font-size:18px;color:rgba(255,255,255,.75);margin-bottom:36px;max-width:560px;line-height:1.8}
+.hero-pills{display:flex;flex-wrap:wrap;gap:10px}
+.hero-pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;padding:7px 16px;font-size:13px;font-weight:500}
+.hero-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px;
+  padding-top:40px;border-top:1px solid rgba(255,255,255,.15)}
+.hero-kpi-n{font-size:32px;font-weight:900;color:var(--sun);line-height:1}
+.hero-kpi-l{font-size:12px;color:rgba(255,255,255,.6);margin-top:6px}
 
-  /* ── SECTION 공통 ── */
-  section{padding:80px 24px}
-  .container{max-width:1100px;margin:0 auto}
-  .sec-tag{display:inline-block;font-size:13px;font-weight:700;color:var(--sun-d);letter-spacing:.06em;margin-bottom:8px}
-  .sec-title{font-family:'Pretendard Variable',sans-serif;font-size:clamp(24px,3.5vw,36px);font-weight:900;line-height:1.3;margin-bottom:14px;letter-spacing:-0.01em}
-  .sec-sub{font-size:15px;color:var(--sft);line-height:1.7;max-width:680px}
+/* ── PROBLEM ── */
+#problem{background:var(--wht)}
+.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px}
+.prob-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:28px 24px}
+.prob-icon{font-size:28px;margin-bottom:14px}
+.prob-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.prob-desc{font-size:13px;color:var(--mu);line-height:1.8}
+.prob-highlight{background:#FFF3D6;border-left:3px solid var(--sun);border-radius:0 var(--r-sm) var(--r-sm) 0;
+  padding:16px 20px;margin-top:32px;font-size:14px;color:var(--sun-d);font-weight:500}
 
-  /* ── 문제·해결 ── */
-  .problem{background:#fff}
-  .p-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;margin-top:42px}
-  .p-card{background:var(--bg);border:1px solid var(--bdr);border-radius:14px;padding:24px}
-  .p-card h3{font-size:16px;font-weight:900;color:var(--red);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-  .p-card ul{padding-left:20px;color:var(--mid);font-size:14px;line-height:2}
-  .p-card.solve h3{color:var(--grn)}
+/* ── SOLUTION ── */
+#solution{background:var(--navy);color:#fff}
+#solution .section-title{color:#fff}
+#solution .section-desc{color:rgba(255,255,255,.7)}
+.sol-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:44px}
+.sol-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--r);padding:28px 24px;transition:transform .2s}
+.sol-card:hover{transform:translateY(-3px)}
+.sol-num{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--sun);text-transform:uppercase;margin-bottom:10px}
+.sol-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
+.sol-desc{font-size:13px;color:rgba(255,255,255,.65);line-height:1.8}
+.sol-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.sol-tag{background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);
+  border-radius:20px;padding:3px 10px;font-size:11px;color:var(--sun);font-weight:500}
 
-  /* ── FEATURES ── */
-  .features{background:linear-gradient(180deg,#FFFDF8,#FBF6EE)}
-  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:50px}
-  .feat-card{background:#fff;border-radius:16px;padding:30px 26px;border:1px solid var(--bdr);transition:all .25s}
-  .feat-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.07);border-color:rgba(245,166,35,.4)}
-  .feat-icon{width:54px;height:54px;background:linear-gradient(135deg,var(--sun-l),#FEF4DC);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px}
-  .feat-title{font-size:17px;font-weight:900;margin-bottom:8px}
-  .feat-desc{font-size:13.5px;color:var(--sft);line-height:1.7}
+/* ── FEATURES ── */
+#features{background:var(--wht)}
+.feat-list{margin-top:48px;display:flex;flex-direction:column;gap:40px}
+.feat-row{display:grid;grid-template-columns:1fr 2fr;gap:48px;align-items:start;
+  padding-bottom:40px;border-bottom:1px solid var(--bd)}
+.feat-row:last-child{border-bottom:none;padding-bottom:0}
+.feat-step{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--sun-d);text-transform:uppercase;margin-bottom:8px}
+.feat-title{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:10px}
+.feat-desc{font-size:14px;color:var(--mu);line-height:1.9}
+.feat-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.feat-chip{background:var(--sky);border:1px solid #BFDBFE;border-radius:var(--r-sm);
+  padding:5px 12px;font-size:12px;font-weight:500;color:var(--navy)}
+.feat-chip.grn{background:var(--grn-l);border-color:#A7F3D0;color:var(--grn)}
+.feat-chip.sun{background:#FFF3D6;border-color:#FDE68A;color:var(--sun-d)}
+.feat-screen{background:linear-gradient(135deg,#EBF4FF,#F0FDF4);
+  border:1px solid var(--bd);border-radius:var(--r);padding:24px;
+  display:flex;flex-direction:column;gap:10px}
+.feat-screen-row{background:#fff;border:1px solid var(--bd);border-radius:var(--r-sm);
+  padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px}
+.feat-screen-ico{font-size:18px;flex-shrink:0}
+.feat-screen-txt{color:var(--txt);font-weight:500}
+.feat-screen-sub{font-size:11px;color:var(--mu);margin-top:2px}
+.feat-screen-badge{margin-left:auto;background:var(--grn-l);color:var(--grn);
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
 
-  /* ── WORKFLOW ── */
-  .workflow{background:#fff}
-  .wf-list{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:42px}
-  .wf-step{background:var(--bg);border:1.5px solid var(--bdr);border-radius:14px;padding:24px;position:relative}
-  .wf-num{position:absolute;top:18px;right:20px;font-size:48px;font-weight:900;color:rgba(245,166,35,.15);font-family:'Pretendard Variable',sans-serif}
-  .wf-step h4{font-size:15px;font-weight:900;color:var(--sun-d);margin-bottom:9px}
-  .wf-step p{font-size:13.5px;color:var(--mid);line-height:1.7}
+/* ── FLOW ── */
+#flow{background:var(--bg)}
+.flow-steps{display:flex;gap:0;margin-top:48px;position:relative}
+.flow-steps::before{content:'';position:absolute;top:36px;left:36px;right:36px;height:2px;
+  background:linear-gradient(90deg,var(--sun),var(--grn));z-index:0}
+.flow-step{flex:1;text-align:center;position:relative;z-index:1;padding:0 8px}
+.flow-dot{width:72px;height:72px;border-radius:50%;
+  background:#fff;border:3px solid var(--sun);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;margin:0 auto 16px;box-shadow:0 4px 16px rgba(245,166,35,.2)}
+.flow-step:last-child .flow-dot{border-color:var(--grn)}
+.flow-n{font-size:10px;font-weight:700;color:var(--sun-d);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
+.flow-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.flow-desc{font-size:11px;color:var(--mu);line-height:1.6}
 
-  /* ── PRICING ── */
-  .pricing{background:linear-gradient(180deg,#F4FAF4,#FFFDF8)}
-  .price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:42px}
-  .plan{background:#fff;border:2px solid var(--bdr);border-radius:18px;padding:28px 22px;text-align:center;transition:all .2s;position:relative}
-  .plan.featured{border-color:var(--sun);background:linear-gradient(180deg,#fff,#FFFDF5)}
-  .plan.featured::before{content:'추천';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--sun),var(--sun-d));color:#fff;font-size:11px;font-weight:700;padding:5px 16px;border-radius:18px}
-  .plan-name{font-size:14px;font-weight:700;color:var(--sft);margin-bottom:6px}
-  .plan-price{font-size:32px;font-weight:900;color:var(--drk);margin:8px 0;line-height:1}
-  .plan-price span{font-size:14px;color:var(--sft);font-weight:600}
-  .plan-price.free{color:var(--grn)}
-  .plan-feat{list-style:none;padding:18px 0;margin:14px 0;border-top:1px solid var(--bdr);font-size:12.5px;color:var(--mid);line-height:2;text-align:left}
-  .plan-feat li{padding-left:22px;position:relative}
-  .plan-feat li::before{content:'✓';position:absolute;left:0;color:var(--grn);font-weight:900}
-  .plan-cta{display:block;width:100%;padding:11px;border-radius:8px;background:#F0F0EA;color:var(--mid);font-weight:700;font-size:13px;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
-  .plan.featured .plan-cta{background:linear-gradient(135deg,var(--sun),var(--sun-d));color:#fff}
-  .plan-cta:hover{transform:translateY(-1px)}
+/* ── PLANS ── */
+#plans{background:var(--wht)}
+.plan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:44px}
+.plan-card{border:1.5px solid var(--bd);border-radius:var(--r);padding:28px 20px;
+  display:flex;flex-direction:column;position:relative}
+.plan-card.featured{border-color:var(--sun);background:linear-gradient(160deg,#FFFDF7,#FFF8EC)}
+.plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:var(--sun);color:#fff;font-size:10px;font-weight:700;
+  padding:3px 14px;border-radius:20px;white-space:nowrap}
+.plan-name{font-size:14px;font-weight:700;color:var(--mu);margin-bottom:10px}
+.plan-price{font-size:28px;font-weight:900;color:var(--navy);line-height:1}
+.plan-unit{font-size:12px;color:var(--mu);margin-top:4px;margin-bottom:20px}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:8px;flex:1}
+.plan-feats li{font-size:12px;color:var(--txt);display:flex;align-items:flex-start;gap:8px}
+.plan-feats li::before{content:'✓';color:var(--grn);font-weight:700;flex-shrink:0;margin-top:1px}
+.plan-feats li.locked{color:var(--mu)}
+.plan-feats li.locked::before{content:'—';color:var(--bd)}
+.plan-cta{margin-top:20px;background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);
+  padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
+.plan-card.featured .plan-cta{background:var(--sun-d)}
 
-  /* ── CTA ── */
-  .cta-final{background:linear-gradient(135deg,var(--nvy),#0A1F4A);color:#fff;text-align:center}
-  .cta-final h2{font-size:clamp(24px,3vw,34px);font-weight:900;margin-bottom:14px;color:#fff}
-  .cta-final p{font-size:15px;color:rgba(255,255,255,.75);margin-bottom:28px;max-width:640px;margin-left:auto;margin-right:auto;word-break:keep-all;line-height:1.7}
-  .cta-final .btn-primary{background:linear-gradient(135deg,#fff,#FFF8E1);color:var(--drk)}
+/* ── CONTACT ── */
+#contact{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;text-align:center;padding:72px 0}
+#contact .section-title{color:#fff}
+.contact-desc{font-size:16px;color:rgba(255,255,255,.75);margin:0 auto 36px;max-width:520px;line-height:1.9}
+.contact-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--sun);color:#fff;border:none;border-radius:var(--r-sm);
+  padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
+  text-decoration:none;display:inline-block}
+.btn-outline{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:var(--r-sm);
+  padding:14px 32px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;
+  text-decoration:none;display:inline-block}
+.contact-info{margin-top:36px;display:flex;gap:32px;justify-content:center;flex-wrap:wrap}
+.contact-item{font-size:13px;color:rgba(255,255,255,.6)}
+.contact-item strong{color:#fff;display:block;font-size:14px;margin-bottom:3px}
 
-  /* ── FOOTER ── */
-  footer{background:#1a1a1a;color:rgba(255,255,255,.55);padding:38px 24px;text-align:center;font-size:12.5px;line-height:2}
-  footer a{color:var(--sun);text-decoration:none}
-  footer .ft-logo{font-size:14px;color:#fff;font-weight:700;margin-bottom:10px}
+/* ── FOOTER ── */
+footer{background:#0A0A0A;color:rgba(255,255,255,.4);text-align:center;padding:24px;font-size:12px}
 
-  /* ── 반응형 ── */
-  @media(max-width:768px){
-    .nav{padding:11px 16px}
-    .nav-links{display:none}
-    .hero{padding:90px 18px 60px}
-    section{padding:54px 18px}
-    .p-grid{grid-template-columns:1fr;gap:18px}
-    .feat-grid{grid-template-columns:1fr;gap:14px}
-    .feat-card{padding:22px 18px}
-    .wf-list{grid-template-columns:1fr}
-    .price-grid{grid-template-columns:1fr 1fr;gap:12px}
-    .plan{padding:22px 16px}
-    .plan-price{font-size:26px}
-    .hero-stats{flex-wrap:wrap;gap:18px 16px;margin-top:36px;padding-top:28px}
-    .stat{flex:0 0 calc(50% - 8px)}
-    .stat-n{font-size:24px}
-    .hero-cta{flex-direction:column;gap:10px}
-    .hero-cta .btn{width:100%;justify-content:center}
-    table{font-size:12.5px}
-  }
-  @media(max-width:480px){
-    .price-grid{grid-template-columns:1fr}
-    .stat-n{font-size:22px}
-    .stat-l{font-size:11px}
-  }
+/* ── 반응형 ── */
+@media(max-width:768px){
+  .prob-grid,.sol-grid,.plan-grid{grid-template-columns:1fr}
+  .feat-row{grid-template-columns:1fr}
+  .flow-steps{flex-direction:column;gap:24px}
+  .flow-steps::before{display:none}
+  .hero-kpis{grid-template-columns:repeat(3,1fr)}
+  .contact-info{flex-direction:column;gap:16px;align-items:center}
+  .contact-btns{flex-direction:column;align-items:center}
+  .btn-primary,.btn-outline{width:100%;max-width:280px;text-align:center}
+  .section-title{font-size:clamp(22px,5vw,32px)}
+  .hero-title{font-size:clamp(28px,6vw,42px)}
+  .sol-card:hover{transform:none}
+  .feat-screen{margin-top:20px}
+}
+@media(max-width:480px){
+  .hero-kpis{grid-template-columns:repeat(3,1fr)}
+  .section{padding:48px 0}
+  .hero-kpi-n{font-size:24px}
+  .hero-kpi-l{font-size:11px}
+  .plan-grid{grid-template-columns:1fr 1fr}
+  .feat-screen-row{flex-wrap:wrap}
+  .feat-screen-badge{margin-top:6px;margin-left:0}
+  .flow-dot{width:56px;height:56px;font-size:20px}
+  .container{padding:0 16px}
+}
+
+/* ── print ── */
+@media(max-width:375px){
+  .plan-grid{grid-template-columns:1fr}
+  .hero-pills{gap:6px}
+  .hero-pill{font-size:11px;padding:5px 12px}
+  .hero-kpis{grid-template-columns:1fr 1fr 1fr}
+  .hero-kpi-n{font-size:20px}
+}
+@media print{
+  #hero{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .section{padding:40px 0}
+}
 </style>
 </head>
 <body>
 
-<!-- ══ NAV ══ -->
-<nav class="nav">
-  <a href="#" class="nav-logo">
-    <span class="icon">☀</span>
-    <span>SolaNavi</span>
-  </a>
-  <div class="nav-links">
-    <a href="#features">기능</a>
-    <a href="#workflow">사용 흐름</a>
-    <a href="#pricing">요금제</a>
-    <a href="SolaNavi_사용가이드북.html">사용 가이드</a>
-  </div>
-  <a href="https://w1nter1052.github.io/solanavi/SolaNavi.html" class="nav-cta">로그인 →</a>
-</nav>
-
-<!-- ══ HERO ══ -->
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-badge">☀ 2026 행안부 햇빛소득마을 공모 대응</div>
-    <div class="hero-sun">☀</div>
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <span class="hero-sun">☀</span>
+      <span>2026 햇빛소득마을 공모 대응 솔루션</span>
+    </div>
     <h1 class="hero-title">
-      마을 태양광 컨설팅을<br>
-      <em>한 번에 끝내는 도구</em>
+      마을의 태양광 사업,<br>
+      <span class="accent">SolaNavi</span>가 길을 안내합니다
     </h1>
     <p class="hero-sub">
-      마을 첫 방문부터 협동조합 설립, 사업계획서 AI 작성, 발전소 운영까지<br>
-      컨설턴트가 순서대로 따라갈 수 있는 통합 플랫폼입니다.
+      행정안전부 햇빛소득마을 공모사업 신청부터 운영까지<br>
+      AI 기반 컨설팅 플레이북 — by 마을항해
     </p>
-    <div class="hero-cta">
-      <a href="https://w1nter1052.github.io/solanavi/SolaNavi.html" class="btn btn-primary">🆓 무료로 시작하기</a>
-      <a href="#pricing" class="btn btn-ghost">요금제 보기 →</a>
+    <div class="hero-pills">
+      <div class="hero-pill">☀ 태양광 수익 분배</div>
+      <div class="hero-pill">📋 서식3 사업계획서 AI 작성</div>
+      <div class="hero-pill">🤝 협동조합 설립 가이드</div>
+      <div class="hero-pill">📱 모바일 최적화</div>
     </div>
-    <div class="hero-stats">
-      <div class="stat"><div class="stat-n">7</div><div class="stat-l">STEP 매뉴얼</div></div>
-      <div class="stat"><div class="stat-n">250+</div><div class="stat-l">시군구 일조 DB</div></div>
-      <div class="stat"><div class="stat-n">10</div><div class="stat-l">AI 작업 도구</div></div>
-      <div class="stat"><div class="stat-n">100%</div><div class="stat-l">모바일 대응</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ══ PROBLEM ── -->
-<section class="problem" id="problem">
-  <div class="container">
-    <span class="sec-tag">왜 SolaNavi인가</span>
-    <h2 class="sec-title">햇빛소득마을 공모, 왜 어려울까?</h2>
-    <p class="sec-sub">2026 행안부 공모는 마을·협동조합·발전사업 세 영역의 복합 컨설팅이 필요합니다.<br>대부분 컨설턴트는 매번 자료를 처음부터 찾고, 서식을 새로 작성합니다.</p>
-    <div class="p-grid">
-      <div class="p-card">
-        <h3>😩 기존 방식의 문제</h3>
-        <ul>
-          <li>STEP별 자료가 흩어져 있어 처음 찾기 어려움</li>
-          <li>마을마다 회의록·동의서·사업계획서를 매번 새로 작성</li>
-          <li>수익성 계산을 엑셀로 일일이 — 마을 설득 자료 부족</li>
-          <li>법령·정관 조항 매번 검색해서 확인</li>
-          <li>마을 진행 단계 관리가 머릿속에만</li>
-          <li>외근·현장에서는 PC가 없으면 작업 불가</li>
-        </ul>
+    <div class="hero-kpis">
+      <div>
+        <div class="hero-kpi-n">500+</div>
+        <div class="hero-kpi-l">선정 목표 마을 수 (전국)</div>
       </div>
-      <div class="p-card solve">
-        <h3>✨ SolaNavi의 해결</h3>
-        <ul>
-          <li>STEP 1~7 매뉴얼 + 단계별 체크리스트 자동 안내</li>
-          <li>회의록·동의서·사업계획서 AI 5초 작성 (Claude AI)</li>
-          <li>전국 250개 시군구 일조 데이터 자동 적용 — 20년 누적 시뮬</li>
-          <li>법령 조문 AI 검색 + 정관(안) 표준예시문 탑재</li>
-          <li>마을별 D-day·진행단계·담당자 통합 관리</li>
-          <li>모바일 완벽 대응 — 현장에서 즉시 입력·조회</li>
-        </ul>
+      <div>
+        <div class="hero-kpi-n">300~</div>
+        <div class="hero-kpi-l">설치 용량 kW (마을당)</div>
+      </div>
+      <div>
+        <div class="hero-kpi-n">20년</div>
+        <div class="hero-kpi-l">발전사업 수익 기간</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══ FEATURES ══ -->
-<section class="features" id="features">
+<!-- PROBLEM -->
+<section id="problem" class="section">
   <div class="container">
-    <span class="sec-tag">핵심 기능</span>
-    <h2 class="sec-title">컨설턴트 1명이 마을 5~10곳을 동시에</h2>
-    <p class="sec-sub">SolaNavi의 10개 도구가 STEP별 컨설팅을 자동화합니다.</p>
-    <div class="feat-grid">
-      <div class="feat-card">
-        <div class="feat-icon">📖</div>
-        <div class="feat-title">STEP 1~7 매뉴얼</div>
-        <div class="feat-desc">첫 방문 설득부터 협동조합 운영까지 50+ 페이지 완전 가이드. 표준정관(안) 102조 탑재.</div>
+    <div class="section-label">문제 인식</div>
+    <h2 class="section-title">마을이 혼자 하기엔<br>너무 복잡합니다</h2>
+    <p class="section-desc">햇빛소득마을 사업은 협동조합 설립, 부지 확보, 인허가, 사업계획서 작성까지 수십 가지 절차가 얽혀있습니다. 전담 컨설턴트 없이는 어디서부터 시작해야 할지조차 막막합니다.</p>
+    <div class="prob-grid">
+      <div class="prob-card">
+        <div class="prob-icon">📑</div>
+        <div class="prob-title">복잡한 공모 서류</div>
+        <div class="prob-desc">서식3 사업계획서, 마을총회 의결서, 붙임서식 1·2 등 공식 양식을 일반 주민이 작성하기 어렵습니다</div>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon">🤖</div>
-        <div class="feat-title">AI 서류 자동 작성</div>
-        <div class="feat-desc">회의록·동의서·사업계획서·공문 등을 Claude AI가 5초 만에 작성. Word·HWP·PDF 다운로드.</div>
+      <div class="prob-card">
+        <div class="prob-icon">⚖️</div>
+        <div class="prob-title">법적 절차의 장벽</div>
+        <div class="prob-desc">협동조합기본법 준수, 정관 필수조항 누락, 70% 주민동의 기준 등 법률 지식이 없으면 실수하기 쉽습니다</div>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon">💰</div>
-        <div class="feat-title">수익성 시뮬레이션</div>
-        <div class="feat-desc">설치 용량·일조시간·SMP·REC를 입력하면 20년 누적 수익 자동 계산. 주민 설명회용 PDF.</div>
+      <div class="prob-card">
+        <div class="prob-icon">🗺️</div>
+        <div class="prob-title">컨설턴트 부족</div>
+        <div class="prob-desc">전국 500개 이상 마을에 동시 컨설팅을 제공할 전문 인력이 절대적으로 부족합니다</div>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon">🗺</div>
-        <div class="feat-title">전국 시군구 DB</div>
-        <div class="feat-desc">17개 시도 + 250개 시군구 평년 일조시간. 시도 선택 시 시군구 자동 필터.</div>
+    </div>
+    <div class="prob-highlight">
+      💡 SolaNavi는 컨설턴트 1인이 수십 개 마을을 동시에 관리할 수 있도록 AI로 업무를 자동화합니다
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SOLUTION -->
+<section id="solution" class="section">
+  <div class="container">
+    <div class="section-label" style="color:rgba(245,166,35,.8)">솔루션</div>
+    <h2 class="section-title">AI 컨설팅 플레이북,<br>SolaNavi</h2>
+    <p class="section-desc">햇빛소득마을 사업 전 과정을 6단계로 구조화하고, AI가 각 단계의 서류·법령·수익 분석을 자동으로 지원합니다.</p>
+    <div class="sol-grid">
+      <div class="sol-card">
+        <div class="sol-num">Core 01</div>
+        <div class="sol-title">📖 STEP 1~6 컨설팅 매뉴얼</div>
+        <div class="sol-desc">햇빛소득마을 사업의 첫 방문부터 20년 운영까지 전 과정을 단계별로 안내. 잠금 해제형으로 플랜에 따라 접근 가능</div>
+        <div class="sol-tags"><span class="sol-tag">6단계 구성</span><span class="sol-tag">FAQ 15개</span><span class="sol-tag">표준 정관(안)</span></div>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon">🎙</div>
-        <div class="feat-title">실시간 녹음 + AI</div>
-        <div class="feat-desc">마을 회의 현장에서 녹음 → AI가 공식 회의록 자동 정리. 모바일 직접 녹음 지원.</div>
+      <div class="sol-card">
+        <div class="sol-num">Core 02</div>
+        <div class="sol-title">🤖 AI 서류 자동 작성</div>
+        <div class="sol-desc">진행보고서·공문·마을공고문·마을총회 의사록·주민동의서·총회소집공고·창립총회 의사록 등 단계별 서류를 AI가 자동 작성. Word 파일로 즉시 다운로드</div>
+        <div class="sol-tags"><span class="sol-tag">STEP별 서류</span><span class="sol-tag">Word 출력</span><span class="sol-tag">공식 서식 적용</span></div>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon">⚖️</div>
-        <div class="feat-title">법령 AI 검색</div>
-        <div class="feat-desc">신재생에너지법·협동조합기본법·전기사업법 조문 자연어 검색.</div>
+      <div class="sol-card">
+        <div class="sol-num">Core 03</div>
+        <div class="sol-title">📋 사업계획서·법령 AI 분석</div>
+        <div class="sol-desc">서식3 6개 항목 AI 초안 작성, 업로드 서류 AI 검토, 이격거리·농지전용·인허가 법령 분석까지 한 번에. 평가 배점 높은 항목 자동 강조</div>
+        <div class="sol-tags"><span class="sol-tag">서식3 완성</span><span class="sol-tag">서류 AI 검토</span><span class="sol-tag">법령 분석</span></div>
       </div>
-      <div class="feat-card">
-        <div class="feat-icon">📊</div>
-        <div class="feat-title">마을 통합 대시보드</div>
-        <div class="feat-desc">담당 마을의 STEP 단계·D-day·준비도를 한 화면에. Excel·CSV 내보내기.</div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">🔍</div>
-        <div class="feat-title">부실 조기경보</div>
-        <div class="feat-desc">공고문 5대 필수 요건 자동 점검 + 갈등 매트릭스 + 시나리오 시뮬.</div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">📱</div>
-        <div class="feat-title">모바일 완벽 대응</div>
-        <div class="feat-desc">현장에서 핸드폰으로 마을 정보 입력·서류 조회·녹음. 어디서나 동기화.</div>
+      <div class="sol-card">
+        <div class="sol-num">Core 04</div>
+        <div class="sol-title">🏘 마을 관리 대시보드</div>
+        <div class="sol-desc">다수 마을 동시 관리, 진행 단계 추적, AI 자료조사로 주민수·부지·계통연계 현황 자동 수집. 데이터 내보내기/가져오기 지원</div>
+        <div class="sol-tags"><span class="sol-tag">마을별 현황</span><span class="sol-tag">AI 자료조사</span><span class="sol-tag">데이터 백업</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══ WORKFLOW ══ -->
-<section class="workflow" id="workflow">
+<!-- FEATURES -->
+<section id="features" class="section">
   <div class="container">
-    <span class="sec-tag">사용 흐름</span>
-    <h2 class="sec-title">3단계로 끝나는 컨설팅 시작</h2>
-    <div class="wf-list">
-      <div class="wf-step">
-        <span class="wf-num">1</span>
-        <h4>로그인 → 마을 등록</h4>
-        <p>발급받은 라이선스 키로 로그인 후, 담당 마을의 기본 정보(이름·이장·주민수)를 입력합니다. 첫 방문 일정도 함께 등록.</p>
+    <div class="section-label">주요 기능</div>
+    <h2 class="section-title">컨설턴트가 실제로<br>사용하는 기능들</h2>
+    <div class="feat-list">
+
+      <div class="feat-row">
+        <div>
+          <div class="feat-step">STEP 01</div>
+          <div class="feat-title">마을 등록 & AI 자료조사</div>
+          <div class="feat-desc">마을명만 입력하면 AI가 인구·고령화율·부지현황·이격거리 조례·계통연계 상황까지 자동 조사. 수집된 데이터는 사업계획서에 자동 반영됩니다.</div>
+          <div class="feat-chips">
+            <span class="feat-chip grn">AI 자동 입력</span>
+            <span class="feat-chip">주민수 자동 추정</span>
+            <span class="feat-chip">권장 kW 자동 계산</span>
+          </div>
+        </div>
+        <div class="feat-screen">
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">🔍</div>
+            <div><div class="feat-screen-txt">해남군 북일면 동해마을</div><div class="feat-screen-sub">마을명 입력 → AI 자료조사 시작</div></div>
+          </div>
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">👥</div>
+            <div><div class="feat-screen-txt">주민 66명 / 가구 32호</div><div class="feat-screen-sub">AI 추정값 — 현장 확인 권장</div></div>
+            <div class="feat-screen-badge">자동 입력</div>
+          </div>
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">☀</div>
+            <div><div class="feat-screen-txt">권장 500kW</div><div class="feat-screen-sub">농지(전·답) 부지 가능 / 계통연계 가능</div></div>
+            <div class="feat-screen-badge">자동 입력</div>
+          </div>
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">⚠️</div>
+            <div><div class="feat-screen-txt">이격거리 조례 확인 필요</div><div class="feat-screen-sub">해남군 조례 현황 확인 권장</div></div>
+          </div>
+        </div>
       </div>
-      <div class="wf-step">
-        <span class="wf-num">2</span>
-        <h4>STEP별 컨설팅 진행</h4>
-        <p>매뉴얼 STEP 1~7을 따라가며, 필요할 때마다 AI 도구로 회의록·동의서·사업계획서를 자동 작성합니다.</p>
+
+      <div class="feat-row">
+        <div>
+          <div class="feat-step">STEP 02</div>
+          <div class="feat-title">서식3 사업계획서 자동 작성</div>
+          <div class="feat-desc">마을 선택 한 번으로 전체 입력 필드 자동 채우기. AI가 평가 배점 높은 항목(지자체협력 20점, 부지확보 8점, 재원확보 7점)을 강조한 초안을 작성합니다.</div>
+          <div class="feat-chips">
+            <span class="feat-chip sun">서식3 6개 항목</span>
+            <span class="feat-chip grn">Word 파일 출력</span>
+            <span class="feat-chip">평가 기준 반영</span>
+            <span class="feat-chip">REC +0.2 조건 명시</span>
+          </div>
+        </div>
+        <div class="feat-screen">
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">📋</div>
+            <div><div class="feat-screen-txt">1. 협동조합 현황</div><div class="feat-screen-sub">설립 목적, 조합원 현황, 출자금 구조</div></div>
+            <div class="feat-screen-badge">AI 작성</div>
+          </div>
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">🏘</div>
+            <div><div class="feat-screen-txt">2. 마을공동체 현황</div><div class="feat-screen-sub">인구·고령화·70% 동의 과정</div></div>
+            <div class="feat-screen-badge">AI 작성</div>
+          </div>
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">☀</div>
+            <div><div class="feat-screen-txt">4. 태양광 발전사업 추진계획</div><div class="feat-screen-sub">부지·설치비·기자재·ReSCO 계획</div></div>
+            <div class="feat-screen-badge">AI 작성</div>
+          </div>
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">💰</div>
+            <div><div class="feat-screen-txt">6. 햇빛소득마을 사업관리계획</div><div class="feat-screen-sub">수익 70% 마을귀속·회계·지자체협력</div></div>
+            <div class="feat-screen-badge">AI 작성</div>
+          </div>
+        </div>
       </div>
-      <div class="wf-step">
-        <span class="wf-num">3</span>
-        <h4>제출 → 결과 관리</h4>
-        <p>준비도 진단 통과 후 공모 서류를 제출. 선정 후 운영 단계도 동일한 도구로 계속 관리합니다.</p>
+
+      <div class="feat-row">
+        <div>
+          <div class="feat-step">STEP 03</div>
+          <div class="feat-title">단계별 서류 자동 작성</div>
+          <div class="feat-desc">STEP1(설득 자료)부터 STEP4(사업계획서)까지 단계별로 필요한 서류를 AI가 자동 작성합니다. 서류 검토 기능으로 업로드한 서류의 미비점도 AI가 분석합니다.</div>
+          <div class="feat-chips">
+            <span class="feat-chip">진행 보고서·공문</span>
+            <span class="feat-chip sun">마을총회 의사록</span>
+            <span class="feat-chip sun">주민 동의서</span>
+            <span class="feat-chip">창립총회 의사록</span>
+            <span class="feat-chip grn">AI 서류 검토</span>
+            <span class="feat-chip">총회 소집 공고</span>
+          </div>
+        </div>
+        <div class="feat-screen">
+          <div class="feat-screen-row" style="background:#FFF8EC;border-color:#FDE68A">
+            <div class="feat-screen-ico">📄</div>
+            <div><div class="feat-screen-txt">마을총회 의사록</div><div class="feat-screen-sub">70% 동의율 자동 계산 · 이장 날인란 포함</div></div>
+            <div class="feat-screen-badge">⬇ Word</div>
+          </div>
+          <div class="feat-screen-row" style="background:#F0FDF4;border-color:#A7F3D0">
+            <div class="feat-screen-ico">✍️</div>
+            <div><div class="feat-screen-txt">주민 동의서</div><div class="feat-screen-sub">개인정보 수집동의 포함 · 서명란 포함</div></div>
+            <div class="feat-screen-badge">⬇ Word</div>
+          </div>
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">🏛</div>
+            <div><div class="feat-screen-txt">창립총회 의사록</div><div class="feat-screen-sub">협동조합기본법 법정 양식 · 출자금 표 포함</div></div>
+            <div class="feat-screen-badge">⬇ Word</div>
+          </div>
+          <div class="feat-screen-row">
+            <div class="feat-screen-ico">🔍</div>
+            <div><div class="feat-screen-txt">서류 AI 검토</div><div class="feat-screen-sub">업로드한 서류의 미비점·위험항목 자동 분석</div></div>
+            <div class="feat-screen-badge">AI 분석</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FLOW -->
+<section id="flow" class="section">
+  <div class="container">
+    <div class="section-label">사용 흐름</div>
+    <h2 class="section-title">컨설턴트 업무 흐름</h2>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-dot">🔑</div>
+        <div class="flow-n">Step 1</div>
+        <div class="flow-title">라이선스 키 입력</div>
+        <div class="flow-desc">구독 플랜에 맞는 키로 로그인</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">🏘</div>
+        <div class="flow-n">Step 2</div>
+        <div class="flow-title">마을 등록</div>
+        <div class="flow-desc">마을명 입력 → AI 자료조사 자동 실행</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">📖</div>
+        <div class="flow-n">Step 3</div>
+        <div class="flow-title">매뉴얼 학습</div>
+        <div class="flow-desc">STEP 1~6 순서대로 현장 준비</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">🤖</div>
+        <div class="flow-n">Step 4</div>
+        <div class="flow-title">AI로 서류 작성</div>
+        <div class="flow-desc">사업계획서·서류 8종 자동 생성</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-dot">✅</div>
+        <div class="flow-n">Step 5</div>
+        <div class="flow-title">공모 신청</div>
+        <div class="flow-desc">완성된 서류로 지자체 제출</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══ PRICING ══ -->
-<section class="pricing" id="pricing">
+<!-- PLANS -->
+<section id="plans" class="section">
   <div class="container">
-    <span class="sec-tag">요금제</span>
-    <h2 class="sec-title">사용 규모에 맞는 4가지 플랜</h2>
-    <p class="sec-sub">개인 컨설턴트부터 컨설팅사·중간지원조직까지. 모든 플랜은 월 단위 결제.</p>
-    <div class="price-grid">
-      <div class="plan">
+    <div class="section-label">요금제</div>
+    <h2 class="section-title">필요에 맞는 플랜 선택</h2>
+    <p class="section-desc">단체·지자체 라이선스는 별도 협의 가능합니다</p>
+    <div class="plan-grid">
+      <div class="plan-card">
         <div class="plan-name">무료 체험</div>
-        <div class="plan-price free">0<span>원</span></div>
-        <ul class="plan-feat">
-          <li>STEP 1 매뉴얼 열람</li>
+        <div class="plan-price">0<span style="font-size:16px;font-weight:400">원</span></div>
+        <div class="plan-unit">제한 없이 체험</div>
+        <ul class="plan-feats">
+          <li>STEP 1 매뉴얼 전체</li>
           <li>마을 1개 관리</li>
           <li>준비도 체크리스트</li>
-          <li>AI 호출 월 30회</li>
+          <li class="locked">AI 기능 (문서작성 등)</li>
+          <li class="locked">STEP 2~6 매뉴얼</li>
         </ul>
-        <a href="https://w1nter1052.github.io/solanavi/SolaNavi.html" class="plan-cta">🆓 무료 시작</a>
+        <button class="plan-cta" style="background:var(--mu)">무료 시작</button>
       </div>
-      <div class="plan">
-        <div class="plan-name">개인 컨설턴트</div>
-        <div class="plan-price">49,000<span>원/월</span></div>
-        <ul class="plan-feat">
-          <li>전체 STEP 1~7 매뉴얼</li>
+      <div class="plan-card">
+        <div class="plan-name">개인</div>
+        <div class="plan-price">49,000<span style="font-size:14px;font-weight:400">원</span></div>
+        <div class="plan-unit">/월 · 개인 컨설턴트</div>
+        <ul class="plan-feats">
+          <li>전체 매뉴얼 STEP 1~6</li>
           <li>마을 5개 관리</li>
-          <li>AI 호출 월 500회</li>
-          <li>회의록 STT 월 100분</li>
-          <li>이메일 지원</li>
+          <li>AI 문서 작성 전체</li>
+          <li>사업계획서 AI 작성</li>
+          <li class="locked">커뮤니티·네트워크</li>
         </ul>
-        <a href="SolaNavi_결제안내.html?plan=basic" class="plan-cta">신청하기 →</a>
+        <button class="plan-cta">구독 문의</button>
       </div>
-      <div class="plan featured">
-        <div class="plan-name">프로 컨설턴트</div>
-        <div class="plan-price">99,000<span>원/월</span></div>
-        <ul class="plan-feat">
+      <div class="plan-card featured">
+        <div class="plan-badge">추천</div>
+        <div class="plan-name">프로</div>
+        <div class="plan-price">99,000<span style="font-size:14px;font-weight:400">원</span></div>
+        <div class="plan-unit">/월 · 활발한 컨설턴트</div>
+        <ul class="plan-feats">
+          <li>개인 플랜 전체 포함</li>
           <li>마을 무제한 관리</li>
-          <li>AI 호출 월 3,000회</li>
-          <li>회의록 STT 월 500분</li>
-          <li>PRO 워크스페이스</li>
-          <li>월 1회 컨설턴트 멘토링</li>
+          <li>커뮤니티·네트워크</li>
+          <li>마을항해팀 Q&A</li>
           <li>우선 지원</li>
         </ul>
-        <a href="SolaNavi_결제안내.html?plan=pro" class="plan-cta">신청하기 →</a>
+        <button class="plan-cta">구독 문의</button>
       </div>
-      <div class="plan">
+      <div class="plan-card">
         <div class="plan-name">컨설팅사</div>
-        <div class="plan-price">290,000<span>원/월</span></div>
-        <ul class="plan-feat">
+        <div class="plan-price">290,000<span style="font-size:14px;font-weight:400">원</span></div>
+        <div class="plan-unit">/월 · 5인 팀</div>
+        <ul class="plan-feats">
           <li>5인 팀 라이선스</li>
-          <li>마을 무제한</li>
-          <li>AI 호출 월 10,000회</li>
-          <li>팀 공유 대시보드</li>
-          <li>전담 지원 매니저</li>
-          <li>맞춤 교육 (월 1회)</li>
+          <li>마을 무제한 관리</li>
+          <li>팀 공유 마을 데이터</li>
+          <li>전담 지원</li>
+          <li>기관 협의 가능</li>
         </ul>
-        <a href="SolaNavi_결제안내.html?plan=agency" class="plan-cta">신청하기 →</a>
+        <button class="plan-cta">별도 문의</button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ══ FINAL CTA ══ -->
-<section class="cta-final">
+<!-- CONTACT -->
+<section id="contact">
   <div class="container">
-    <h2>지금 시작해 보세요</h2>
-    <p>무료 체험으로 STEP 1 매뉴얼과 자가진단을 먼저 사용해보고, 필요하면 유료로 업그레이드하세요.</p>
-    <a href="https://w1nter1052.github.io/solanavi/SolaNavi.html" class="btn btn-primary">☀ SolaNavi 시작하기</a>
+    <div class="section-label" style="color:rgba(245,166,35,.8);text-align:center">문의</div>
+    <h2 class="section-title" style="text-align:center">지금 바로 도입 상담</h2>
+    <p class="contact-desc">지자체·단체 라이선스, 시범 사업 협력, 커스터마이징 등<br>다양한 형태의 협력을 논의합니다</p>
+    <div class="contact-btns">
+      <a href="mailto:sadad1052@naver.com?subject=SolaNavi 도입 문의" class="btn-primary">📧 이메일 문의</a>
+      <a href="mailto:sadad1052@naver.com?subject=SolaNavi 데모 요청" class="btn-outline">💻 데모 신청</a>
+    </div>
+    <div class="contact-info">
+      <div class="contact-item"><strong>이메일</strong>sadad1052@naver.com</div>
+      <div class="contact-item"><strong>서비스</strong>SolaNavi by 마을항해</div>
+      <div class="contact-item"><strong>대상</strong>햇빛소득마을 컨설턴트·지자체·단체</div>
+    </div>
   </div>
 </section>
 
-<!-- ══ FOOTER ══ -->
 <footer>
-  <div class="ft-logo">☀ SolaNavi by 마을항해</div>
-  © 2026 마을항해 (Maeul Hang Co.) · 햇빛소득마을 공모 컨설팅 플랫폼<br>
-  문의: <a href="mailto:sadad1052@naver.com">sadad1052@naver.com</a> ·
-  <a href="SolaNavi_사용가이드북.html">사용 가이드북</a> ·
-  <a href="https://w1nter1052.github.io/solanavi/SolaNavi.html">로그인</a><br>
-  무단 복제·배포 금지. Licensed for authorized subscribers only.<br>
-  <span style="opacity:.45;font-size:11px">협력: 사회혁신교육원 사회적협동조합</span>
+  © 2026 SolaNavi by 마을항해 · 햇빛소득마을 컨설팅 플레이북 · Navigate Your Solar Village · sadad1052@naver.com
 </footer>
 
 </body>
