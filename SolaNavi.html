@@ -2049,7 +2049,7 @@ if (CLOUD_ENABLED) {
 <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="onImportFile(this)">
 
       <a href="mailto:sadad1052@naver.com?subject=SolaNavi 키 발급 문의" style="color:var(--sft);font-size:11px;text-decoration:none">✉ 키 발급 문의하기</a><br>
-      © 2026 마을항해 · 무단 복제 및 재배포 금지
+      © 2026 마을항해 · 무단 복제 및 재배포 금지 <span style="opacity:.5;font-size:10px">· 협력: 사회혁신교육원 사회적협동조합</span>
     </div>
   </div>
 </div>
@@ -7360,7 +7360,7 @@ if (CLOUD_ENABLED) {
 </div>
 
 <!-- 워터마크 -->
-<div class="watermark" id="watermark">© 2026 SolaNavi by 마을항해</div>
+<div class="watermark" id="watermark">© 2026 SolaNavi by 마을항해 <span style="opacity:.6">· 협력 사회혁신교육원</span></div>
 
 <script>const WD_DOC_BTN_MAP = {
   report:'wdb-report', official:'wdb-official', notice:'wdb-notice', notice2:'wdb-notice2',
@@ -7951,7 +7951,7 @@ function updateBadge() {
   else if (p === 'basic') { b.innerHTML = '<span class="plan-badge pb-basic">💙 BASIC</span>'; }
   else if (window._isFreeTest) { b.innerHTML = '<span class="plan-badge" style="background:#FFF3CD;color:#856404;border:1px solid #FFC107">🧪 체험 중</span>'; }
   else { b.innerHTML = '<span class="plan-badge pb-free">🆓 무료</span>'; }
-  if (wm && MH.key) wm.textContent = '© 마을항해 · ' + MH.key.slice(0,14) + '***  |  무단복제금지';
+  if (wm && MH.key) wm.textContent = '© 마을항해 · ' + MH.key.slice(0,14) + '***  |  무단복제금지  · 협력 사회혁신교육원';
 }
 
 function applyLocks() {
