@@ -1023,19 +1023,20 @@ textarea{resize:vertical;line-height:1.7}
   border:1px solid rgba(245,166,35,.2);border-radius:20px;padding:44px 40px;
   text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.08);
 }
-.login-sun{font-size:52px;margin-bottom:12px;animation:lp 3s infinite}
+.login-sun{font-size:60px;margin-bottom:14px;animation:lp 3s infinite}
 @keyframes lp{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-.login-brand{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:22px;font-weight:900;color:#1A1A1A;margin-bottom:4px}
-.login-sub{font-size:12px;color:#6A6A6A;margin-bottom:32px}
-.lpt-wrap{display:flex;gap:6px;margin-bottom:24px;background:#F7F3EA;border-radius:10px;padding:4px}
-.lpt{flex:1;padding:8px 4px;border-radius:7px;font-size:11px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:transparent;color:#6A6A6A;transition:all .2s}
+.login-brand{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:30px;font-weight:900;color:#1A1A1A;margin-bottom:6px;letter-spacing:-0.01em}
+.login-sub{font-size:14px;color:#4A4A4A;margin-bottom:28px;font-weight:500;line-height:1.6}
+.lpt-wrap{display:flex;gap:6px;margin-bottom:24px;background:#F7F3EA;border-radius:10px;padding:5px}
+.lpt{flex:1;padding:10px 4px;border-radius:7px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:transparent;color:#5A5A5A;transition:all .2s}
 .lpt.active{background:var(--sun-d);color:#fff}
 .l-input-wrap{position:relative;margin-bottom:14px}
-.l-input{width:100%;background:#ffffff;border:1.5px solid #E8E4DC;color:#1A1A1A;padding:13px 46px 13px 16px;border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;letter-spacing:.05em}
+.l-input{width:100%;background:#ffffff;border:1.5px solid #E8E4DC;color:#1A1A1A;padding:14px 48px 14px 16px;border-radius:10px;font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;letter-spacing:.05em}
 .l-input:focus{border-color:var(--sun-d)}
 .l-input::placeholder{color:#A3A3A3;letter-spacing:0}
 .l-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#6A6A6A;cursor:pointer;font-size:16px;padding:4px}
-.l-btn{width:100%;padding:14px;background:linear-gradient(135deg,#F5A623,#C47D0A);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.l-btn{width:100%;padding:16px;background:linear-gradient(135deg,#F5A623,#C47D0A);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(245,166,35,.3)}
+.l-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(245,166,35,.4)}
 .l-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
 .l-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .l-err{color:#EF4444;font-size:12px;margin-top:10px;padding:8px 12px;background:rgba(239,68,68,.1);border-radius:7px;display:none}
@@ -2039,24 +2040,28 @@ if (CLOUD_ENABLED) {
 
     <div id="lt-about" style="display:none">
       <div style="text-align:left">
-        <div style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700;color:#3B82F6;margin-bottom:6px">👤 개인 컨설턴트 — 월 49,000원</div>
-          <div style="font-size:12px;color:#4A4A4A;line-height:1.8">STEP 1~6 전체 · AI 기능 전체 · 서류 라이브러리 · 마을 5개 관리</div>
+        <div onclick="window.open('SolaNavi_결제안내.html?plan=basic','_blank')" style="background:rgba(59,130,246,.1);border:1.5px solid rgba(59,130,246,.3);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='#3B82F6';this.style.background='rgba(59,130,246,.18)'" onmouseout="this.style.borderColor='rgba(59,130,246,.3)';this.style.background='rgba(59,130,246,.1)'">
+          <div style="font-size:14px;font-weight:700;color:#3B82F6;margin-bottom:6px">👤 개인 컨설턴트 — 월 49,000원 <span style="float:right;font-size:11px;color:#3B82F6">신청 →</span></div>
+          <div style="font-size:13px;color:#4A4A4A;line-height:1.8">STEP 1~6 전체 · AI 기능 전체 · 서류 라이브러리 · 마을 5개 관리</div>
         </div>
-        <div style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);border-radius:10px;padding:14px;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700;color:var(--sun-d);margin-bottom:6px">⭐ 프로 컨설턴트 — 월 99,000원</div>
-          <div style="font-size:12px;color:#4A4A4A;line-height:1.8">마을 무제한 · 커뮤니티 · 현장사례 · 컨설턴트 네트워크 · 마을항해팀 직접 Q&A</div>
+        <div onclick="window.open('SolaNavi_결제안내.html?plan=pro','_blank')" style="background:rgba(245,166,35,.15);border:2px solid rgba(245,166,35,.5);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .15s;position:relative" onmouseover="this.style.borderColor='var(--sun)';this.style.background='rgba(245,166,35,.25)'" onmouseout="this.style.borderColor='rgba(245,166,35,.5)';this.style.background='rgba(245,166,35,.15)'">
+          <div style="position:absolute;top:-9px;right:14px;background:linear-gradient(135deg,var(--sun),var(--sun-d));color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:11px">추천</div>
+          <div style="font-size:14px;font-weight:700;color:var(--sun-d);margin-bottom:6px">⭐ 프로 컨설턴트 — 월 99,000원 <span style="float:right;font-size:11px;color:var(--sun-d)">신청 →</span></div>
+          <div style="font-size:13px;color:#4A4A4A;line-height:1.8">마을 무제한 · 커뮤니티 · 현장사례 · 컨설턴트 네트워크 · 마을항해팀 직접 Q&A</div>
         </div>
-        <div style="background:rgba(107,70,193,.1);border:1px solid rgba(107,70,193,.2);border-radius:10px;padding:14px;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700;color:#6B46C1;margin-bottom:6px">🏢 컨설팅사 — 월 290,000원</div>
-          <div style="font-size:12px;color:#4A4A4A;line-height:1.8">5인 팀 · 전체 기능 · 전용 온보딩 · 우선 지원</div>
+        <div onclick="window.open('SolaNavi_결제안내.html?plan=agency','_blank')" style="background:rgba(107,70,193,.1);border:1.5px solid rgba(107,70,193,.3);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='#6B46C1';this.style.background='rgba(107,70,193,.18)'" onmouseout="this.style.borderColor='rgba(107,70,193,.3)';this.style.background='rgba(107,70,193,.1)'">
+          <div style="font-size:14px;font-weight:700;color:#6B46C1;margin-bottom:6px">🏢 컨설팅사 — 월 290,000원 <span style="float:right;font-size:11px;color:#6B46C1">신청 →</span></div>
+          <div style="font-size:13px;color:#4A4A4A;line-height:1.8">5인 팀 · 전체 기능 · 전용 온보딩 · 우선 지원</div>
         </div>
-        <div style="background:rgba(22,160,133,.1);border:1px solid rgba(22,160,133,.2);border-radius:10px;padding:14px">
-          <div style="font-size:13px;font-weight:700;color:#14B8A6;margin-bottom:6px">🏛 기관 — 협의</div>
-          <div style="font-size:12px;color:#4A4A4A;line-height:1.8">지자체·중간지원조직 협약 · 다수 사용자 · 맞춤 콘텐츠</div>
+        <div onclick="window.open('mailto:sadad1052@naver.com?subject=SolaNavi 기관 협약 문의&body=안녕하세요. 마을항해입니다.%0A%0A기관 협약 관련 문의드립니다.%0A%0A■ 기관명:%0A■ 담당자:%0A■ 연락처:%0A■ 사용 인원:%0A■ 사용 목적:%0A%0A%0A')" style="background:rgba(22,160,133,.1);border:1.5px solid rgba(22,160,133,.3);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='#16A085';this.style.background='rgba(22,160,133,.18)'" onmouseout="this.style.borderColor='rgba(22,160,133,.3)';this.style.background='rgba(22,160,133,.1)'">
+          <div style="font-size:14px;font-weight:700;color:#16A085;margin-bottom:6px">🏛 기관 — 협의 <span style="float:right;font-size:11px;color:#16A085">문의 →</span></div>
+          <div style="font-size:13px;color:#4A4A4A;line-height:1.8">지자체·중간지원조직 협약 · 다수 사용자 · 맞춤 콘텐츠</div>
         </div>
       </div>
-      <button class="l-btn" style="margin-top:16px" onclick="window.open('mailto:sadad1052@naver.com?subject=햇빛소득마을 컨설팅 플랫폼 구독 문의')">✉ 구독 문의하기</button>
+      <div style="margin-top:14px;padding:12px;background:#F9F7F2;border-radius:8px;font-size:12px;color:#5A5A5A;line-height:1.8;text-align:center">
+        💡 위 플랜 카드를 <strong>클릭</strong>하면 결제 안내 페이지로 이동합니다.<br>
+        궁금한 점은 <a href="mailto:sadad1052@naver.com?subject=SolaNavi 구독 문의" style="color:var(--sun-d);font-weight:700">sadad1052@naver.com</a> 으로 문의해주세요.
+      </div>
     </div>
 
     <div class="l-footer">
