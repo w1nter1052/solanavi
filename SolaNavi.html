@@ -1657,6 +1657,15 @@ function openSubscribeForm(planKey) {
     alert('무료 체험은 별도 신청 없이 바로 사용 가능합니다.\n로그인 후 즉시 STEP 1 매뉴얼·자가진단 등 이용해 보세요.');
     return;
   }
+  // 결제 안내 페이지로 이동 (Phase 3a — 계좌 이체 + 신청 폼 통합)
+  window.open('SolaNavi_결제안내.html?plan=' + planKey, '_blank');
+  return;
+
+  // ⬇ 아래 코드는 더 이상 실행되지 않음 (기존 이메일 신청 폼 - dead code, 참고용 보존)
+  /* eslint-disable */
+  if (false) {
+    return;
+  }
   var existing = document.getElementById('plan-modal');
   if (existing) existing.remove();
   var html = '<div id="subscribe-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9001;display:flex;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.remove()">'
@@ -1679,6 +1688,8 @@ function openSubscribeForm(planKey) {
     + '<button type="submit" style="background:'+p.color+';color:#fff;border:none;border-radius:6px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📧 신청 제출</button>'
     + '</div></form></div></div>';
   document.body.insertAdjacentHTML('beforeend', html);
+  }
+  /* eslint-enable */
 }
 
 function submitSubscribe(planKey) {
@@ -8054,8 +8065,39 @@ async function doLogin() {
   }
 }
 
-function doFreeLogin(){
-  MH.activate('MHTEST-FREE').then(function(r){if(r&&r.ok){ window._isFreeTest=true; onLoginOK(); }});
+async function doFreeLogin(){
+  var btn = document.querySelector('button[onclick="doFreeLogin()"]');
+  var orig = btn ? btn.innerHTML : '';
+  if (btn) btn.innerHTML = '⏳ 무료 키 발급 중...';
+  try {
+    // 1차: 기존 정적 무료 키 시도
+    var r = await MH.activate('MHTEST-FREE');
+    if (r && r.ok) {
+      window._isFreeTest = true;
+      onLoginOK();
+      return;
+    }
+    // 2차: 워커에서 데모 키 자동 발급 받기
+    var res = await fetch('https://solanavi-api.hnsane.workers.dev/demo/free', { method: 'POST' });
+    if (res.ok) {
+      var data = await res.json();
+      if (data && data.key) {
+        var r2 = await MH.activate(data.key);
+        if (r2 && r2.ok) {
+          window._isFreeTest = true;
+          onLoginOK();
+          return;
+        }
+      }
+    }
+    // 둘 다 실패
+    alert('무료 체험 활성화에 실패했습니다.\n인터넷 연결을 확인 후 다시 시도해주세요.\n계속 실패하면 sadad1052@naver.com 으로 문의해주세요.');
+  } catch(e) {
+    console.error('doFreeLogin:', e);
+    alert('무료 체험 활성화 중 오류가 발생했습니다: ' + e.message);
+  } finally {
+    if (btn && orig) btn.innerHTML = orig;
+  }
 }
 
 function onLoginOK() {
