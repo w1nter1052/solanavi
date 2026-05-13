@@ -281,7 +281,19 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
 .cv-sun{font-size:60px;margin-bottom:16px;animation:pulse 3s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .cv-title{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(24px,4vw,42px);font-weight:700;color:#1A1A1A;line-height:1.3;margin-bottom:8px}
-.cv-sub{font-size:clamp(12px,1.8vw,15px);color:#6A6A6A;margin-bottom:32px;line-height:1.7}
+.cv-sub{font-size:clamp(12px,1.8vw,15px);color:#6A6A6A;margin-bottom:24px;line-height:1.7}
+
+/* 홈 단축 도구 (자가진단·조기경보 등 8개 버튼) */
+.home-tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:880px;width:100%;margin:0 auto 18px}
+.home-tools .ht-btn{color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:transform .15s}
+.home-tools .ht-btn:hover{transform:translateY(-1px)}
+@media(max-width:760px){
+  .home-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:380px;padding:0 8px}
+  .home-tools .ht-btn{padding:11px 6px;font-size:12.5px;white-space:nowrap;width:100%;text-align:center;letter-spacing:-0.02em}
+}
+@media(max-width:360px){
+  .home-tools .ht-btn{font-size:11.5px;padding:10px 4px}
+}
 
 /* 단계 카드 그리드 */
 .step-grid{max-width:900px;width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
@@ -2523,18 +2535,16 @@ if (CLOUD_ENABLED) {
       <h1 class="cv-title">햇빛소득마을<br>컨설팅 매뉴얼</h1>
       <p class="cv-sub">마을 첫 방문부터 운영까지<br>컨설턴트가 순서대로 따라가는 실전 가이드</p>
 
-      <!-- 안전망 빠른 진입 -->
-      <div style="display:flex;gap:8px;justify-content:center;margin:12px 0 6px;flex-wrap:wrap">
-        <button onclick="openSelfcheckModal()" style="background:#1A5276;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(26,82,118,.2)">📋 마을 자가진단</button>
-        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openIntegrityReport() : alert('마을을 먼저 선택해주세요')" style="background:#C0392B;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(192,57,43,.2)">🔍 부실 조기경보</button>
-        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openSiteCheckModal() : alert('마을을 먼저 선택해주세요')" style="background:#16A085;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(22,160,133,.2)">🌾 부지 점검</button>
-        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openConflictMatrix() : alert('마을을 먼저 선택해주세요')" style="background:#D35400;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(211,84,0,.2)">🤝 갈등 매트릭스</button>
-        <button onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openRiskSimulator() : alert('마을을 먼저 선택해주세요')" style="background:#7B241C;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(123,36,28,.2)">🎲 시나리오 시뮬</button>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:center;margin:0 0 6px;flex-wrap:wrap">
-        <button onclick="openCoopCompare()" style="background:#2E86C1;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(46,134,193,.2)">⚖ 조합 형태 비교</button>
-        <button onclick="openPermitGantt()" style="background:#5B2C6F;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(91,44,111,.2)">⏱ 인허가 타임라인</button>
-        <button onclick="openHandbookModal('gov')" style="background:#8E44AD;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(142,68,173,.2)">📚 운영 핸드북</button>
+      <!-- 안전망 빠른 진입 (홈 단축 도구) -->
+      <div class="home-tools">
+        <button class="ht-btn" onclick="openSelfcheckModal()" style="background:#1A5276;box-shadow:0 4px 12px rgba(26,82,118,.2)">📋 마을 자가진단</button>
+        <button class="ht-btn" onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openIntegrityReport() : alert('마을을 먼저 선택해주세요')" style="background:#C0392B;box-shadow:0 4px 12px rgba(192,57,43,.2)">🔍 부실 조기경보</button>
+        <button class="ht-btn" onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openSiteCheckModal() : alert('마을을 먼저 선택해주세요')" style="background:#16A085;box-shadow:0 4px 12px rgba(22,160,133,.2)">🌾 부지 점검</button>
+        <button class="ht-btn" onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openConflictMatrix() : alert('마을을 먼저 선택해주세요')" style="background:#D35400;box-shadow:0 4px 12px rgba(211,84,0,.2)">🤝 갈등 매트릭스</button>
+        <button class="ht-btn" onclick="(typeof selectedVid !== 'undefined' && selectedVid) ? openRiskSimulator() : alert('마을을 먼저 선택해주세요')" style="background:#7B241C;box-shadow:0 4px 12px rgba(123,36,28,.2)">🎲 시나리오 시뮬</button>
+        <button class="ht-btn" onclick="openCoopCompare()" style="background:#2E86C1;box-shadow:0 4px 12px rgba(46,134,193,.2)">⚖ 조합 형태 비교</button>
+        <button class="ht-btn" onclick="openPermitGantt()" style="background:#5B2C6F;box-shadow:0 4px 12px rgba(91,44,111,.2)">⏱ 인허가 타임라인</button>
+        <button class="ht-btn" onclick="openHandbookModal('gov')" style="background:#8E44AD;box-shadow:0 4px 12px rgba(142,68,173,.2)">📚 운영 핸드북</button>
       </div>
 
       <div class="step-grid">
