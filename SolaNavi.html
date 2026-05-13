@@ -59,52 +59,101 @@ window.showInstallGuide = function() {
   var ua = navigator.userAgent;
   var isIOS = /iPhone|iPad|iPod/i.test(ua);
   var isAndroid = /Android/i.test(ua);
-  // 1) 자동 설치 가능하면 바로 트리거
+  var isSamsung = /SamsungBrowser/i.test(ua);
+  var isChrome = /Chrome/i.test(ua) && !/Edg|OPR|SamsungBrowser/i.test(ua);
+  var isHTTPS = location.protocol === 'https:';
+  var hasSW = 'serviceWorker' in navigator;
+
+  // 1) 자동 설치 가능하면 바로 트리거 (PWA 조건 모두 충족된 경우)
   if (deferredPrompt) {
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
+    deferredPrompt.userChoice.then(function(res){
+      deferredPrompt = null;
+      if (res && res.outcome === 'accepted') {
+        alert('✅ 설치 시작됐어요!\n잠시 후 홈 화면에 ☀ SolaNavi 아이콘이 생깁니다.');
+      }
+    });
     return;
   }
-  // 2) 수동 안내 모달
-  var modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,Pretendard,sans-serif';
+
+  // 2) 진단 메시지 (왜 자동 설치가 안 되는지)
+  var diag = '';
+  if (!isHTTPS) {
+    diag = '<div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:#991B1B;line-height:1.55">' +
+      '<strong>⚠ HTTPS 미적용 상태</strong><br>현재 http:// 로 접속 중이라 자동 설치가 막혀있습니다.<br>주소창에 <strong>https://solanavi.kr</strong> 로 다시 접속해주세요.' +
+      '</div>';
+  } else if (isSamsung) {
+    diag = '<div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:#92400E;line-height:1.55">' +
+      '<strong>📱 삼성 인터넷 브라우저 감지</strong><br>자동 설치 팝업이 안 뜨면 <strong>크롬(Chrome)</strong> 앱으로 다시 접속해주세요. (삼성인터넷도 수동 설치는 가능 — 아래 안내 참고)' +
+      '</div>';
+  } else if (isAndroid && isChrome) {
+    diag = '<div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:#92400E;line-height:1.55">' +
+      '<strong>ℹ 자동 설치 팝업이 안 뜬 이유</strong><br>Chrome이 사이트 사용 패턴을 학습 중이거나, 이미 한 번 거절한 적이 있을 수 있습니다.<br>아래 <strong>수동 설치</strong>로 진행해주세요 (10초면 끝!)' +
+      '</div>';
+  }
+
+  // 3) 수동 안내 본문
   var iosBody = '<div style="font-size:14px;line-height:1.7;color:#1A1A1A;text-align:left">' +
-    '<div style="font-weight:700;font-size:15px;margin-bottom:10px;color:#F5A623">📱 iPhone / iPad (Safari)</div>' +
-    '<ol style="padding-left:22px;margin:0">' +
-    '<li>Safari 하단 가운데 <strong>공유 버튼 (□↑)</strong> 탭</li>' +
-    '<li>메뉴를 아래로 스크롤 → <strong>"홈 화면에 추가"</strong></li>' +
-    '<li>이름 확인 후 우측 상단 <strong>"추가"</strong></li>' +
-    '<li>홈 화면에 ☀ SolaNavi 아이콘 생성!</li>' +
-    '</ol>' +
-    '<div style="font-size:12px;color:#C0392B;margin-top:10px;padding:8px;background:#FDF2F2;border-radius:6px">⚠ 반드시 <strong>Safari</strong>로 접속해야 합니다 (Chrome/네이버 앱 ❌)</div>' +
+    '<div style="font-weight:900;font-size:16px;margin-bottom:12px;color:#F5A623">📱 iPhone · iPad (Safari)</div>' +
+    '<div style="background:#F9FAFB;border-radius:10px;padding:14px;margin-bottom:10px">' +
+    '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px"><div style="flex-shrink:0;width:24px;height:24px;background:#F5A623;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">1</div><div>Safari <strong>하단 가운데</strong> <span style="background:#1F2937;color:#fff;padding:2px 8px;border-radius:6px;font-size:13px">▢↑</span> (공유) 탭</div></div>' +
+    '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px"><div style="flex-shrink:0;width:24px;height:24px;background:#F5A623;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">2</div><div>메뉴 아래로 스크롤 → <strong>"홈 화면에 추가"</strong></div></div>' +
+    '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px"><div style="flex-shrink:0;width:24px;height:24px;background:#F5A623;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">3</div><div>우측 상단 <strong>"추가"</strong> 탭</div></div>' +
+    '<div style="display:flex;gap:10px;align-items:flex-start"><div style="flex-shrink:0;width:24px;height:24px;background:#22C55E;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">✓</div><div>홈 화면에 <strong style="color:#F5A623">☀ SolaNavi</strong> 아이콘 완료!</div></div>' +
+    '</div>' +
+    '<div style="font-size:12px;color:#991B1B;background:#FEF2F2;padding:9px;border-radius:6px">⚠ <strong>Safari</strong>로 접속해야 합니다 (Chrome / 네이버 ❌)</div>' +
     '</div>';
+
   var androidBody = '<div style="font-size:14px;line-height:1.7;color:#1A1A1A;text-align:left">' +
-    '<div style="font-weight:700;font-size:15px;margin-bottom:10px;color:#F5A623">📱 안드로이드 (Chrome)</div>' +
-    '<ol style="padding-left:22px;margin:0">' +
-    '<li>Chrome 우측 상단 <strong>⋮ (점 3개)</strong> 탭</li>' +
-    '<li>메뉴에서 <strong>"앱 설치"</strong> 또는 <strong>"홈 화면에 추가"</strong></li>' +
-    '<li>확인 팝업 → <strong>"설치"</strong> 탭</li>' +
-    '<li>홈 화면에 ☀ SolaNavi 아이콘 생성!</li>' +
-    '</ol>' +
-    '<div style="font-size:12px;color:#C0392B;margin-top:10px;padding:8px;background:#FDF2F2;border-radius:6px">⚠ 반드시 <strong>Chrome</strong>으로 접속해야 합니다 (삼성인터넷·네이버앱은 메뉴가 다릅니다)</div>' +
+    '<div style="font-weight:900;font-size:16px;margin-bottom:12px;color:#F5A623">📱 안드로이드 · 삼성폰 (Chrome)</div>' +
+    '<div style="background:#F9FAFB;border-radius:10px;padding:14px;margin-bottom:10px">' +
+    '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px"><div style="flex-shrink:0;width:24px;height:24px;background:#F5A623;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">1</div><div>Chrome 화면 <strong>우측 상단</strong>의 <span style="background:#1F2937;color:#fff;padding:3px 10px;border-radius:6px;font-size:15px;font-weight:900;letter-spacing:2px">⋮</span> (점 3개) 탭</div></div>' +
+    '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px"><div style="flex-shrink:0;width:24px;height:24px;background:#F5A623;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">2</div><div>메뉴에서 <strong style="background:#FEF3C7;padding:1px 6px;border-radius:4px">"앱 설치"</strong> 또는 <strong style="background:#FEF3C7;padding:1px 6px;border-radius:4px">"홈 화면에 추가"</strong> 탭<br><span style="font-size:11.5px;color:#6A6A6A">(메뉴 위치는 폰마다 살짝 다름 — "설치" / "홈 화면" 단어 찾기)</span></div></div>' +
+    '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px"><div style="flex-shrink:0;width:24px;height:24px;background:#F5A623;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">3</div><div>"앱 설치" 팝업 → <strong style="background:#DCFCE7;padding:1px 6px;border-radius:4px">"설치"</strong> 탭</div></div>' +
+    '<div style="display:flex;gap:10px;align-items:flex-start"><div style="flex-shrink:0;width:24px;height:24px;background:#22C55E;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">✓</div><div>홈 화면에 <strong style="color:#F5A623">☀ SolaNavi</strong> 아이콘 완료!</div></div>' +
+    '</div>' +
+    '<div style="font-size:12px;color:#991B1B;background:#FEF2F2;padding:9px;border-radius:6px;line-height:1.5">⚠ <strong>Chrome</strong> 앱으로 열어야 안정적입니다.<br>삼성인터넷·네이버앱에서는 메뉴 위치가 달라요 (대부분 ≡ → 추가 → 홈 화면)</div>' +
     '</div>';
+
   var pcBody = '<div style="font-size:14px;line-height:1.7;color:#1A1A1A;text-align:left">' +
-    '<div style="font-weight:700;font-size:15px;margin-bottom:10px;color:#F5A623">💻 PC (Chrome / Edge)</div>' +
-    '<ol style="padding-left:22px;margin:0">' +
-    '<li>주소창 오른쪽 <strong>⊕ 아이콘</strong> 클릭</li>' +
-    '<li>"SolaNavi 설치" 팝업 → <strong>"설치"</strong></li>' +
-    '<li>바탕화면 / 작업표시줄에 앱 생성!</li>' +
-    '</ol>' +
-    '<div style="font-size:12px;color:#5A5A5A;margin-top:10px">💡 모바일에서 사용하시려면 휴대폰으로 접속해주세요</div>' +
+    '<div style="font-weight:900;font-size:16px;margin-bottom:12px;color:#F5A623">💻 PC (Chrome · Edge)</div>' +
+    '<div style="background:#F9FAFB;border-radius:10px;padding:14px;margin-bottom:10px">' +
+    '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px"><div style="flex-shrink:0;width:24px;height:24px;background:#F5A623;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">1</div><div>주소창 오른쪽 끝 <strong>⊕ 아이콘</strong> 클릭</div></div>' +
+    '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px"><div style="flex-shrink:0;width:24px;height:24px;background:#F5A623;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">2</div><div>"SolaNavi 설치" 팝업 → <strong>"설치"</strong></div></div>' +
+    '<div style="display:flex;gap:10px;align-items:flex-start"><div style="flex-shrink:0;width:24px;height:24px;background:#22C55E;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">✓</div><div>바탕화면 · 작업표시줄에 앱 생성!</div></div>' +
+    '</div>' +
+    '<div style="font-size:12px;color:#5A5A5A;background:#F9FAFB;padding:9px;border-radius:6px">💡 모바일에서 쓰려면 휴대폰으로 접속해주세요</div>' +
     '</div>';
+
   var body = isIOS ? iosBody : (isAndroid ? androidBody : pcBody);
-  modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;max-width:380px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3)">' +
-    '<div style="text-align:center;margin-bottom:14px"><div style="font-size:36px">📲</div><div style="font-size:17px;font-weight:900;color:#1A1A1A;margin-top:6px">SolaNavi 앱 설치</div><div style="font-size:12px;color:#5A5A5A;margin-top:4px">홈 화면에 추가하면 앱처럼 빠르게 사용!</div></div>' +
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;font-family:-apple-system,Pretendard,sans-serif';
+  modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:22px 20px;max-width:400px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.4)">' +
+    '<div style="text-align:center;margin-bottom:16px"><div style="font-size:40px">📲</div><div style="font-size:18px;font-weight:900;color:#1A1A1A;margin-top:6px">SolaNavi 앱으로 설치</div><div style="font-size:12px;color:#5A5A5A;margin-top:4px">홈 화면에 추가하면 앱처럼 빠르게 사용!</div></div>' +
+    diag +
     body +
-    '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="width:100%;margin-top:16px;padding:11px;background:#1A1A1A;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">확인</button>' +
+    '<button id="pwa-retry-btn" style="width:100%;margin-top:12px;padding:11px;background:#F5A623;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🔄 자동 설치 다시 시도</button>' +
+    '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="width:100%;margin-top:8px;padding:11px;background:transparent;color:#5A5A5A;border:1px solid #E5E7EB;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>' +
     '</div>';
   modal.addEventListener('click', function(e){ if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
+
+  // 재시도 버튼 — 자동 설치 다시 시도 (페이지 머문 시간이 늘어나면 Chrome이 프롬프트를 띄울 수 있음)
+  setTimeout(function(){
+    var rb = document.getElementById('pwa-retry-btn');
+    if (rb) rb.onclick = function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
+        modal.remove();
+      } else {
+        rb.textContent = '⏳ 잠시 후 다시 — 위의 수동 설치를 권장합니다';
+        rb.style.background = '#9CA3AF';
+        rb.disabled = true;
+      }
+    };
+  }, 0);
 };
 </script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="%23F5A623"/><text x="16" y="22" text-anchor="middle" font-size="18" fill="%23fff">☀</text></svg>">
@@ -2192,10 +2241,10 @@ if (CLOUD_ENABLED) {
     </div>
 
     <div class="l-footer">
-      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;justify-content:center">
-  <button onclick="exportAllData()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--sft);cursor:pointer">⬇ 데이터 백업</button>
-  <button onclick="importAllData()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--sft);cursor:pointer">⬆ 데이터 복원</button>
-  <button onclick="if(confirm('저장된 로그인 정보를 삭제합니다.\n다음 방문 시 키를 다시 입력해야 합니다.\n진행할까요?')){try{localStorage.removeItem('mh_session');sessionStorage.clear();}catch(e){}location.reload();}" title="저장된 로그인 정보 삭제" style="background:none;border:1px solid #EEE;border-radius:6px;padding:3px 9px;font-size:11px;color:#AAA;cursor:pointer">🚪 로그아웃</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+  <button onclick="exportAllData()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:5px 4px;font-size:11px;color:var(--sft);cursor:pointer;white-space:nowrap;font-family:inherit">⬇ 데이터 백업</button>
+  <button onclick="importAllData()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:5px 4px;font-size:11px;color:var(--sft);cursor:pointer;white-space:nowrap;font-family:inherit">⬆ 데이터 복원</button>
+  <button onclick="if(confirm('저장된 키와 자동 로그인 정보를 삭제합니다.\n다음 방문 시 키를 다시 입력해야 합니다.\n초기화할까요?')){try{localStorage.removeItem('mh_session');sessionStorage.clear();}catch(e){}location.reload();}" title="저장된 키·자동 로그인 정보 초기화" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:5px 4px;font-size:11px;color:var(--sft);cursor:pointer;white-space:nowrap;font-family:inherit">🔓 키 초기화</button>
 </div>
 <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="onImportFile(this)">
 
