@@ -326,7 +326,8 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
   .form-row{grid-template-columns:1fr;gap:6px}
   .doc-grid{grid-template-columns:1fr}
   #cv{padding:24px 14px}
-  .login-box{padding:32px 22px;border-radius:16px;max-width:100%}
+  .login-box{padding:28px 18px;border-radius:16px;max-width:100%;margin:12px auto}
+  #login-screen{padding:12px 12px}
   .login-brand{font-size:28px}
   .login-sun{font-size:44px}
   .login-sub{font-size:13px;margin-bottom:24px}
@@ -769,8 +770,10 @@ body{font-family:'Pretendard',-apple-system,'Noto Sans KR',sans-serif;background
 .four{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
 @media(max-width:900px){.two,.three,.four{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){#tabbar{top:88px !important}
-  .login-box{padding:28px 18px;border-radius:14px}
+  .login-box{padding:24px 16px;border-radius:14px;margin:8px auto}
   .login-brand{font-size:26px}
+  .login-sun{font-size:48px;margin-bottom:10px}
+  #login-screen{padding:8px 10px}
   .two,.three,.four{grid-template-columns:1fr}
   .f2,.f3{grid-template-columns:1fr}
   .brow{flex-direction:column}
@@ -1017,13 +1020,17 @@ textarea{resize:vertical;line-height:1.7}
 #login-screen {
   position:fixed;inset:0;
   background:linear-gradient(160deg,#FFFDF8 0%,#FFF8EC 50%,#FFFDF8 100%);
-  display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;
+  z-index:9999;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:20px 16px;
 }
 .login-box {
   width:100%;max-width:440px;
   background:#ffffff;
   border:1px solid rgba(245,166,35,.2);border-radius:20px;padding:44px 40px;
   text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.08);
+  margin:20px auto;  /* 위아래 여백 + 가운데 정렬 */
 }
 .login-sun{font-size:60px;margin-bottom:14px;animation:lp 3s infinite}
 @keyframes lp{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
