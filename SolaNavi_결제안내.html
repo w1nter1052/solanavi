@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+<title>결제 안내 · SolaNavi by 마을항해</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23F5A623'/><text x='16' y='22' text-anchor='middle' font-size='18' fill='%23fff'>☀</text></svg>">
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#FDFAF5;color:#1A1A1A;line-height:1.7}
+  a{text-decoration:none;color:#C47D0A}
+  .nav{background:rgba(253,250,245,.95);backdrop-filter:blur(12px);border-bottom:1px solid #E8E4DC;padding:14px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+  .nav a.logo{color:#1A1A1A;font-weight:900;display:flex;align-items:center;gap:9px;font-size:17px}
+  .nav-icon{width:30px;height:30px;background:linear-gradient(135deg,#F5A623,#C47D0A);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+  .breadcrumb{font-size:12.5px;color:#6A6A6A;margin-left:auto}
+
+  main{max-width:760px;margin:0 auto;padding:32px 20px 60px}
+  h1{font-size:28px;font-weight:900;line-height:1.3;margin-bottom:8px;letter-spacing:-0.01em;color:#1A3A6B}
+  .h1-sub{font-size:14px;color:#6A6A6A;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid #E8E4DC}
+
+  .step-card{background:#fff;border:1px solid #E8E4DC;border-radius:14px;padding:24px;margin-bottom:18px;position:relative}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:linear-gradient(135deg,#F5A623,#C47D0A);color:#fff;border-radius:50%;font-size:14px;font-weight:900;margin-right:11px;vertical-align:middle}
+  .step-title{display:inline-block;font-size:17px;font-weight:900;vertical-align:middle}
+
+  /* 플랜 선택 */
+  .plan-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+  .plan-card{background:#fff;border:2px solid #E8E4DC;border-radius:11px;padding:14px 12px;cursor:pointer;text-align:center;transition:all .15s}
+  .plan-card.on{border-color:#F5A623;background:#FFFBF0}
+  .plan-card.disabled{opacity:.4;cursor:not-allowed}
+  .plan-name{font-size:12px;font-weight:700;color:#6A6A6A;margin-bottom:4px}
+  .plan-price{font-size:18px;font-weight:900;color:#1A1A1A}
+  .plan-price span{font-size:11px;color:#6A6A6A;font-weight:600;margin-left:3px}
+
+  /* 입금 정보 박스 */
+  .bank-box{background:linear-gradient(135deg,#FFFBF0,#FFF8E1);border:2px dashed #F5A623;border-radius:12px;padding:18px 20px;margin:14px 0}
+  .bank-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:14px}
+  .bank-row:last-child{margin-bottom:0}
+  .bank-label{color:#6A6A6A;font-weight:700;font-size:12.5px}
+  .bank-val{font-weight:700;color:#1A1A1A;font-family:'JetBrains Mono',Consolas,monospace}
+  .copy-btn{background:#fff;border:1px solid #E8E4DC;padding:3px 9px;border-radius:6px;font-size:11px;color:#6A6A6A;cursor:pointer;font-family:inherit;margin-left:8px}
+  .copy-btn:hover{background:#F5A623;color:#fff;border-color:#F5A623}
+  .price-big{font-size:22px;color:#C0392B}
+
+  /* 입력 폼 */
+  label{display:block;font-size:13px;font-weight:700;color:#1A1A1A;margin-bottom:5px;margin-top:11px}
+  label .req{color:#C0392B;margin-left:3px}
+  input,select,textarea{width:100%;border:1.5px solid #E8E4DC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fff}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#F5A623}
+  textarea{resize:vertical;min-height:60px}
+
+  /* 입금자명 미리보기 */
+  .depositor-preview{background:#EBF5FB;border-left:4px solid #1A5276;padding:10px 14px;border-radius:0 8px 8px 0;font-size:13px;margin-top:8px}
+  .depositor-preview strong{color:#1A5276;font-family:'JetBrains Mono',monospace;font-size:14px}
+
+  /* CTA */
+  .submit-btn{display:block;width:100%;background:linear-gradient(135deg,#F5A623,#C47D0A);color:#fff;border:none;border-radius:11px;padding:16px;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:18px;box-shadow:0 6px 24px rgba(245,166,35,.35);transition:all .2s}
+  .submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(245,166,35,.45)}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+  .info-box{background:#FFF8E1;border-left:4px solid #F5A623;padding:11px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#5D4037;margin:14px 0;line-height:1.7}
+  .info-box strong{color:#C47D0A}
+  .warn-box{background:#FDEDEC;border-left:4px solid #C0392B;padding:11px 16px;border-radius:0 8px 8px 0;font-size:13px;color:#5D2C2C;margin:14px 0;line-height:1.7}
+  .warn-box strong{color:#C0392B}
+
+  /* QR 영역 (선택) */
+  .qr-note{font-size:11.5px;color:#999;text-align:center;margin-top:10px}
+
+  footer{text-align:center;padding:30px 20px;font-size:12px;color:#888;border-top:1px solid #E8E4DC;background:#fff;margin-top:50px}
+  footer a{color:#C47D0A}
+
+  @media(max-width:600px){
+    h1{font-size:22px}
+    .h1-sub{font-size:13px}
+    main{padding:24px 14px 50px}
+    .step-card{padding:18px 14px}
+    .step-title{font-size:15px}
+    .bank-row{flex-wrap:wrap;gap:4px}
+    .bank-label{font-size:11.5px}
+    .bank-val{font-size:13px;word-break:break-all}
+    .price-big{font-size:18px}
+    .plan-grid{grid-template-columns:1fr 1fr;gap:8px}
+    .plan-card{padding:11px 8px}
+    .plan-name{font-size:11px}
+    .plan-price{font-size:15px}
+    .submit-btn{font-size:14px;padding:14px}
+    label{font-size:12.5px}
+    input,select,textarea{font-size:13px;padding:9px 11px}
+    .info-box,.warn-box{font-size:12px;padding:10px 13px}
+    .depositor-preview{font-size:12px}
+    .copy-btn{font-size:10.5px;padding:2px 7px}
+    .nav{padding:11px 14px}
+    .nav a.logo{font-size:15px}
+    .breadcrumb{font-size:11px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="logo" href="SolaNavi_소개서.html"><span class="nav-icon">☀</span> SolaNavi</a>
+  <span class="breadcrumb"><a href="SolaNavi_소개서.html">홈</a> › 결제 안내</span>
+</nav>
+
+<main>
+  <h1>💳 구독 결제 안내</h1>
+  <p class="h1-sub">계좌 이체로 결제하시고, 신청서를 보내주세요. <strong style="color:#C47D0A">영업일 기준 1~3시간 이내</strong>에 라이선스 키를 이메일로 발급해드립니다.</p>
+
+  <!-- ─ Step 1: 플랜 선택 ─ -->
+  <div class="step-card">
+    <span class="step-num">1</span><span class="step-title">플랜 선택</span>
+    <div class="plan-grid">
+      <div class="plan-card disabled" data-plan="free" data-price="0">
+        <div class="plan-name">무료 체험</div>
+        <div class="plan-price">0<span>원 (결제 불필요)</span></div>
+      </div>
+      <div class="plan-card" data-plan="basic" data-price="49000" onclick="selectPlan('basic',49000,'베이직')">
+        <div class="plan-name">개인 컨설턴트</div>
+        <div class="plan-price">49,000<span>원/월</span></div>
+      </div>
+      <div class="plan-card on" data-plan="pro" data-price="99000" onclick="selectPlan('pro',99000,'PRO')">
+        <div class="plan-name">⭐ 프로 컨설턴트</div>
+        <div class="plan-price">99,000<span>원/월</span></div>
+      </div>
+      <div class="plan-card" data-plan="agency" data-price="290000" onclick="selectPlan('agency',290000,'컨설팅사')">
+        <div class="plan-name">컨설팅사 (5인 팀)</div>
+        <div class="plan-price">290,000<span>원/월</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─ Step 2: 입금 정보 ─ -->
+  <div class="step-card">
+    <span class="step-num">2</span><span class="step-title">계좌 이체</span>
+    <p style="font-size:13.5px;color:#6A6A6A;margin-top:10px">아래 계좌로 <strong>입금자명에 본인 이름과 플랜명</strong>을 함께 적어 이체해주세요.</p>
+
+    <div class="bank-box">
+      <div class="bank-row">
+        <span class="bank-label">은행</span>
+        <span class="bank-val">농협 (NH)</span>
+      </div>
+      <div class="bank-row">
+        <span class="bank-label">계좌번호</span>
+        <span><span class="bank-val" id="acct-num">302-7102-5391-11</span><button class="copy-btn" onclick="copyText('302-7102-5391-11')">복사</button></span>
+      </div>
+      <div class="bank-row">
+        <span class="bank-label">예금주</span>
+        <span class="bank-val">김효상</span>
+      </div>
+      <div class="bank-row" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(245,166,35,.3)">
+        <span class="bank-label">입금 금액</span>
+        <span class="bank-val price-big" id="amount-disp">99,000원</span>
+      </div>
+    </div>
+
+    <div class="info-box">
+      💡 <strong>왜 개인 계좌인가요?</strong> 현재 마을항해 법인 설립 진행 중으로 일시적으로 대표자(김효상) 개인 계좌로 운영합니다. 법인 설립 완료 후 회사 계좌로 변경됩니다.
+    </div>
+  </div>
+
+  <!-- ─ Step 3: 신청자 정보 ─ -->
+  <div class="step-card">
+    <span class="step-num">3</span><span class="step-title">신청자 정보 입력</span>
+
+    <label>이름 <span class="req">*</span></label>
+    <input id="f-name" placeholder="홍길동" oninput="updateDepositor()">
+
+    <label>이메일 <span class="req">*</span><span style="font-size:11px;font-weight:400;color:#6A6A6A;margin-left:6px">(라이선스 키를 받을 주소)</span></label>
+    <input id="f-email" type="email" placeholder="user@example.com">
+
+    <label>연락처</label>
+    <input id="f-tel" placeholder="010-0000-0000">
+
+    <label>소속 / 회사명</label>
+    <input id="f-org" placeholder="OO컨설팅 · OO군청 · OO마을 등">
+
+    <label>예상 관리 마을 수 / 사업 단계</label>
+    <input id="f-villages" placeholder="예: 3개 마을, STEP1~3 진행 중">
+
+    <label>세금계산서 발행 필요 여부</label>
+    <select id="f-tax">
+      <option value="no">불필요 (개인)</option>
+      <option value="yes">필요 (사업자) — 사업자등록증 메일로 별도 송부</option>
+    </select>
+
+    <label>요청사항 / 메모</label>
+    <textarea id="f-memo" placeholder="시작 희망일·결제 후 키 받을 이메일 주소 변경 등"></textarea>
+
+    <!-- 입금자명 미리보기 -->
+    <div class="depositor-preview">
+      💳 <strong>입금자명 안내:</strong> <strong id="depositor-name">홍길동PRO</strong> 형식으로 적어주세요. (이름+플랜) 자동 매칭에 도움이 됩니다.
+    </div>
+  </div>
+
+  <!-- ─ Step 4: 신청서 보내기 ─ -->
+  <div class="step-card">
+    <span class="step-num">4</span><span class="step-title">입금 완료 → 신청서 보내기</span>
+
+    <div class="warn-box">
+      ⚠️ <strong>순서:</strong> ① 먼저 위 계좌로 입금 → ② 아래 버튼 클릭 → ③ 자동 작성된 메일 전송 → ④ 마을항해가 입금 확인 후 라이선스 키 발급
+    </div>
+
+    <button class="submit-btn" onclick="submitPayment()">📧 입금 완료 — 신청서 보내기</button>
+    <div class="qr-note">버튼 클릭 시 이메일 앱이 열려 sadad1052@naver.com 으로 자동 전송 준비됩니다.</div>
+  </div>
+
+  <!-- ─ FAQ ─ -->
+  <div class="info-box" style="margin-top:24px">
+    <strong>❓ 자주 묻는 질문</strong><br>
+    • <strong>발급까지 얼마나?</strong> 영업일(평일 10-18시) 기준 1~3시간 이내. 야간·주말 신청은 다음 영업일 오전.<br>
+    • <strong>세금계산서?</strong> 사업자등록증을 메일로 함께 보내주시면 발행해드립니다.<br>
+    • <strong>환불 정책?</strong> <a href="SolaNavi_이용약관.html">이용약관 제8조</a> 참조 (7일 이내 미사용 시 전액 환불).<br>
+    • <strong>토스/카드 결제는 언제?</strong> 마을항해 법인 설립 후 토스페이먼츠 자동 결제 도입 예정 (2026년 하반기).
+  </div>
+
+  <div style="text-align:center;margin-top:24px">
+    <a href="SolaNavi_소개서.html" style="font-size:13px;color:#6A6A6A">← 소개서로 돌아가기</a>
+  </div>
+</main>
+
+<footer>
+  © 2026 마을항해 · SolaNavi ·
+  <a href="SolaNavi_사용가이드북.html">사용 가이드</a> ·
+  <a href="SolaNavi_이용약관.html">이용약관</a> ·
+  <a href="SolaNavi_개인정보처리방침.html">개인정보처리방침</a>
+</footer>
+
+<script>
+// URL 쿼리에서 플랜 자동 선택 (?plan=pro)
+var PLANS = {
+  basic: { price: 49000, name: '베이직' },
+  pro: { price: 99000, name: 'PRO' },
+  agency: { price: 290000, name: '컨설팅사' },
+};
+var current = { plan: 'pro', price: 99000, name: 'PRO' };
+
+function selectPlan(plan, price, name) {
+  current = { plan, price, name };
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.toggle('on', c.dataset.plan === plan));
+  document.getElementById('amount-disp').textContent = price.toLocaleString() + '원';
+  updateDepositor();
+}
+
+function updateDepositor() {
+  var name = (document.getElementById('f-name').value || '본인이름').trim();
+  document.getElementById('depositor-name').textContent = name + current.name;
+}
+
+function copyText(t) {
+  navigator.clipboard.writeText(t).then(() => {
+    showToast('📋 ' + t + ' 복사됨');
+  }).catch(() => {
+    prompt('아래 텍스트를 복사하세요:', t);
+  });
+}
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:11px 22px;border-radius:25px;font-size:13px;z-index:10000;box-shadow:0 10px 30px rgba(0,0,0,.3)';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+function submitPayment() {
+  var name = document.getElementById('f-name').value.trim();
+  var email = document.getElementById('f-email').value.trim();
+  var tel = document.getElementById('f-tel').value.trim();
+  var org = document.getElementById('f-org').value.trim();
+  var villages = document.getElementById('f-villages').value.trim();
+  var tax = document.getElementById('f-tax').value;
+  var memo = document.getElementById('f-memo').value.trim();
+
+  if (!name) { alert('이름을 입력해주세요'); return; }
+  if (!email || !/.+@.+\..+/.test(email)) { alert('정확한 이메일을 입력해주세요'); return; }
+
+  if (!confirm('이미 입금을 완료하셨나요?\n\n계좌: 농협 302-7102-5391-11 (예금주: 김효상)\n금액: ' + current.price.toLocaleString() + '원\n입금자명: ' + name + current.name + '\n\n입금 후 [확인]을 누르면 신청서 메일 작성 화면이 열립니다.')) return;
+
+  var subject = '[SolaNavi 입금완료] ' + current.name + ' · ' + name;
+  var body =
+    '안녕하세요. 솔라나비 ' + current.name + ' 플랜 결제 완료 신청드립니다.\n\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '■ 신청자: ' + name + '\n' +
+    '■ 이메일: ' + email + '\n' +
+    '■ 연락처: ' + tel + '\n' +
+    '■ 소속: ' + org + '\n' +
+    '■ 관리 마을: ' + villages + '\n' +
+    '■ 세금계산서: ' + (tax === 'yes' ? '필요 (사업자등록증 별첨)' : '불필요') + '\n' +
+    '■ 메모: ' + memo + '\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n' +
+    '■ 플랜: ' + current.name + ' (' + current.price.toLocaleString() + '원/월)\n' +
+    '■ 입금 계좌: 농협 302-7102-5391-11 (김효상)\n' +
+    '■ 입금자명: ' + name + current.name + '\n' +
+    '━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+    '입금 확인 후 라이선스 키를 위 이메일로 발급 부탁드립니다.\n\n' +
+    '감사합니다.';
+
+  var mailto = 'mailto:sadad1052@naver.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  // 자동 저장
+  try {
+    localStorage.setItem('hsv_payment_pending', JSON.stringify({
+      plan: current.plan, name, email, tel, org, villages, tax, memo,
+      submittedAt: new Date().toISOString()
+    }));
+  } catch(e) {}
+  window.location.href = mailto;
+  setTimeout(() => {
+    alert('📧 메일 작성 화면이 열렸습니다.\n\n메일을 보내주시면 영업일 기준 1~3시간 내에 라이선스 키를 이메일로 발급해드립니다.\n\n문의: sadad1052@naver.com');
+  }, 800);
+}
+
+// 페이지 로드 시 URL에서 플랜 자동 선택
+(function() {
+  var p = new URLSearchParams(location.search).get('plan');
+  if (p && PLANS[p]) selectPlan(p, PLANS[p].price, PLANS[p].name);
+  updateDepositor();
+})();
+</script>
+
+</body>
+</html>
