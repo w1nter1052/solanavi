@@ -1352,7 +1352,7 @@ const CloudSync = {
       const merged = Object.values(map);
 
       // 플랜 한도 적용
-      const limits = { free: 1, basic: 5, pro: Infinity };
+      const limits = { free: 1, basic: 5, pro: Infinity, agency: Infinity };
       const lim = (typeof MH !== 'undefined') ? (limits[MH.plan] || 1) : 1;
       const final = lim === Infinity ? merged : merged.slice(0, lim);
 
@@ -1532,7 +1532,7 @@ if (location.search.includes('admin=1')) setTimeout(openAdminConsole, 1500);
       var banner = document.createElement('div');
       banner.id = 'unofficial-banner';
       banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#C0392B;color:#fff;padding:10px 16px;text-align:center;font-size:13px;font-weight:700;font-family:inherit;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,.2)';
-      banner.innerHTML = '⚠ 비공식 사본 — SolaNavi 공식 사이트가 아닙니다. 정식 라이선스: <a href="https://w1nter1052.github.io/solanavi/SolaNavi.html" style="color:#fff;text-decoration:underline">w1nter1052.github.io/solanavi</a> · 무단 복제 시 저작권법 제136조에 따라 5년 이하 징역 또는 5천만 원 이하 벌금';
+      banner.innerHTML = '⚠ 비공식 사본 — SolaNavi 공식 사이트가 아닙니다. 정식 라이선스: <a href="https://solanavi.kr" style="color:#fff;text-decoration:underline">solanavi.kr</a> · 무단 복제 시 저작권법 제136조에 따라 5년 이하 징역 또는 5천만 원 이하 벌금';
       document.body.insertBefore(banner, document.body.firstChild);
       document.body.style.paddingTop = '50px';
     }, 1000);
@@ -7532,8 +7532,9 @@ const MH = (function() {
 
     get plan() { return _plan; },
     get key() { return _key; },
-    get isPaid() { return _plan === 'basic' || _plan === 'pro'; },
-    get isPro() { return _plan === 'pro'; },
+    get isPaid() { return _plan === 'basic' || _plan === 'pro' || _plan === 'agency'; },
+    get isPro() { return _plan === 'pro' || _plan === 'agency'; },
+    get isAgency() { return _plan === 'agency'; },
     get isActive() { return _plan !== null; },
 
     logout() {
@@ -7982,7 +7983,8 @@ function updateBadge() {
   const wm = document.getElementById('watermark');
   if (!b) return;
   const p = MH.plan;
-  if (p === 'pro') { b.innerHTML = '<span class="plan-badge pb-pro">⭐ PRO</span>'; }
+  if (p === 'agency') { b.innerHTML = '<span class="plan-badge" style="background:#1A3A6B;color:#fff;border:1px solid #1A3A6B">🏢 컨설팅사</span>'; }
+  else if (p === 'pro') { b.innerHTML = '<span class="plan-badge pb-pro">⭐ PRO</span>'; }
   else if (p === 'basic') { b.innerHTML = '<span class="plan-badge pb-basic">💙 BASIC</span>'; }
   else if (window._isFreeTest) { b.innerHTML = '<span class="plan-badge" style="background:#FFF3CD;color:#856404;border:1px solid #FFC107">🧪 체험 중</span>'; }
   else { b.innerHTML = '<span class="plan-badge pb-free">🆓 무료</span>'; }
@@ -13005,7 +13007,7 @@ function renderVillages() {
     </div>`).join('');
   // 플랜별 한도 체크 후 추가 버튼 표시
   var cnt = villages ? villages.length : 0;
-  var limits = { free: 1, basic: 5, pro: null };
+  var limits = { free: 1, basic: 5, pro: null, agency: null };
   var limit = limits[MH.plan];
   var atLimit = limit !== null && limit !== undefined && cnt >= limit;
   if (atLimit) {
@@ -13373,7 +13375,7 @@ function updateVillageCountLabel() {
   var el = document.getElementById('village-count-label');
   if (!el) return;
   var cnt = villages ? villages.length : 0;
-  var limits = { free: 1, basic: 5, pro: null };
+  var limits = { free: 1, basic: 5, pro: null, agency: null };
   var limit = limits[MH.plan];
   if (limit === null || limit === undefined) {
     el.textContent = '등록 마을: ' + cnt + '개';
@@ -13430,7 +13432,7 @@ function saveVillage() {
   if (!editId) { // 신규 추가일 때만 체크
     const cnt = villages ? villages.length : 0;
     const plan = MH.plan;
-    const limits = { free: 1, basic: 5, pro: Infinity };
+    const limits = { free: 1, basic: 5, pro: Infinity, agency: Infinity };
     const limit = limits[plan] !== undefined ? limits[plan] : 1;
     if (cnt >= limit) {
       const msgs = {
@@ -14810,7 +14812,7 @@ document.addEventListener('DOMContentLoaded', function() {
           var preview = document.getElementById('saved-key-preview');
           if (hint && preview) {
             var masked = d.k.slice(0,8) + '****' + d.k.slice(-4);
-            preview.textContent = masked + ' (' + (d.p === 'pro' ? '프로' : d.p === 'basic' ? '베이직' : '무료') + ' 플랜)';
+            preview.textContent = masked + ' (' + (d.p === 'pro' ? '프로' : d.p === 'basic' ? '베이직' : d.p === 'agency' ? '컨설팅사' : '무료') + ' 플랜)';
             hint.style.display = 'flex';
           }
         }
