@@ -368,10 +368,11 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
 .ni{display:block;padding:6px 14px 6px 44px;font-size:12px;color:#6A6A6A;cursor:pointer;border-left:2px solid transparent;transition:all .15s;line-height:1.6;position:relative}
 .ni:hover{color:var(--sun-d);background:#F7F3EA}
 .ni.on{color:var(--sun);border-left-color:var(--sun);background:rgba(245,166,35,.06)}
-/* 진행률 — 방문한 페이지에 우측 ✓ */
-.ni.visited::after{content:'✓';position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#22C55E;font-size:10px;font-weight:900;opacity:.7}
-.ni.on.visited::after{color:var(--sun);opacity:1}
-/* 그룹별 진행 카운트 (nc 옆) */
+/* 진행률 — 방문(연한 점) vs 완료(녹색 ✓) 분리 */
+.ni.visited::after{content:'·';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#C0C0C0;font-size:16px;font-weight:900;line-height:0}
+.ni.done::after{content:'✓';position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#22C55E;font-size:11px;font-weight:900;opacity:1}
+.ni.on.done::after{color:var(--sun)}
+/* 그룹별 진행 카운트 (nc 옆) — 완료된 것만 카운트 */
 .nc{position:relative}
 .nc .progress-chip{position:absolute;right:34px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;color:#22C55E;background:rgba(34,197,94,.1);padding:2px 6px;border-radius:8px;letter-spacing:-.02em}
 .nc .progress-chip.full{background:#22C55E;color:#fff}
@@ -442,7 +443,9 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
 .sc-item{font-size:11px;padding:2px 8px;border-radius:10px;opacity:.7}
 
 /* ── 컨텐츠 공통 ── */
-.cp{padding:36px 32px;max-width:940px}
+.cp{padding:36px 32px;max-width:1100px;margin:0 auto}
+/* 수익성 계산기는 추가로 넓게 — 좌우 카드 시각화 여유 */
+#page-s1-calc .cp{max-width:1240px}
 .step-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:28px;padding:20px 24px;border-radius:14px}
 .step-header .step-num{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0}
 .step-header h1{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;margin-bottom:3px}
@@ -916,8 +919,9 @@ html[data-theme="dark"] .pm-modal-body .pm-warn{background:#3A2D10;border-color:
 /* 모달 */
 #modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;padding:20px}
 #modal-ov.show{display:flex}
-#manual-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:flex-end;justify-content:center;padding:0}
+#manual-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
 #manual-modal-ov.show{display:flex}
+@media(max-width:600px){#manual-modal-ov{padding:12px;align-items:flex-start;padding-top:30px}}
 #manual-modal{background:#fff;width:100%;max-width:620px;border-radius:16px 16px 0 0;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
 #manual-modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd);flex-shrink:0}
 #manual-modal-title{font-size:14px;font-weight:700;color:var(--drk)}
@@ -6985,19 +6989,31 @@ if (CLOUD_ENABLED) {
         <div class="step-num" style="background:#B8860B">★</div>
         <div><h1>서류 라이브러리</h1><p>공모 신청에 필요한 모든 서류를 한 곳에서 열람하고 다운로드</p></div>
       </div>
-      <div class="cl sun"><span class="cl-ic">⭐</span><div class="cl-bd"><strong>컨설턴트 활용 가이드</strong>[보기] 버튼으로 내용 확인 → [⬇ Word]로 편집 가능한 파일 다운로드 → [🖨 PDF]로 인쇄/PDF 저장. 정관(안)은 행안부 표준정관(안) 11장 102조 예시문 반영본입니다. OO 부분을 마을 정보로 채워 사용하세요.</div></div>
-      <div class="cl grn"><span class="cl-ic">🇰🇷</span><div class="cl-bd"><strong>한글(.hwp) 서식 다운로드</strong>[🇰🇷 한글] 버튼 클릭 시 공식 출처 사이트로 이동합니다. <strong>공모 서식(서식1~4)</strong>은 행안부 공고 첨부 HWPX 파일에서 직접 다운로드 가능 → <a href="https://www.mois.go.kr/frt/bbs/type010/commonSelectBoardArticle.do?bbsId=BBSMSTR_000000000008&nttId=124882" target="_blank" style="color:var(--grn);font-weight:700">행안부 공고 페이지 ↗</a>. <strong>협동조합 설립서식</strong>은 coop.go.kr 서식자료실에서 다운로드.</div></div>
+      <div class="cl sun"><span class="cl-ic">⭐</span><div class="cl-bd"><strong>활용 안내</strong> — [보기]로 미리보기, [⬇ Word]로 다운로드, [🇰🇷 한글]은 한컴 변환용 .docx 제공, [🖨 PDF]로 인쇄. 공식 한글 양식은 <a href="https://www.mois.go.kr" target="_blank" style="color:var(--sun-d);font-weight:700">행안부 공고 페이지 ↗</a>에서 다운로드 가능.</div></div>
+
+      <!-- ── 카테고리 1: 공모 신청 서식 (4개) ── -->
+      <div class="st" style="margin-top:18px;display:flex;align-items:center;gap:8px">📑 공모 신청 서식 <span style="background:#FFF3E0;color:#B8860B;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px">서식 1~4</span></div>
       <div class="doc-grid">
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#FFF3E0">📋</div><div class="doc-meta"><div class="doc-num">서식 1</div><div class="doc-name">신청전 체크리스트</div><div class="doc-desc">10가지 요건 충족 여부 사전 점검</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('checklist')">보기</button><button class="doc-btn dl" onclick="dlDocx('checklist')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('checklist')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('checklist')">🖨 PDF</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E8F5E9">📄</div><div class="doc-meta"><div class="doc-num">서식 2</div><div class="doc-name">햇빛소득마을 지원 신청서</div><div class="doc-desc">마을 기본정보·태양광 계획·담당자 현황</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('apply2')">보기</button><button class="doc-btn dl" onclick="dlDocx('apply2')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('apply2')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('apply2')">🖨 PDF</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#F3E5F5">📊</div><div class="doc-meta"><div class="doc-num">서식 3</div><div class="doc-name">사업계획서</div><div class="doc-desc">협동조합 현황·마을현황·발전소계획</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('bizplan')">보기</button><button class="doc-btn dl" onclick="dlDocx('bizplan')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('bizplan')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('bizplan')">🖨 PDF</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E3F2FD">🏢</div><div class="doc-meta"><div class="doc-num">서식 4</div><div class="doc-name">사업지원계획서</div><div class="doc-desc">기초 지방정부가 작성·공문 제출</div></div></div><div class="doc-card-foot"><span class="doc-tag ref">지자체 제출</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('gov4')">보기</button><button class="doc-btn dl" onclick="dlDocx('gov4')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('gov4')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('gov4')">🖨 PDF</button></div></div></div>
+      </div>
+
+      <!-- ── 카테고리 2: 붙임 서식 (4개) ── -->
+      <div class="st" style="margin-top:24px;display:flex;align-items:center;gap:8px">📎 붙임 서식 <span style="background:#E3F2FD;color:#1976D2;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px">붙임 1~4</span></div>
+      <div class="doc-grid">
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E3F2FD">🏛️</div><div class="doc-meta"><div class="doc-num">붙임서식 1</div><div class="doc-name">마을총회 의결서</div><div class="doc-desc">햇빛소득마을 사업 참여 총회 결의</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('assembly')">보기</button><button class="doc-btn dl" onclick="dlDocx('assembly')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('assembly')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('assembly')">🖨 PDF</button></div></div></div>
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#FCE4EC">✍️</div><div class="doc-meta"><div class="doc-num">붙임서식 2</div><div class="doc-name">주민 동의서</div><div class="doc-desc">사업추진·개인정보 수집이용 동의</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('consent')">보기</button><button class="doc-btn dl" onclick="dlDocx('consent')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('consent')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('consent')">🖨 PDF</button></div></div></div>
-        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#F3E5F5">📊</div><div class="doc-meta"><div class="doc-num">서식 3</div><div class="doc-name">사업계획서</div><div class="doc-desc">협동조합 현황·마을현황·발전소계획</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('bizplan')">보기</button><button class="doc-btn dl" onclick="dlDocx('bizplan')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('bizplan')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('bizplan')">🖨 PDF</button></div></div></div>
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E0F7FA">👥</div><div class="doc-meta"><div class="doc-num">붙임서식 3</div><div class="doc-name">조합원 명부</div><div class="doc-desc">성명·생년월일·주소·출자금</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('members')">보기</button><button class="doc-btn dl" onclick="dlDocx('members')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('members')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('members')">🖨 PDF</button></div></div></div>
+        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#FFF3E0">🔒</div><div class="doc-meta"><div class="doc-num">붙임서식 4</div><div class="doc-name">조합원 개인정보 동의서</div><div class="doc-desc">조합원용 개인정보 수집·이용 동의</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('privacy4')">보기</button><button class="doc-btn dl" onclick="dlDocx('privacy4')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('privacy4')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('privacy4')">🖨 PDF</button></div></div></div>
+      </div>
+
+      <!-- ── 카테고리 3: 컨설팅 초안 (2개) ── -->
+      <div class="st" style="margin-top:24px;display:flex;align-items:center;gap:8px">⚖️ 컨설팅 초안 <span style="background:#FFF8E1;color:#B8860B;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px">표준 양식 기반</span></div>
+      <div class="doc-grid">
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#FFF8E1">⚖️</div><div class="doc-meta"><div class="doc-num">정관(안)</div><div class="doc-name">협동조합 정관(안)</div><div class="doc-desc">행안부 공식 표준예시문 · 11장 102조</div></div></div><div class="doc-card-foot"><span class="doc-tag draft">컨설팅용 초안</span><div class="doc-actions"><button class="doc-btn view" onclick="manualGo('s3-charter')">전체보기</button><button class="doc-btn dl" onclick="dlDocx('charter')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('charter')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintCharter()">🖨 PDF</button></div></div></div>
         <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E8F5E9">📌</div><div class="doc-meta"><div class="doc-num">규약 개정안</div><div class="doc-name">마을회 규약 개정 조문(안)</div><div class="doc-desc">협동조합 설치 근거 조문 삽입용</div></div></div><div class="doc-card-foot"><span class="doc-tag draft">컨설팅용 초안</span><div class="doc-actions"><button class="doc-btn view" onclick="manualGo('docs-rules')">전체보기</button><button class="doc-btn dl" onclick="dlDoc('rules')">⬇ HTML</button></div></div></div>
-        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E8F5E9">📄</div><div class="doc-meta"><div class="doc-num">서식 2</div><div class="doc-name">햇빛소득마을 지원 신청서</div><div class="doc-desc">마을 기본정보·태양광 계획·담당자 현황</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('apply2')">보기</button><button class="doc-btn dl" onclick="dlDocx('apply2')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('apply2')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('apply2')">🖨 PDF</button></div></div></div>
-        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#FFF3E0">🔒</div><div class="doc-meta"><div class="doc-num">붙임서식 4</div><div class="doc-name">조합원 개인정보 동의서</div><div class="doc-desc">조합원용 개인정보 수집·이용 동의</div></div></div><div class="doc-card-foot"><span class="doc-tag req">필수</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('privacy4')">보기</button><button class="doc-btn dl" onclick="dlDocx('privacy4')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('privacy4')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('privacy4')">🖨 PDF</button></div></div></div>
-        <div class="doc-card"><div class="doc-card-head"><div class="doc-icon" style="background:#E3F2FD">🏢</div><div class="doc-meta"><div class="doc-num">서식 4</div><div class="doc-name">사업지원계획서 (지자체용)</div><div class="doc-desc">기초 지방정부가 작성·공문 제출</div></div></div><div class="doc-card-foot"><span class="doc-tag ref">지자체 제출</span><div class="doc-actions"><button class="doc-btn view" onclick="manualOpenModal('gov4')">보기</button><button class="doc-btn dl" onclick="dlDocx('gov4')">⬇ Word</button><button class="doc-btn hwp" onclick="dlHwp('gov4')">🇰🇷 한글</button><button class="doc-btn pdf" onclick="manualPrintDoc('gov4')">🖨 PDF</button></div></div></div>
       </div>
       <div class="st" style="margin-top:24px">🏢 협동조합 설립 서류 (STEP 3-2)</div>
       <div class="cl grn" style="margin-bottom:14px"><span class="cl-ic">💡</span><div class="cl-bd"><strong>사용 순서</strong>: 설립신고서 → 창립총회 의사록 → 임원 취임승낙서 → 출자금 납입확인서 → (사회적협동조합인 경우) 기재부 인가 신청</div></div>
@@ -9210,39 +9226,63 @@ window.UIState = {
   }
 };
 
-// ── 진행률(방문 기록) ──
+// ── 진행률(방문 + 완료) ──
+// visited = 단순 클릭/방문 (회색 점)
+// done = 30초+ 체류 또는 수동 완료 체크 (녹색 ✓)
 function _getVisited(){
   try { return JSON.parse(localStorage.getItem('mh_visited_pages')||'{}'); } catch(e){ return {}; }
+}
+function _getDone(){
+  try { return JSON.parse(localStorage.getItem('mh_done_pages')||'{}'); } catch(e){ return {}; }
 }
 function _setVisited(map){
   try { localStorage.setItem('mh_visited_pages', JSON.stringify(map)); } catch(e){}
 }
+function _setDone(map){
+  try { localStorage.setItem('mh_done_pages', JSON.stringify(map)); } catch(e){}
+}
+var _enterPageTs = 0;
+var _enterPageId = null;
 function _markVisited(pageId){
   if (!pageId || pageId === 'home') return;
+  // 이전 페이지가 있고 30초 이상 머물렀으면 done으로 승격
+  if (_enterPageId && _enterPageId !== 'home' && _enterPageTs > 0) {
+    var elapsed = Date.now() - _enterPageTs;
+    if (elapsed >= 30000) { // 30초+
+      var d = _getDone();
+      if (!d[_enterPageId]) {
+        d[_enterPageId] = Date.now();
+        _setDone(d);
+      }
+    }
+  }
+  // 현재 페이지 = visited 등록
   var v = _getVisited();
   if (!v[pageId]) {
     v[pageId] = Date.now();
     _setVisited(v);
   }
+  _enterPageTs = Date.now();
+  _enterPageId = pageId;
   _renderProgress();
 }
 function _renderProgress(){
   var v = _getVisited();
-  // 각 .ni 에 ✓ 클래스 적용
+  var d = _getDone();
   document.querySelectorAll('.ni').forEach(function(ni){
     var on = ni.getAttribute('onclick') || '';
     var m = on.match(/manualGo\(['"]([^'"]+)['"]/);
     if (!m) return;
     var pid = m[1];
-    if (v[pid]) ni.classList.add('visited');
-    else ni.classList.remove('visited');
+    ni.classList.toggle('visited', !!v[pid]);
+    ni.classList.toggle('done', !!d[pid]);
   });
-  // 그룹별(.nc) 카운트 칩
+  // 그룹별 카운트 칩 — done 기준만
   document.querySelectorAll('.ns').forEach(function(ns){
     var items = ns.querySelectorAll('.ni');
     if (items.length === 0) return;
     var done = 0;
-    items.forEach(function(ni){ if (ni.classList.contains('visited')) done++; });
+    items.forEach(function(ni){ if (ni.classList.contains('done')) done++; });
     var nc = ns.querySelector('.nc');
     if (!nc) return;
     var chip = nc.querySelector('.progress-chip');
@@ -9250,7 +9290,6 @@ function _renderProgress(){
     if (!chip) {
       chip = document.createElement('span');
       chip.className = 'progress-chip';
-      // .nc-a (▶) 앞에 삽입
       var arrow = nc.querySelector('.nc-a');
       if (arrow) nc.insertBefore(chip, arrow); else nc.appendChild(chip);
     }
@@ -9258,10 +9297,24 @@ function _renderProgress(){
     chip.classList.toggle('full', done === items.length);
   });
 }
-// 페이지 진입 시 한 번 렌더
+// 사용자 수동 완료 토글 (사이드바 ✓ 우클릭/롱프레스 또는 페이지에서 직접)
+window.toggleDone = function(pageId){
+  if (!pageId) return;
+  var d = _getDone();
+  if (d[pageId]) delete d[pageId];
+  else d[pageId] = Date.now();
+  _setDone(d);
+  _renderProgress();
+};
 setTimeout(function(){ try{ _renderProgress(); }catch(e){} }, 400);
-// 진행률 초기화 헬퍼 (관리자용)
-window.resetProgress = function(){ if(confirm('진행 기록을 초기화할까요?')){ localStorage.removeItem('mh_visited_pages'); _renderProgress(); } };
+// 진행 초기화
+window.resetProgress = function(){
+  if(confirm('진행 기록(방문·완료)을 모두 초기화할까요?')){
+    localStorage.removeItem('mh_visited_pages');
+    localStorage.removeItem('mh_done_pages');
+    _renderProgress();
+  }
+};
 
 // ── 글로벌 검색 (Ctrl+K / 사이드바 검색 트리거) ──
 window._searchIndex = null;
@@ -13493,9 +13546,13 @@ function manualPrintDoc(key) {
 </div>
 ${d.html}
 <div class="footer">이 서식은 2026년 햇빛소득마을 선정 공모 공고문 기준 서식입니다. 제출 시 지자체 배포본 확인 필요.</div>
-<scr'+'ipt>window.onload=function(){window.print();}<\/script>
 </body></html>`);
   w.document.close();
+  // 새 창 onload 이벤트로 인쇄 다이얼로그 자동 표시 (스크립트 태그 노출 방지)
+  try {
+    if (w.document.readyState === 'complete') { setTimeout(function(){ try{w.print();}catch(e){} }, 250); }
+    else { w.addEventListener('load', function(){ setTimeout(function(){ try{w.print();}catch(e){} }, 250); }); }
+  } catch(e){}
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -16252,16 +16309,17 @@ function printDocEdit() {
   if (!ed) return;
   const title = (document.getElementById('doc-form-title') ? document.getElementById('doc-form-title').textContent : '문서');
   const w = window.open('', '_blank');
-  const closeTag = '<' + '/script>';
-  const openTag = '<' + 'script>';
   w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title + '</title>' +
     '<style>body{font-family:"Malgun Gothic",sans-serif;padding:30pt;line-height:1.7;font-size:11pt}' +
     'pre{white-space:pre-wrap;font-family:inherit}' +
     '@media print { body { padding: 15pt } }' +
     '</style></head><body><pre>' + ed.value.replace(/</g,'&lt;') + '</pre>' +
-    openTag + 'window.onload=function(){window.print();}' + closeTag +
     '</body></html>');
   w.document.close();
+  try {
+    if (w.document.readyState === 'complete') { setTimeout(function(){ try{w.print();}catch(e){} }, 250); }
+    else { w.addEventListener('load', function(){ setTimeout(function(){ try{w.print();}catch(e){} }, 250); }); }
+  } catch(e){}
 }
 
 // ══════════════════════════════════════
