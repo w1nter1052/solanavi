@@ -444,8 +444,6 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
 
 /* ── 컨텐츠 공통 ── */
 .cp{padding:36px 32px;max-width:1100px;margin:0 auto}
-/* 수익성 계산기는 추가로 넓게 — 좌우 카드 시각화 여유 */
-#page-s1-calc .cp{max-width:1240px}
 .step-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:28px;padding:20px 24px;border-radius:14px}
 .step-header .step-num{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0}
 .step-header h1{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;margin-bottom:3px}
@@ -12782,40 +12780,138 @@ apply: {
 </div>`
 },
 bizplan: {
-  title: '서식 3 · 햇빛소득마을 사업계획서',
+  title: '서식 3 · 햇빛소득마을 사업계획서 (7개 챕터)',
   html: `<div class="form-section">
-<div class="form-section-title" style="text-align:center">2026년 햇빛소득마을 사업계획서 (마을 공동체용)</div>
-<div class="form-section">
-<div class="form-section-title">1. 협동조합 현황</div>
+<div class="form-section-title" style="text-align:center;font-size:16px">2026년 햇빛소득마을 사업계획서 (마을 공동체용)</div>
+<div style="background:#FFF3CD;border:1px solid #FFC107;padding:10px 14px;border-radius:6px;margin:8px 0 16px;font-size:11.5px;line-height:1.6">💡 행안부 공모 신청용 7개 챕터 공식 양식입니다. 빈칸 없이 작성하는 게 심사 가점에 유리합니다.</div>
+
+<div class="form-section"><div class="form-section-title">1. 협동조합 현황</div>
 <div class="form-row"><span class="form-label">협동조합명</span><div class="form-field"></div></div>
-<div class="form-row"><span class="form-label">이사장(회장)</span><div class="form-field"></div></div>
+<div class="form-row"><span class="form-label">이사장(회장) 성명</span><div class="form-field"></div></div>
 <div class="form-row"><span class="form-label">법인 주소</span><div class="form-field"></div></div>
+<div class="form-row"><span class="form-label">전화번호</span><div class="form-field"></div></div>
 <div class="form-row"><span class="form-label">설립인가번호</span><div class="form-field"></div></div>
-<div class="form-row"><span class="form-label">조합원 수</span><div class="form-field"></div></div>
+<div class="form-row"><span class="form-label">조합원 수</span><div class="form-field">    명</div></div>
+<div class="form-row"><span class="form-label">사업자등록번호</span><div class="form-field"></div></div>
+<div class="form-row"><span class="form-label">설립 인가일</span><div class="form-field"></div></div>
 <div class="form-row"><span class="form-label">협동조합 형태</span><div class="form-field"><span class="cb"><input type="checkbox"> 협동조합</span> &nbsp; <span class="cb"><input type="checkbox"> 사회적협동조합</span></div></div>
 </div>
-<div class="form-section">
-<div class="form-section-title">2. 마을 공동체 현황</div>
+
+<div class="form-section"><div class="form-section-title">2. 마을 공동체 현황</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:8px 0 4px">가. 마을 현황</p>
 <div class="form-row"><span class="form-label">마을명</span><div class="form-field"></div></div>
 <div class="form-row"><span class="form-label">소재지</span><div class="form-field"></div></div>
-<div class="form-row"><span class="form-label">인구 정보</span><div class="form-field">총 &nbsp;&nbsp;&nbsp; 세대 / &nbsp;&nbsp;&nbsp; 명</div></div>
-<div class="form-row"><span class="form-label">주민 동의율</span><div class="form-field">&nbsp;&nbsp;&nbsp; 명 / &nbsp;&nbsp;&nbsp; 명 = &nbsp;&nbsp;&nbsp; %</div></div>
+<div class="form-row"><span class="form-label">행정 구역</span><div class="form-field">   도(시)    시·군    읍·면    리</div></div>
+<div class="form-row"><span class="form-label">인구 정보</span><div class="form-field">총     세대 /     명</div></div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">나. 주민 및 주민 동의 현황</p>
+<table class="form-table"><thead><tr><th>총 주민수</th><th>사업참여 주민수</th><th>동의율 (%)</th></tr></thead>
+<tbody><tr><td>    명</td><td>    명</td><td>    %</td></tr></tbody></table>
+<p style="font-size:11px;color:#C0392B;margin-top:4px">※ 마을 자치규약에 따라 자격을 갖춘 주민 70% 이상 동의 필수</p>
 </div>
-<div class="form-section">
-<div class="form-section-title">3. 협동조합 의사결정 구조</div>
-<div class="form-field lg">총회 구성 및 의결 방식, 이사회 운영 방식, 감사 방식 등 기재</div>
+
+<div class="form-section"><div class="form-section-title">3. 협동조합 세부 현황</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:8px 0 4px">가. 의사결정 구조</p>
+<div class="form-field lg" style="min-height:60px">총회 구성·소집, 의결정족수, 이사회 권한, 감사 역할 등 기재</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">나. 운영체계</p>
+<div class="form-field lg" style="min-height:60px">조합원 가입·탈퇴 절차, 임원 임기·선출 방식, 회계 처리·공시 방식 등 기재</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">다. 출자·수입의 적립·배분 구조</p>
+<div class="form-field lg" style="min-height:60px">1좌당 출자금액, 마을공동기금 적립률, 주민 배분 방식(지역화폐), 유지보수 적립률 등 기재</div>
 </div>
-<div class="form-section">
-<div class="form-section-title">4. 태양광 발전소 계획</div>
-<div class="form-row"><span class="form-label">설치 예정 위치</span><div class="form-field"></div></div>
-<div class="form-row"><span class="form-label">설치 용량</span><div class="form-field">&nbsp;&nbsp;&nbsp; kW (300kW 이상 ~ 1,000kW 이하)</div></div>
-<div class="form-row"><span class="form-label">총 사업비</span><div class="form-field">약 &nbsp;&nbsp;&nbsp; 백만원</div></div>
-<div class="form-row"><span class="form-label">자부담 재원</span><div class="form-field">약 &nbsp;&nbsp;&nbsp; 백만원 (재원 확보 방안 기재)</div></div>
-<div class="form-row"><span class="form-label">계통연계 여부</span><div class="form-field"><span class="cb"><input type="checkbox"> 확인 완료</span> &nbsp; <span class="cb"><input type="checkbox"> 확인 중</span></div></div>
+
+<div class="form-section"><div class="form-section-title">4. 태양광 발전사업 추진 계획</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:8px 0 4px">가. 총괄표</p>
+<div class="form-row"><span class="form-label">총 용량</span><div class="form-field">    kW (300kW 이상 ~ 1,000kW 이하 원칙)</div></div>
+<div class="form-row"><span class="form-label">설치형태 및 용량</span><div class="form-field"><span class="cb"><input type="checkbox"> 지상형 (    kW)</span> <span class="cb"><input type="checkbox"> 건물형 (    kW)</span> <span class="cb"><input type="checkbox"> 수상형 (    kW)</span></div></div>
+<div class="form-row"><span class="form-label">계통연계</span><div class="form-field"><span class="cb"><input type="checkbox"> 계통연계 가능</span> &nbsp; <span class="cb"><input type="checkbox"> 계통연계 불가 (ESS 설치 등)</span></div></div>
+<div class="form-row"><span class="form-label">총 예상 설치비</span><div class="form-field">    백만원 (100%)</div></div>
+<div class="form-row"><span class="form-label">예상 사업일정</span><div class="form-field">발전사업허가 2026.   /  공사계획인가 2026.   /  상업운전개시 2026.</div></div>
+
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">나. 세부 부지 추진 계획</p>
+<table class="form-table"><thead><tr><th style="width:50px">번호</th><th>주소</th><th>설치형태</th><th>부지 소유자</th><th>확보 여부</th><th>용량(kW)</th></tr></thead>
+<tbody>
+${[1,2,3,4,5].map(function(i){return '<tr><td style="text-align:center">'+i+'</td><td></td><td>지상/건물/수상</td><td></td><td>O / X</td><td></td></tr>';}).join('')}
+<tr style="background:#E6F4EC;font-weight:700"><td colspan="5" style="text-align:center">합계</td><td></td></tr>
+</tbody></table>
+
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">다. 부지 확보계획 (미확보 부지)</p>
+<div class="form-field lg" style="min-height:50px">미확보 부지 확보 방법(매입·임대·지자체 무상임대), 확보 일정 기재</div>
+
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">라. 태양광 설치비 현황</p>
+<div class="form-row"><span class="form-label">총 예상 설치비</span><div class="form-field">    백만원 (100%)</div></div>
+<div class="form-row"><span class="form-label">자부담 확보 현황</span><div class="form-field"><strong style="color:#C0392B">    백만원 (    %) — 15% 이상 필수</strong></div></div>
+
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">마. 총 예상 태양광 설치비 산출 근거</p>
+<table class="form-table"><thead><tr><th>구분</th><th>세부 항목</th><th>수량</th><th>금액(백만원)</th></tr></thead>
+<tbody>
+<tr><td rowspan="5" style="background:#f9f9f9;text-align:center;font-weight:700">직접비</td><td>모듈</td><td></td><td></td></tr>
+<tr><td>인버터</td><td></td><td></td></tr>
+<tr><td>기자재비</td><td></td><td></td></tr>
+<tr><td>구조물</td><td></td><td></td></tr>
+<tr><td>기타</td><td></td><td></td></tr>
+<tr><td rowspan="4" style="background:#f9f9f9;text-align:center;font-weight:700">시공비</td><td>기계공사비</td><td></td><td></td></tr>
+<tr><td>계전공사비</td><td></td><td></td></tr>
+<tr><td>토목공사비</td><td></td><td></td></tr>
+<tr><td>건축공사비</td><td></td><td></td></tr>
+<tr><td rowspan="4" style="background:#f9f9f9;text-align:center;font-weight:700">간접비</td><td>부대공사비</td><td></td><td></td></tr>
+<tr><td>설계용역비</td><td></td><td></td></tr>
+<tr><td>외자조작비·사업주 제경비</td><td></td><td></td></tr>
+<tr><td>건설이자</td><td></td><td></td></tr>
+<tr style="background:#FFF8E1;font-weight:700"><td colspan="3" style="text-align:center">합계</td><td></td></tr>
+</tbody></table>
+
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">바. 태양광 설치비 확보계획</p>
+<div class="form-field lg" style="min-height:50px">국비·지방비·자부담 비율 및 조달 방안(마을기금·지역금융·정부 융자 등) 기재</div>
+
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">사. 주요 설비 개요</p>
+<table class="form-table"><thead><tr><th>구분</th><th>모델명</th><th>인증번호 (KS)</th><th>수량</th><th>출력(Wp)</th></tr></thead>
+<tbody>
+<tr><td>모듈 1</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>모듈 2</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>인버터 1</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>인버터 2</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>접속함</td><td></td><td></td><td></td><td></td></tr>
+</tbody></table>
+<p style="font-size:11px;color:#C0392B;margin-top:4px">※ 모듈 탄소배출량 655kgCO₂/kW 이하 필수 · KS 인증제품</p>
+
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">아. 재생에너지 산업 생태계 기여 계획</p>
+<div class="form-field lg" style="min-height:50px">저탄소 모듈 사용 계획, 국내 산업·경제적 파급효과 기여 방안 기재</div>
 </div>
-<div class="form-section">
-<div class="form-section-title">5. 수익 활용 계획</div>
-<div class="form-field lg">마을기금 적립 비율, 주민 배분 방식, 공동사업 투자 방향 등 기재. 마을 귀속 70% 이상 유지 방안 명시.</div>
+
+<div class="form-section"><div class="form-section-title">5. 태양광 발전사업 사업관리 계획</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:8px 0 4px">가. 수입 확보계획</p>
+<div class="form-row"><span class="form-label">수입확보 방안</span><div class="form-field"><span class="cb"><input type="checkbox"> 고정가격계약 경쟁입찰</span> &nbsp; <span class="cb"><input type="checkbox"> PPA (전력거래계약)</span></div></div>
+<div class="form-row"><span class="form-label">입찰 예상금액</span><div class="form-field">SMP + 1REC =     원/MWh</div></div>
+<p style="font-size:11px;color:#7A7A7A;margin-top:4px">※ 발전사업 허가일로부터 12개월 이내 고정가격계약 또는 PPA 체결 필수</p>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">나. 설비 유지관리 등 운영 계획</p>
+<div class="form-field lg" style="min-height:50px">REMS 연동, 정기점검(태양광 4년, ESS 1~2년), 인버터 교체 주기, 고장 대응 체계 등 기재</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">다. 기타 사항</p>
+<div class="form-field lg" style="min-height:40px"></div>
+</div>
+
+<div class="form-section"><div class="form-section-title">6. 햇빛소득마을 사업관리 계획</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:8px 0 4px">가. 수익 활용 계획</p>
+<div class="form-field lg" style="min-height:60px">마을복지사업·주민 배분(지역화폐 원칙)·공동사업 투자 등 활용 방안. 정관에 명시. <strong style="color:#C0392B">마을 귀속 70% 이상 필수</strong></div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">나. 회계관리 계획</p>
+<div class="form-field lg" style="min-height:50px">분기별 정산, 연간 결산, 매 회계연도 4개월 이내 경영공시 등 기재</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">다. 햇빛소득마을 관리자 채용 및 활용 계획</p>
+<div class="form-field lg" style="min-height:50px">관리자 별도 지정, 회계·정산·태양광 기초 유지관리 업무 부여 (가점 2점)</div>
+<p style="font-size:12px;color:#5A5A5A;font-weight:700;margin:14px 0 4px">라. 기타 사항</p>
+<div class="form-field lg" style="min-height:40px"></div>
+</div>
+
+<div class="form-section"><div class="form-section-title">7. 태양광 설치 계획 참고자료</div>
+<table class="form-table"><thead><tr><th style="width:40px">번호</th><th>설치 예정지</th><th>전주번호</th><th>부지 현황</th><th>부지 소유자</th><th>설치 형태</th><th>확보 여부</th><th>용량(kW)</th><th>투자비(백만원)</th></tr></thead>
+<tbody>
+${[1,2,3,4,5].map(function(i){return '<tr><td style="text-align:center">'+i+'</td><td></td><td>한전간 100</td><td>사진</td><td>개인/마을/지방정부/공공기관</td><td>지상/건물/수상</td><td>O / X</td><td></td><td></td></tr>';}).join('')}
+<tr style="background:#E6F4EC;font-weight:700"><td colspan="7" style="text-align:center">합 계</td><td></td><td></td></tr>
+</tbody></table>
+</div>
+
+<div style="margin-top:18px;padding:12px;background:#FFF3CD;border:1px solid #FFC107;border-radius:6px;font-size:11.5px;color:#5A4A00;line-height:1.65">
+⚠ <strong>심사 가점 항목</strong> — ① 인구감소지역(+5점) ② 마을 귀속 70%+ (REC 가중치 +0.2) ③ 자부담 20%+ ④ 사회적협동조합 ⑤ 지방정부 부지 제공 (3점) ⑥ 관리자 채용 (2점)
+</div>
+<div style="margin-top:10px;padding:10px;background:#E3F2FD;border-radius:6px;font-size:11px;color:#1a3a6b">
+📌 <strong>제출 시 함께</strong> — 붙임서식 1~4, 마을총회 회의록, 시공업체 견적서, 토지대장, 시공업체 탄소배출 인증서, 계통연계 가능 확인서
 </div>
 </div>`
 },
@@ -12879,109 +12975,6 @@ gov: {
 </div>
 </div>`
 },
-  assembly: { title:'창립총회 회의록', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:2;padding:10px">
-<div style="text-align:center;font-size:16px;font-weight:700;margin-bottom:20px">창립총회 회의록</div>
-<table style="width:100%;border-collapse:collapse;margin-bottom:16px"><tbody>
-<tr><th style="border:1px solid #999;padding:8px;background:#f5f5f5;width:30%">일시</th><td style="border:1px solid #999;padding:8px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;년 &nbsp;&nbsp;월 &nbsp;&nbsp;일 &nbsp;&nbsp;시 &nbsp;&nbsp;분</td></tr>
-<tr><th style="border:1px solid #999;padding:8px;background:#f5f5f5">장소</th><td style="border:1px solid #999;padding:8px"></td></tr>
-<tr><th style="border:1px solid #999;padding:8px;background:#f5f5f5">참석 조합원</th><td style="border:1px solid #999;padding:8px">재적 &nbsp;&nbsp;&nbsp;명 중 &nbsp;&nbsp;&nbsp;명 참석</td></tr>
-</tbody></table>
-<div style="font-weight:700;margin:12px 0 6px">안건</div>
-<div style="padding-left:10px">1. 정관 승인의 건<br>2. 임원 선출의 건<br>3. 사업계획 및 예산 승인의 건<br>4. 기타</div>
-<div style="font-weight:700;margin:16px 0 6px">의결사항</div>
-<div style="padding-left:10px;line-height:2.2">
-위 안건을 상정하여 참석 조합원 전원 찬성으로 가결함.<br>
-가. 정관 원안대로 승인함<br>
-나. 이사장 ____을 선출함<br>
-다. 사업계획 및 예산 원안대로 승인함
-</div>
-<div style="margin-top:30px;text-align:right">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;년 &nbsp;&nbsp;월 &nbsp;&nbsp;일<br><br>
-의장 (이사장) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (인)<br>
-서기 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (인)
-</div></div>` },
-
-  consent: { title:'주민동의서 (개별)', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:2;padding:10px">
-<div style="text-align:center;font-size:15px;font-weight:700;margin-bottom:16px">햇빛소득마을 사업 주민 동의서</div>
-<div style="margin-bottom:16px">본인은 우리 마을의 햇빛소득마을 공모사업 신청 및 마을협동조합 설립에 동의합니다.</div>
-<table style="width:100%;border-collapse:collapse"><tbody>
-<tr><th style="border:1px solid #999;padding:8px;background:#f5f5f5;width:20%">성명</th><td style="border:1px solid #999;padding:8px"></td><th style="border:1px solid #999;padding:8px;background:#f5f5f5;width:20%">생년월일</th><td style="border:1px solid #999;padding:8px"></td></tr>
-<tr><th style="border:1px solid #999;padding:8px;background:#f5f5f5">주소</th><td style="border:1px solid #999;padding:8px" colspan="3"></td></tr>
-<tr><th style="border:1px solid #999;padding:8px;background:#f5f5f5">연락처</th><td style="border:1px solid #999;padding:8px"></td><th style="border:1px solid #999;padding:8px;background:#f5f5f5">서명</th><td style="border:1px solid #999;padding:8px"></td></tr>
-</tbody></table>
-<div style="margin-top:20px;text-align:right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;년 &nbsp;&nbsp;월 &nbsp;&nbsp;일</div>
-</div>` },
-
-  checklist: { title:'공모 신청 체크리스트', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:2;padding:10px">
-<div style="text-align:center;font-size:15px;font-weight:700;margin-bottom:16px">2026 햇빛소득마을 공모 신청 체크리스트</div>
-<table style="width:100%;border-collapse:collapse"><thead><tr>
-<th style="border:1px solid #999;padding:8px;background:#1a3a6b;color:#fff">구분</th>
-<th style="border:1px solid #999;padding:8px;background:#1a3a6b;color:#fff">항목</th>
-<th style="border:1px solid #999;padding:8px;background:#1a3a6b;color:#fff;width:80px">확인</th>
-</tr></thead><tbody>
-<tr><td rowspan="3" style="border:1px solid #999;padding:8px;text-align:center;font-weight:700">서식</td><td style="border:1px solid #999;padding:8px">서식1 체크리스트</td><td style="border:1px solid #999;padding:8px;text-align:center">□</td></tr>
-<tr><td style="border:1px solid #999;padding:8px">서식2 지원신청서 + 붙임서식1,2</td><td style="border:1px solid #999;padding:8px;text-align:center">□</td></tr>
-<tr><td style="border:1px solid #999;padding:8px">서식3 사업계획서 + 붙임서식3,4</td><td style="border:1px solid #999;padding:8px;text-align:center">□</td></tr>
-<tr><td rowspan="4" style="border:1px solid #999;padding:8px;text-align:center;font-weight:700">필수<br>증빙</td><td style="border:1px solid #999;padding:8px">협동조합 설립신고증</td><td style="border:1px solid #999;padding:8px;text-align:center">□</td></tr>
-<tr><td style="border:1px solid #999;padding:8px">정관</td><td style="border:1px solid #999;padding:8px;text-align:center">□</td></tr>
-<tr><td style="border:1px solid #999;padding:8px">부지 확보 증빙 (토지이용계획, 동의서 등)</td><td style="border:1px solid #999;padding:8px;text-align:center">□</td></tr>
-<tr><td style="border:1px solid #999;padding:8px">계통연계 가능 확인서 (한전)</td><td style="border:1px solid #999;padding:8px;text-align:center">□</td></tr>
-</tbody></table></div>` },
-
-  bizplan: { title:'서식3 사업계획서 (양식)', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:1.9;padding:10px;color:#111">
-<div style="text-align:center;background:#1a3a6b;color:#fff;padding:12px;font-size:14px;font-weight:700;margin-bottom:16px">
-2026 햇빛소득마을 사업계획서 (서식3)</div>
-<div style="background:#FFF3CD;border:1px solid #FFC107;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:11px">
-💡 이 양식은 참고용 초안입니다. 좌측 STEP4 탭의 AI 사업계획서 생성 기능을 사용하면 마을 정보를 반영한 완성본을 만들 수 있습니다.</div>
-<div style="background:#1a3a6b;color:#fff;padding:8px 12px;font-weight:700;margin:12px 0 6px">1. 협동조합 현황</div>
-<table style="width:100%;border-collapse:collapse"><tbody>
-<tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5;width:30%">협동조합명</th><td style="border:1px solid #999;padding:7px"></td></tr>
-<tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">설립일</th><td style="border:1px solid #999;padding:7px"></td></tr>
-<tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">조합원 수</th><td style="border:1px solid #999;padding:7px">&nbsp;&nbsp;&nbsp;명</td></tr>
-<tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">출자금 총액</th><td style="border:1px solid #999;padding:7px">&nbsp;&nbsp;&nbsp;원</td></tr>
-</tbody></table>
-</div>` },
-
-  members: { title:'조합원 명부 (붙임서식3)', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:1.9;padding:10px">
-<div style="text-align:center;font-size:15px;font-weight:700;margin-bottom:16px">조합원 명부 (붙임서식 3)</div>
-<table style="width:100%;border-collapse:collapse"><thead><tr>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">번호</th>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">성명</th>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">생년월일</th>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">주소</th>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">출자좌수</th>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">서명</th>
-</tr></thead><tbody>
-${Array.from({length:10},(_,i)=>`<tr><td style="border:1px solid #999;padding:7px;text-align:center">${i+1}</td><td style="border:1px solid #999;padding:7px"></td><td style="border:1px solid #999;padding:7px"></td><td style="border:1px solid #999;padding:7px"></td><td style="border:1px solid #999;padding:7px;text-align:center"></td><td style="border:1px solid #999;padding:7px"></td></tr>`).join('')}
-</tbody></table></div>` },
-
-  privacy4: { title:'개인정보 수집·이용 동의서 (붙임서식4)', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:2;padding:10px">
-<div style="text-align:center;font-size:14px;font-weight:700;margin-bottom:16px">개인정보 수집·이용 동의서 (붙임서식 4)</div>
-<div style="margin-bottom:12px">귀하의 개인정보는 햇빛소득마을 사업 신청 및 운영 목적으로만 수집·이용되며, 목적 외 용도로 사용하지 않습니다.</div>
-<table style="width:100%;border-collapse:collapse;margin-bottom:16px"><thead><tr>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">수집 항목</th>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">수집 목적</th>
-<th style="border:1px solid #999;padding:7px;background:#f5f5f5">보유 기간</th>
-</tr></thead><tbody>
-<tr><td style="border:1px solid #999;padding:7px">성명, 생년월일, 주소, 연락처</td><td style="border:1px solid #999;padding:7px">조합원 관리, 수익 배분</td><td style="border:1px solid #999;padding:7px">사업 종료 후 5년</td></tr>
-</tbody></table>
-<div>위 개인정보 수집·이용에 동의합니다. &nbsp;&nbsp;&nbsp;&nbsp; □ 동의 &nbsp;&nbsp; □ 미동의</div>
-<div style="margin-top:16px">성명: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (인) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 년 &nbsp;&nbsp;월 &nbsp;&nbsp;일</div>
-</div>` },
-
-  gov4: { title:'서식4 지자체 지원계획서', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:1.9;padding:10px">
-<div style="text-align:center;background:#1a3a6b;color:#fff;padding:10px;font-size:14px;font-weight:700;margin-bottom:16px">서식4 지자체 지원계획서</div>
-<div style="background:#FFF3CD;border:1px solid #FFC107;padding:10px;border-radius:6px;margin-bottom:14px;font-size:11px">
-⚠️ 서식4는 지자체 담당 공무원이 작성하는 서류입니다. 이 양식은 참고용이며, 실제 제출본은 담당 지자체에서 작성합니다.</div>
-<table style="width:100%;border-collapse:collapse"><tbody>
-<tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5;width:30%">지자체명</th><td style="border:1px solid #999;padding:7px"></td></tr>
-<tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">담당자</th><td style="border:1px solid #999;padding:7px"></td></tr>
-<tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">지원 내용</th><td style="border:1px solid #999;padding:7px"></td></tr>
-<tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">행정 지원 사항</th><td style="border:1px solid #999;padding:7px"></td></tr>
-</tbody></table></div>` },
-  members: { title:'조합원 명부 (붙임서식3)', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:1.9;padding:10px"><div style="text-align:center;font-size:14px;font-weight:700;margin-bottom:14px">조합원 명부 (붙임서식 3)</div><table style="width:100%;border-collapse:collapse"><thead><tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">번호</th><th style="border:1px solid #999;padding:7px;background:#f5f5f5">성명</th><th style="border:1px solid #999;padding:7px;background:#f5f5f5">생년월일</th><th style="border:1px solid #999;padding:7px;background:#f5f5f5">주소</th><th style="border:1px solid #999;padding:7px;background:#f5f5f5">출자좌수</th><th style="border:1px solid #999;padding:7px;background:#f5f5f5">서명</th></tr></thead><tbody><tr><td style="border:1px solid #999;padding:7px;text-align:center">1</td><td style="border:1px solid #999;padding:7px"></td><td style="border:1px solid #999;padding:7px"></td><td style="border:1px solid #999;padding:7px"></td><td style="border:1px solid #999;padding:7px;text-align:center"></td><td style="border:1px solid #999;padding:7px"></td></tr></tbody></table></div>` },
-  privacy4: { title:'개인정보 수집·이용 동의서 (붙임서식4)', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:2;padding:10px"><div style="text-align:center;font-size:14px;font-weight:700;margin-bottom:14px">개인정보 수집·이용 동의서 (붙임서식 4)</div><div style="margin-bottom:12px">귀하의 개인정보는 햇빛소득마을 사업 신청 및 운영 목적으로만 수집·이용됩니다.</div><table style="width:100%;border-collapse:collapse"><thead><tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">수집 항목</th><th style="border:1px solid #999;padding:7px;background:#f5f5f5">수집 목적</th><th style="border:1px solid #999;padding:7px;background:#f5f5f5">보유 기간</th></tr></thead><tbody><tr><td style="border:1px solid #999;padding:7px">성명, 생년월일, 주소, 연락처</td><td style="border:1px solid #999;padding:7px">조합원 관리, 수익 배분</td><td style="border:1px solid #999;padding:7px">사업 종료 후 5년</td></tr></tbody></table><div style="margin-top:14px">위 개인정보 수집·이용에 동의합니다. □ 동의 &nbsp;□ 미동의</div><div style="margin-top:12px">성명: _______________ (인) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 년 &nbsp;월 &nbsp;일</div></div>` },
-  gov4: { title:'서식4 지자체 지원계획서', html:`<div style="font-family:'Malgun Gothic',sans-serif;font-size:12px;line-height:1.9;padding:10px"><div style="text-align:center;background:#1a3a6b;color:#fff;padding:10px;font-size:13px;font-weight:700;margin-bottom:14px">서식4 지자체 지원계획서</div><div style="background:#FFF3CD;border:1px solid #FFC107;padding:10px;border-radius:6px;margin-bottom:12px;font-size:11px">⚠️ 서식4는 지자체 담당 공무원이 작성합니다. 이 양식은 참고용입니다.</div><table style="width:100%;border-collapse:collapse"><tbody><tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5;width:30%">지자체명</th><td style="border:1px solid #999;padding:7px"></td></tr><tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">담당자</th><td style="border:1px solid #999;padding:7px"></td></tr><tr><th style="border:1px solid #999;padding:7px;background:#f5f5f5">지원 내용</th><td style="border:1px solid #999;padding:7px"></td></tr></tbody></table></div>` }
 };
 
 // ════ 수익성 계산기 ════
