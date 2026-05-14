@@ -507,6 +507,98 @@ button,.btn,.lpt,.l-btn,a.btn{word-break:keep-all !important}
   .chk{width:24px;height:24px}
 }
 
+/* ── 페이지별 메모 (floating panel) ── */
+.memo-fab{position:fixed;bottom:90px;right:18px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#3B82F6 0%,#1E40AF 100%);color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 6px 18px rgba(59,130,246,.35);display:flex;align-items:center;justify-content:center;z-index:980;transition:all .2s;font-family:inherit}
+.memo-fab:hover{transform:scale(1.05);box-shadow:0 8px 22px rgba(59,130,246,.45)}
+.memo-fab .memo-fab-dot{position:absolute;top:-3px;right:-3px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff}
+
+.memo-panel{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:100vw;background:#fff;box-shadow:-12px 0 32px rgba(0,0,0,.12);z-index:9700;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;font-family:inherit}
+.memo-panel.show{transform:translateX(0)}
+html[data-theme="dark"] .memo-panel{background:#1E1B14}
+.memo-head{padding:16px 18px;border-bottom:1px solid #F0EDE4;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-shrink:0}
+html[data-theme="dark"] .memo-head{border-bottom-color:#3A3530}
+.memo-head h3{margin:0;font-size:15px;font-weight:900;color:#1A1A1A;letter-spacing:-.01em;display:flex;align-items:center;gap:7px}
+html[data-theme="dark"] .memo-head h3{color:#F0F0F0}
+.memo-head .mh-sub{font-size:11px;color:#7A7A7A;margin-top:3px;line-height:1.4}
+.memo-close{background:#F3F4F6;border:none;width:32px;height:32px;border-radius:8px;cursor:pointer;color:#6A6A6A;font-size:14px;font-weight:700;flex-shrink:0;font-family:inherit}
+.memo-list{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.memo-item{background:#FAFAF7;border:1px solid #EFEAE0;border-radius:10px;padding:11px 12px;position:relative}
+html[data-theme="dark"] .memo-item{background:#26221A;border-color:#3A3530}
+.memo-item.pinned{background:#FEF8E7;border-color:#F5A623}
+html[data-theme="dark"] .memo-item.pinned{background:#3A2D14;border-color:#F5B043}
+.memo-item .mi-text{font-size:13px;color:#1A1A1A;line-height:1.6;word-break:keep-all;white-space:pre-wrap}
+html[data-theme="dark"] .memo-item .mi-text{color:#E0E0E0}
+.memo-item .mi-meta{font-size:10.5px;color:#9A9A9A;margin-top:6px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.memo-item .mi-actions{display:flex;gap:4px}
+.memo-item .mi-actions button{background:transparent;border:none;font-size:12px;cursor:pointer;color:#9A9A9A;padding:2px 4px;border-radius:4px;font-family:inherit}
+.memo-item .mi-actions button:hover{background:#F0EDE4;color:#5A5A5A}
+.memo-empty{text-align:center;padding:36px 16px;color:#9A9A9A;font-size:12px}
+.memo-input-wrap{padding:12px 14px;border-top:1px solid #F0EDE4;flex-shrink:0;background:#FAFAF7}
+html[data-theme="dark"] .memo-input-wrap{border-top-color:#3A3530;background:#16140E}
+.memo-input{width:100%;min-height:72px;max-height:200px;resize:vertical;border:1.5px solid #E8E4DC;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;line-height:1.55;color:#1A1A1A}
+html[data-theme="dark"] .memo-input{background:#26221A;border-color:#3A3530;color:#F0F0F0}
+.memo-input:focus{border-color:var(--sun)}
+.memo-input-bar{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px}
+.memo-input-bar .mib-hint{font-size:10.5px;color:#9A9A9A}
+.memo-input-bar button{background:linear-gradient(135deg,#3B82F6,#1E40AF);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.memo-input-bar button:hover{transform:translateY(-1px)}
+.memo-page-badge{display:inline-block;font-size:10px;background:#E5E7EB;color:#4B5563;padding:1px 6px;border-radius:5px;font-weight:700}
+
+@media(max-width:600px){
+  .memo-fab{bottom:80px;right:14px;width:46px;height:46px}
+  .memo-panel{width:100vw}
+}
+
+/* ── 음성 입력 (textarea 옆 🎤 버튼) ── */
+.voice-wrap{position:relative}
+.voice-btn{position:absolute;bottom:8px;right:8px;background:linear-gradient(135deg,#16A085 0%,#0E7568 100%);color:#fff;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(22,160,133,.3);transition:all .2s;z-index:5;font-family:inherit}
+.voice-btn:hover{transform:scale(1.06)}
+.voice-btn.listening{background:linear-gradient(135deg,#EF4444 0%,#B91C1C 100%);box-shadow:0 4px 12px rgba(239,68,68,.4);animation:voicePulse 1.2s ease-in-out infinite}
+@keyframes voicePulse{0%,100%{box-shadow:0 4px 12px rgba(239,68,68,.4),0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 4px 12px rgba(239,68,68,.4),0 0 0 12px rgba(239,68,68,0)}}
+.voice-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,.3);display:flex;align-items:center;gap:8px;font-family:inherit}
+.voice-toast .vt-dot{width:8px;height:8px;border-radius:50%;background:#EF4444;animation:voicePulse 1s ease-in-out infinite}
+.voice-toast.success{background:#16A34A}
+.voice-toast.error{background:#DC2626}
+
+/* ── 알림 센터 (벨 아이콘 + 드롭다운) ── */
+.notif-trigger{position:relative;background:transparent;border:1.5px solid var(--bdr);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;font-family:inherit;padding:0}
+.notif-trigger:hover{border-color:var(--sun);background:var(--sun-l)}
+.notif-trigger .notif-dot{position:absolute;top:-3px;right:-3px;background:#EF4444;color:#fff;font-size:9px;font-weight:900;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff}
+html[data-theme="dark"] .notif-trigger{border-color:#3A3530;background:#26221A;color:#F0F0F0}
+html[data-theme="dark"] .notif-trigger .notif-dot{border-color:#1E1B14}
+
+.notif-panel{position:fixed;top:50px;right:8px;width:340px;max-width:calc(100vw - 16px);background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.18);border:1px solid #E8E4DC;z-index:1050;display:none;flex-direction:column;max-height:80vh;overflow:hidden}
+.notif-panel.show{display:flex}
+html[data-theme="dark"] .notif-panel{background:#1E1B14;border-color:#3A3530}
+.notif-head{padding:14px 16px;border-bottom:1px solid #F0EDE4;display:flex;justify-content:space-between;align-items:center}
+html[data-theme="dark"] .notif-head{border-bottom-color:#3A3530}
+.notif-head h3{margin:0;font-size:14px;font-weight:900;color:#1A1A1A;letter-spacing:-.01em}
+html[data-theme="dark"] .notif-head h3{color:#F0F0F0}
+.notif-head .nh-clear{background:none;border:none;color:#9A9A9A;font-size:11px;cursor:pointer;font-family:inherit;padding:4px 8px;border-radius:6px}
+.notif-head .nh-clear:hover{color:#5A5A5A;background:#F3F4F6}
+.notif-list{flex:1;overflow-y:auto;padding:6px}
+.notif-item{padding:10px 12px;border-radius:9px;cursor:pointer;transition:background .12s;display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid #F5F2EC}
+html[data-theme="dark"] .notif-item{border-bottom-color:#2A251D}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:rgba(245,166,35,.06)}
+.notif-item.unread{background:rgba(245,166,35,.04);position:relative}
+.notif-item.unread::before{content:'';position:absolute;left:3px;top:50%;transform:translateY(-50%);width:6px;height:6px;background:var(--sun);border-radius:50%}
+.notif-item .ni-icon{font-size:18px;flex-shrink:0;line-height:1.3}
+.notif-item .ni-body{flex:1;min-width:0}
+.notif-item .ni-title{font-size:12.5px;font-weight:700;color:#1A1A1A;line-height:1.4;margin-bottom:2px}
+html[data-theme="dark"] .notif-item .ni-title{color:#F0F0F0}
+.notif-item .ni-desc{font-size:11.5px;color:#6A6A6A;line-height:1.55;word-break:keep-all}
+html[data-theme="dark"] .notif-item .ni-desc{color:#A0A0A0}
+.notif-item .ni-time{font-size:10.5px;color:#A0A0A0;margin-top:3px}
+.notif-item.urgent{border-left:3px solid #EF4444;padding-left:10px}
+.notif-item.urgent .ni-title{color:#C0392B}
+html[data-theme="dark"] .notif-item.urgent .ni-title{color:#FF6B6B}
+.notif-empty{text-align:center;padding:32px 16px;color:#9A9A9A;font-size:12px}
+
+@media(max-width:600px){
+  .notif-panel{right:6px;top:46px;width:calc(100vw - 12px);max-height:75vh}
+}
+
 /* ── 마을 비교 대시보드 ── */
 .vc-modal{position:fixed;inset:0;background:rgba(20,15,5,.5);z-index:9300;display:none;align-items:flex-start;justify-content:center;padding:30px 16px;font-family:inherit;overflow-y:auto}
 .vc-modal.show{display:flex}
@@ -2642,9 +2734,39 @@ if (CLOUD_ENABLED) {
   </button>
   <div class="sw-right">
     <div id="sw-badge"></div>
+    <button class="notif-trigger" id="notif-bell" onclick="toggleNotif()" title="알림" aria-label="알림">🔔<span class="notif-dot" id="notif-count" style="display:none">0</span></button>
     <button class="theme-toggle" onclick="toggleTheme()" title="다크 모드 전환" aria-label="다크모드 전환" style="position:static;margin:0">🌙</button>
     <button class="sw-logout" onclick="doLogout()">로그아웃</button>
   </div>
+</div>
+
+<!-- 메모 패널 (FAB + Slide-in) -->
+<button id="memo-fab" class="memo-fab" onclick="toggleMemoPanel()" title="페이지 메모" aria-label="페이지 메모">📝<span class="memo-fab-dot" id="memo-fab-dot" style="display:none">0</span></button>
+<div id="memo-panel" class="memo-panel">
+  <div class="memo-head">
+    <div>
+      <h3>📝 메모 <span id="memo-page-name" class="memo-page-badge"></span></h3>
+      <div class="mh-sub" id="memo-village-name">현재 마을 · 현재 페이지 메모</div>
+    </div>
+    <button class="memo-close" onclick="toggleMemoPanel()" aria-label="닫기">✕</button>
+  </div>
+  <div class="memo-list" id="memo-list"></div>
+  <div class="memo-input-wrap">
+    <textarea class="memo-input" id="memo-input" placeholder="현장 메모·할 일·의문점을 남기세요 (Enter 줄바꿈 · Ctrl+Enter 저장)" onkeydown="memoInputKey(event)"></textarea>
+    <div class="memo-input-bar">
+      <span class="mib-hint">💡 마을·페이지별로 자동 저장</span>
+      <button onclick="saveMemo()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 알림 패널 -->
+<div id="notif-panel" class="notif-panel">
+  <div class="notif-head">
+    <h3>🔔 알림</h3>
+    <button class="nh-clear" onclick="clearAllNotif()">모두 읽음</button>
+  </div>
+  <div class="notif-list" id="notif-list"></div>
 </div>
 
 <!-- ══ 앱1: 매뉴얼북 ══ -->
@@ -9082,6 +9204,443 @@ document.addEventListener('keydown', function(e){
   }
 });
 
+// ── 메모/논의 (페이지별 메모 — 마을 + 페이지 페어로 저장) ──
+window.Memo = {
+  _STORAGE: 'mh_memos',
+  _read: function(){ try { return JSON.parse(localStorage.getItem(this._STORAGE)||'{}'); } catch(e){ return {}; } },
+  _write: function(obj){ try { localStorage.setItem(this._STORAGE, JSON.stringify(obj)); } catch(e){} },
+  _key: function(vid, pid){ return (vid||'_global') + '::' + (pid||'_home'); },
+  _currentPage: function(){
+    var on = document.querySelector('.page.on');
+    return on ? on.id.replace('page-','') : 'home';
+  },
+  _currentVillage: function(){
+    return window.selectedVid || localStorage.getItem('mh_selected_vid') || '_global';
+  },
+  _villageName: function(){
+    var vid = this._currentVillage();
+    if (vid === '_global') return '(마을 미선택)';
+    try {
+      var vs = JSON.parse(localStorage.getItem('mh_villages')||'{}');
+      return (vs[vid] && vs[vid].name) || vid;
+    } catch(e){ return vid; }
+  },
+  list: function(){
+    var key = this._key(this._currentVillage(), this._currentPage());
+    var all = this._read();
+    return all[key] || [];
+  },
+  add: function(text){
+    if (!text || !text.trim()) return;
+    var all = this._read();
+    var key = this._key(this._currentVillage(), this._currentPage());
+    if (!all[key]) all[key] = [];
+    all[key].unshift({
+      id: 'm_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      text: text.trim(),
+      pinned: false,
+      ts: Date.now()
+    });
+    this._write(all);
+    this.render();
+  },
+  remove: function(id){
+    var all = this._read();
+    var key = this._key(this._currentVillage(), this._currentPage());
+    if (!all[key]) return;
+    all[key] = all[key].filter(function(m){ return m.id !== id; });
+    this._write(all);
+    this.render();
+  },
+  togglePin: function(id){
+    var all = this._read();
+    var key = this._key(this._currentVillage(), this._currentPage());
+    if (!all[key]) return;
+    all[key] = all[key].map(function(m){ if (m.id===id) m.pinned = !m.pinned; return m; });
+    // 핀 우선 정렬
+    all[key].sort(function(a,b){ if (a.pinned!==b.pinned) return a.pinned?-1:1; return b.ts - a.ts; });
+    this._write(all);
+    this.render();
+  },
+  countAll: function(){
+    var all = this._read();
+    var n = 0;
+    Object.values(all).forEach(function(arr){ n += (arr||[]).length; });
+    return n;
+  },
+  _formatTime: function(ts){
+    var d = (Date.now() - ts)/1000;
+    if (d < 60) return '방금';
+    if (d < 3600) return Math.floor(d/60) + '분 전';
+    if (d < 86400) return Math.floor(d/3600) + '시간 전';
+    if (d < 604800) return Math.floor(d/86400) + '일 전';
+    var dt = new Date(ts);
+    return dt.getMonth()+1 + '/' + dt.getDate();
+  },
+  render: function(){
+    var list = this.list();
+    var listEl = document.getElementById('memo-list');
+    var pageEl = document.getElementById('memo-page-name');
+    var vEl = document.getElementById('memo-village-name');
+    var fabDot = document.getElementById('memo-fab-dot');
+    var pageId = this._currentPage();
+    var pageTitle = (typeof titles!=='undefined' && titles[pageId]) || pageId;
+    if (pageEl) pageEl.textContent = pageTitle;
+    if (vEl) vEl.textContent = '🏘 ' + this._villageName() + ' · ' + pageTitle;
+    if (fabDot) {
+      if (list.length > 0) { fabDot.textContent = list.length > 9 ? '9+' : list.length; fabDot.style.display = 'flex'; }
+      else fabDot.style.display = 'none';
+    }
+    if (!listEl) return;
+    if (list.length === 0) {
+      listEl.innerHTML = '<div class="memo-empty"><div style="font-size:32px;margin-bottom:10px">💭</div><div>아직 메모가 없어요</div><div style="margin-top:6px;font-size:11px;color:#B0B0B0">현장 미팅 후 떠오른 메모를 남겨두세요</div></div>';
+      return;
+    }
+    listEl.innerHTML = list.map(function(m){
+      var safeText = m.text.replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+      return '<div class="memo-item'+(m.pinned?' pinned':'')+'">'
+        + '<div class="mi-text">'+safeText+'</div>'
+        + '<div class="mi-meta">'
+        + '<span>'+(m.pinned?'📌 ':'')+Memo._formatTime(m.ts)+'</span>'
+        + '<span class="mi-actions">'
+        + '<button onclick="Memo.togglePin(\''+m.id+'\')" title="고정">'+(m.pinned?'📌':'📍')+'</button>'
+        + '<button onclick="if(confirm(\'메모를 삭제할까요?\'))Memo.remove(\''+m.id+'\')" title="삭제">🗑</button>'
+        + '</span>'
+        + '</div></div>';
+    }).join('');
+  }
+};
+window.toggleMemoPanel = function(){
+  var p = document.getElementById('memo-panel');
+  if (!p) return;
+  if (p.classList.contains('show')) {
+    p.classList.remove('show');
+  } else {
+    Memo.render();
+    p.classList.add('show');
+    setTimeout(function(){ var i = document.getElementById('memo-input'); if (i) i.focus(); }, 200);
+  }
+};
+window.saveMemo = function(){
+  var inp = document.getElementById('memo-input');
+  if (!inp) return;
+  var v = inp.value;
+  if (!v.trim()) return;
+  Memo.add(v);
+  inp.value = '';
+};
+window.memoInputKey = function(e){
+  // Ctrl+Enter / Cmd+Enter: 저장
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    saveMemo();
+  }
+};
+// 페이지 전환 시 카운트·내용 갱신
+(function(){
+  var _origMG = window.manualGo;
+  if (typeof _origMG === 'function') {
+    window.manualGo = function(){
+      var r = _origMG.apply(this, arguments);
+      setTimeout(function(){ try{ Memo.render(); }catch(e){} }, 80);
+      return r;
+    };
+  }
+  // 로그인 후 첫 렌더
+  setTimeout(function(){ try{ Memo.render(); }catch(e){} }, 1200);
+})();
+
+// ── 음성 입력 (Web Speech API — 한국어 인식) ──
+window.Voice = {
+  _recognition: null,
+  _active: null, // 현재 녹음 중인 textarea
+  _supported: function(){
+    return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+  },
+  _toast: function(msg, type, duration){
+    var t = document.createElement('div');
+    t.className = 'voice-toast ' + (type||'');
+    t.innerHTML = (type==='success'?'✅ ':(type==='error'?'❌ ':'<span class="vt-dot"></span>')) + msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ if (t.parentNode) t.remove(); }, duration||2500);
+    return t;
+  },
+  start: function(textareaEl, btnEl){
+    if (!this._supported()) {
+      this._toast('이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 권장', 'error', 3500);
+      return;
+    }
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (this._recognition) {
+      try { this._recognition.stop(); } catch(e){}
+    }
+    var rec = new SR();
+    rec.lang = 'ko-KR';
+    rec.continuous = true;
+    rec.interimResults = true;
+    this._recognition = rec;
+    this._active = textareaEl;
+    var self = this;
+    var startText = textareaEl.value || '';
+    var liveToast = this._toast('녹음 중... 다시 마이크를 누르면 종료');
+    rec.onresult = function(event){
+      var finalText = '';
+      var interimText = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalText += t;
+        else interimText += t;
+      }
+      if (finalText) {
+        startText = startText + (startText && !startText.endsWith(' ')?' ':'') + finalText;
+        textareaEl.value = startText;
+        // input 이벤트 발생 (oninput 핸들러 호출용)
+        textareaEl.dispatchEvent(new Event('input', {bubbles:true}));
+      }
+      // interim 표시 (회색)
+      if (interimText && liveToast) {
+        liveToast.innerHTML = '<span class="vt-dot"></span>' + (interimText.length>40?'…'+interimText.slice(-40):interimText);
+      }
+    };
+    rec.onerror = function(e){
+      self._toast('인식 오류: ' + (e.error || '알 수 없음'), 'error', 3000);
+      self.stop();
+    };
+    rec.onend = function(){
+      if (liveToast && liveToast.parentNode) liveToast.remove();
+      if (btnEl) btnEl.classList.remove('listening');
+      self._active = null;
+      self._recognition = null;
+    };
+    try {
+      rec.start();
+      if (btnEl) btnEl.classList.add('listening');
+    } catch(e) {
+      this._toast('마이크 권한이 필요합니다', 'error', 3000);
+    }
+  },
+  stop: function(){
+    if (this._recognition) {
+      try { this._recognition.stop(); } catch(e){}
+    }
+  },
+  // textarea에 자동으로 🎤 버튼 부착
+  attachTo: function(textareaEl){
+    if (!this._supported()) return;
+    if (textareaEl.dataset.voiceAttached === '1') return;
+    if (textareaEl.disabled || textareaEl.readOnly) return;
+    var r = textareaEl.getBoundingClientRect();
+    if (r.width < 200) return; // 너무 작은 input 제외
+    var parent = textareaEl.parentElement;
+    if (!parent) return;
+    if (!parent.classList.contains('voice-wrap')) {
+      // textarea를 voice-wrap으로 감싸기
+      var wrap = document.createElement('div');
+      wrap.className = 'voice-wrap';
+      wrap.style.position = 'relative';
+      // 기존 textarea 스타일에서 margin 가져와 wrap에 적용
+      var ts = getComputedStyle(textareaEl);
+      if (ts.marginBottom !== '0px') {
+        wrap.style.marginBottom = ts.marginBottom;
+        textareaEl.style.marginBottom = '0';
+      }
+      textareaEl.parentNode.insertBefore(wrap, textareaEl);
+      wrap.appendChild(textareaEl);
+      parent = wrap;
+    }
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'voice-btn';
+    btn.title = '음성 입력 (한국어)';
+    btn.setAttribute('aria-label', '음성 입력');
+    btn.textContent = '🎤';
+    btn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (btn.classList.contains('listening')) {
+        Voice.stop();
+      } else {
+        Voice.start(textareaEl, btn);
+      }
+    };
+    parent.appendChild(btn);
+    textareaEl.dataset.voiceAttached = '1';
+  },
+  // 페이지의 모든 textarea에 일괄 부착
+  attachAll: function(){
+    if (!this._supported()) return;
+    document.querySelectorAll('textarea').forEach(function(ta){ Voice.attachTo(ta); });
+  }
+};
+// 초기 부착 + MutationObserver로 동적 추가된 textarea도 자동 부착
+(function(){
+  setTimeout(function(){ try{ Voice.attachAll(); }catch(e){} }, 600);
+  var mo = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      m.addedNodes.forEach(function(n){
+        if (n.nodeType !== 1) return;
+        if (n.tagName === 'TEXTAREA') Voice.attachTo(n);
+        else if (n.querySelectorAll) {
+          n.querySelectorAll('textarea').forEach(function(ta){ Voice.attachTo(ta); });
+        }
+      });
+    });
+  });
+  if (document.body) mo.observe(document.body, {childList:true, subtree:true});
+  else window.addEventListener('DOMContentLoaded', function(){ mo.observe(document.body, {childList:true, subtree:true}); });
+})();
+
+// ── 알림 센터 (공모 마감·STEP 액션·체크) ──
+window.Notif = {
+  _STORAGE: 'mh_notifs',
+  // 공모 마감일 (행안부 햇빛소득마을 5월 31일 기준)
+  _DEADLINE: function(){
+    var y = new Date().getFullYear();
+    return new Date(y, 4, 31, 23, 59, 59); // 5월 31일
+  },
+  _read: function(){
+    try { return JSON.parse(localStorage.getItem(this._STORAGE)||'[]'); } catch(e){ return []; }
+  },
+  _write: function(arr){
+    try { localStorage.setItem(this._STORAGE, JSON.stringify(arr)); } catch(e){}
+  },
+  add: function(notif){
+    var list = this._read();
+    // 중복 키 제거
+    if (notif.key) list = list.filter(function(n){ return n.key !== notif.key; });
+    list.unshift({
+      id: 'n_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      key: notif.key,
+      icon: notif.icon || '🔔',
+      title: notif.title,
+      desc: notif.desc || '',
+      url: notif.url || '',
+      urgent: !!notif.urgent,
+      read: false,
+      ts: Date.now()
+    });
+    if (list.length > 30) list = list.slice(0, 30);
+    this._write(list);
+    this.render();
+  },
+  unreadCount: function(){
+    return this._read().filter(function(n){ return !n.read; }).length;
+  },
+  markRead: function(id){
+    var list = this._read();
+    list = list.map(function(n){ if (n.id === id) n.read = true; return n; });
+    this._write(list);
+    this.render();
+  },
+  clearAll: function(){
+    var list = this._read().map(function(n){ n.read = true; return n; });
+    this._write(list);
+    this.render();
+  },
+  formatTime: function(ts){
+    var d = (Date.now() - ts) / 1000;
+    if (d < 60) return '방금';
+    if (d < 3600) return Math.floor(d/60) + '분 전';
+    if (d < 86400) return Math.floor(d/3600) + '시간 전';
+    return Math.floor(d/86400) + '일 전';
+  },
+  render: function(){
+    var count = this.unreadCount();
+    var dot = document.getElementById('notif-count');
+    if (dot) {
+      if (count > 0) { dot.textContent = count > 9 ? '9+' : count; dot.style.display='flex'; }
+      else dot.style.display='none';
+    }
+    var list = this._read();
+    var listEl = document.getElementById('notif-list');
+    if (!listEl) return;
+    if (list.length === 0) {
+      listEl.innerHTML = '<div class="notif-empty"><div style="font-size:30px;margin-bottom:8px">🎉</div>아직 알림이 없어요</div>';
+      return;
+    }
+    listEl.innerHTML = list.map(function(n){
+      return '<div class="notif-item '+(n.read?'':'unread')+(n.urgent?' urgent':'')+'" onclick="onNotifClick(\''+n.id+'\','+(n.url?"'"+n.url+"'":'null')+')">'
+        + '<span class="ni-icon">'+n.icon+'</span>'
+        + '<div class="ni-body"><div class="ni-title">'+n.title+'</div>'
+        + (n.desc?'<div class="ni-desc">'+n.desc+'</div>':'')
+        + '<div class="ni-time">'+Notif.formatTime(n.ts)+'</div></div>'
+        + '</div>';
+    }).join('');
+  },
+  // 자동 생성: 공모 마감 D-30/D-7/D-1, 마을 STEP 진척 알림
+  autoGenerate: function(){
+    var deadline = this._DEADLINE();
+    var daysLeft = Math.ceil((deadline.getTime() - Date.now())/86400000);
+    // 마감 임박 알림 (이미 있어도 갱신)
+    if (daysLeft <= 30 && daysLeft > 0) {
+      var urgent = daysLeft <= 7;
+      var icon = daysLeft <= 1 ? '🚨' : (daysLeft <= 7 ? '⏰' : '📅');
+      this.add({
+        key: 'deadline-' + daysLeft,
+        icon: icon,
+        title: '공모 마감 D-' + daysLeft,
+        desc: '햇빛소득마을 공모가 ' + daysLeft + '일 남았습니다. STEP 5 사업계획서 제출을 확인하세요.',
+        url: 's5-bizplan',
+        urgent: urgent
+      });
+    }
+    // 마을 미진행 알림 (30일 이상 STEP 2 이하)
+    try {
+      var villages = JSON.parse(localStorage.getItem('mh_villages')||'{}');
+      var now = Date.now();
+      Object.values(villages).forEach(function(v){
+        var age = (now - (v.createdAt||now))/86400000;
+        if (age > 30 && (v.step||1) <= 2) {
+          Notif.add({
+            key: 'stuck-' + v.id,
+            icon: '⚠',
+            title: v.name + ' 진행 지연',
+            desc: '추가된 지 ' + Math.floor(age) + '일 됐는데 STEP ' + (v.step||1) + '에 머물러 있습니다.',
+            url: 'home'
+          });
+        }
+      });
+    } catch(e){}
+  }
+};
+window.toggleNotif = function(){
+  var p = document.getElementById('notif-panel');
+  if (!p) return;
+  if (p.classList.contains('show')) {
+    p.classList.remove('show');
+  } else {
+    Notif.render();
+    p.classList.add('show');
+  }
+};
+window.clearAllNotif = function(){ Notif.clearAll(); };
+window.onNotifClick = function(id, url){
+  Notif.markRead(id);
+  if (url && typeof manualGo === 'function') {
+    manualGo(url);
+    document.getElementById('notif-panel').classList.remove('show');
+  }
+};
+// 페이지 외부 클릭 시 패널 닫기
+document.addEventListener('click', function(e){
+  var panel = document.getElementById('notif-panel');
+  var trigger = document.getElementById('notif-bell');
+  if (!panel || !trigger) return;
+  if (panel.classList.contains('show') && !panel.contains(e.target) && !trigger.contains(e.target)) {
+    panel.classList.remove('show');
+  }
+});
+// 로그인 후 자동 생성
+(function(){
+  var _origOnLoginOK2 = window.onLoginOK;
+  if (typeof _origOnLoginOK2 === 'function') {
+    window.onLoginOK = function(){
+      _origOnLoginOK2.apply(this, arguments);
+      setTimeout(function(){ try{ Notif.autoGenerate(); Notif.render(); }catch(e){} }, 1000);
+    };
+  }
+})();
+
 // ── 마을 비교 대시보드 (컨설팅사 핵심 가치) ──
 window.openVillageCompare = function(){
   var modal = document.getElementById('vc-modal');
@@ -11220,7 +11779,65 @@ function dlDocx(key) {
   URL.revokeObjectURL(url);
 }
 
+// 한컴 변환 안내 모달 표시 (사용자 인지 개선)
+function showHwpGuide(filename){
+  var existing = document.getElementById('hwp-guide-modal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'hwp-guide-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(20,15,5,.55);z-index:9900;display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit;backdrop-filter:blur(3px)';
+  modal.onclick = function(e){ if (e.target === modal) modal.remove(); };
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden">' +
+    '<div style="padding:24px 24px 16px;text-align:center;background:linear-gradient(135deg,#FFF8EC 0%,#F4FAF4 100%);border-bottom:1px solid #F0EDE4">' +
+      '<div style="font-size:42px;line-height:1;margin-bottom:8px">📥</div>' +
+      '<div style="font-size:17px;font-weight:900;color:#1A1A1A;letter-spacing:-.02em">다운로드 완료!</div>' +
+      '<div style="font-size:11.5px;color:#6A6A6A;margin-top:4px;word-break:keep-all">'+filename+'</div>' +
+    '</div>' +
+    '<div style="padding:18px 22px">' +
+      '<div style="background:#FEF3C7;border:1.5px solid #FCD34D;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;color:#92400E;line-height:1.65;word-break:keep-all">' +
+        '💡 <strong>한글(.hwp)은 한컴 독점 포맷</strong>으로 웹에서 직접 생성할 수 없어요.<br>' +
+        '대신 표준 <strong>.docx</strong>를 받았고, 아래 둘 중 한 방법으로 사용하세요:' +
+      '</div>' +
+      '<div style="display:grid;gap:10px">' +
+        '<div style="border:1.5px solid #E8E4DC;border-radius:10px;padding:12px 14px">' +
+          '<div style="font-size:13px;font-weight:700;color:#1A1A1A;margin-bottom:6px">방법 ① 한컴오피스에서 한글로 변환 (권장)</div>' +
+          '<div style="font-size:12px;color:#5A5A5A;line-height:1.65;word-break:keep-all">' +
+            '1️⃣ 받은 .docx 파일을 <strong>한컴오피스에서 열기</strong><br>' +
+            '2️⃣ 메뉴 → <strong>「다른 이름으로 저장」</strong><br>' +
+            '3️⃣ 파일 형식: <strong>「한글 문서 (*.hwpx)」</strong> 선택' +
+          '</div>' +
+        '</div>' +
+        '<div style="border:1.5px solid #E8E4DC;border-radius:10px;padding:12px 14px">' +
+          '<div style="font-size:13px;font-weight:700;color:#1A1A1A;margin-bottom:6px">방법 ② 그대로 MS Word·구글 문서로 사용</div>' +
+          '<div style="font-size:12px;color:#5A5A5A;line-height:1.65;word-break:keep-all">' +
+            '받은 .docx는 <strong>그대로 제출 가능</strong>합니다. 행안부도 .docx 접수해요.<br>' +
+            '<span style="color:#9A9A9A;font-size:11px">단, 일부 지자체가 .hwp만 받는다면 ① 방법으로 변환</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-top:14px;padding:10px 12px;background:#F0F9FF;border-radius:8px;font-size:11.5px;color:#075985;line-height:1.6;word-break:keep-all">' +
+        'ℹ <strong>본 양식은 행안부 2026 공모 지침</strong>의 별지 서식을 기반으로 했습니다. 최신 공고문과 비교 검토 후 제출하세요.' +
+      '</div>' +
+    '</div>' +
+    '<div style="padding:0 22px 20px;display:flex;gap:8px">' +
+      '<label style="flex:1;display:flex;align-items:center;gap:6px;font-size:11.5px;color:#7A7A7A;cursor:pointer"><input type="checkbox" id="hwp-guide-dontshow" style="margin:0">다시 보지 않기</label>' +
+      '<button onclick="closeHwpGuide()" style="padding:9px 20px;background:linear-gradient(135deg,#F5A623,#C47D0A);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">확인</button>' +
+    '</div>' +
+    '</div>';
+  document.body.appendChild(modal);
+}
+window.closeHwpGuide = function(){
+  var cb = document.getElementById('hwp-guide-dontshow');
+  if (cb && cb.checked) {
+    try { localStorage.setItem('mh_hwp_guide_skip','1'); } catch(e){}
+  }
+  var m = document.getElementById('hwp-guide-modal');
+  if (m) m.remove();
+};
+
 function dlHwp(key) {
+  var filename = '';
   // 1) 사전 등록 OOXML이 있으면 그것을 .docx로 제공 (한컴에서 .hwpx 1-클릭 변환 가능)
   if (typeof DOCX !== 'undefined' && DOCX[key]) {
     const d = DOCX[key];
@@ -11230,16 +11847,23 @@ function dlHwp(key) {
     const blob = new Blob([arr], {type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = (d.name || '서식').replace(/\.docx?$/i,'') + '.docx';
+    filename = (d.name || '서식').replace(/\.docx?$/i,'') + '.docx';
+    a.href = url; a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    if (typeof showToast === 'function') showToast('🇰🇷 한컴오피스에서 열어 「다른 이름으로 저장 → 한글 문서(*.hwpx)」 클릭 시 한글 파일로 변환됩니다', 5500);
+    // 첫 다운로드 시 안내 모달, 이후엔 토스트만
+    var skip = false; try { skip = localStorage.getItem('mh_hwp_guide_skip')==='1'; } catch(e){}
+    if (!skip) {
+      setTimeout(function(){ showHwpGuide(filename); }, 350);
+    } else {
+      if (typeof showToast === 'function') showToast('✅ '+filename+' 다운로드 완료 — 한컴에서 열어 .hwpx로 저장 가능', 4000);
+    }
     return;
   }
   // 2) 폴백: HTML→.doc (구버전 호환)
   if (typeof dlDoc === 'function') {
     dlDoc(key);
-    if (typeof showToast === 'function') showToast('🇰🇷 한컴오피스에서 열어 「한글 문서(*.hwpx)」로 저장하면 변환됩니다', 5500);
+    if (typeof showToast === 'function') showToast('⚠ 빈 양식만 다운로드 — AI 작성 결과는 별도 페이지에서 생성하세요', 5500);
     return;
   }
   // 3) 최후 폴백: 공식 공고 페이지
