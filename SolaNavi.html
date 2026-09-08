@@ -18748,6 +18748,7 @@ async function genDocWd(step, type) {
     report: 3500,         // 진행 보고서
     official: 2500,       // 공문
     notice: 2500,         // 공고문
+    notice2: 3500,        // 총회 소집 공고 (소집권자·안건·위임·통지기한 확인문구까지 — 2500에서 잘렸음)
     assembly: 1500,       // 공식 붙임 서식1 1페이지 초안
     consent: 3000,        // 주민 동의서
     founding: 6000,       // 협동조합 창립총회 의사록 (5개 안건)
@@ -18786,6 +18787,15 @@ async function genDocWd(step, type) {
       return;
     }
     const data = await res.json();
+    // 토큰 한도에서 잘린 문서를 그대로 보여주면 사용자는 끝까지 쓰인 줄 안다.
+    // (총회 소집 공고가 2500에서 잘리고도 정상처럼 보였다)
+    if (data && data.stop_reason === 'max_tokens') {
+      resultEl.classList.remove('streaming');
+      resultEl.innerHTML = '⚠ 문서가 분량 한도에서 잘렸습니다. 입력 내용을 줄이거나 관리자에게 알려주세요.'
+        + '<br><span style="font-size:11px;color:#888">문서 종류: ' + type + ' · 한도 ' + maxT + ' 토큰</span>';
+      resultEl.style.display = '';
+      return;
+    }
     const text = data && data.content && data.content[0] && data.content[0].text || '';
     if (!text.trim()) {
       resultEl.textContent = '⚠ AI 응답이 비어 있습니다. 다시 시도해주세요.';
