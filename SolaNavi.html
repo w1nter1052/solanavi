@@ -19766,12 +19766,20 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
   //          → 장을 나눠 생성한 뒤 1~7장 순서로 병합한다.
   //          4장은 가~아 8단원이라 단독으로도 8192를 넘겨서(실측) 가~라 / 마~아 둘로 더 쪼갠다.
   //          partOf가 있는 배치는 section 래퍼 없이 내용만 받아 하나의 4장 section으로 합친다.
+  //          장을 묶어 3~4회로 줄여도 한도를 넘었다. 범위를 좁혀 주면 모델이 장별로
+  //          더 상세하게 쓰기 때문에 묶음 크기에 비례해 짧아지지 않는다(실측).
+  //          → 장 단위로 쪼개 8개 요청으로 나누고, 동시에 3개씩 병렬 처리해 대기시간을 줄인다.
   var BP_BATCHES = [
-    { keys:['1','2','3'], chs:[1,2,3], label:'1~3장 · 조합·마을 현황' },
+    { keys:['1'],  chs:[1], label:'1장 · 협동조합 현황' },
+    { keys:['2'],  chs:[2], label:'2장 · 마을 공동체 현황' },
+    { keys:['3'],  chs:[3], label:'3장 · 협동조합 세부 현황' },
     { keys:['4a'], chs:[4], partOf:4, part:1, label:'4장(1/2) · 총괄·부지·설치비' },
     { keys:['4b'], chs:[4], partOf:4, part:2, label:'4장(2/2) · 산출근거·설비·산업생태계' },
-    { keys:['5','6','7'], chs:[5,6,7], label:'5~7장 · 사업관리·참고자료' }
+    { keys:['5'],  chs:[5], label:'5장 · 발전사업 관리 계획' },
+    { keys:['6'],  chs:[6], label:'6장 · 햇빛소득마을 관리 계획' },
+    { keys:['7'],  chs:[7], label:'7장 · 설치 계획 참고자료' }
   ];
+  var BP_CONCURRENCY = 3;
 
   // 채팅 수정 이력에 남길 입력 요약
   var userPrompt = BP_INPUT_BLOCK + '\n\n' + BP_CONTROL_BLOCK;
@@ -19782,15 +19790,15 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
   if (previewEl) previewEl.style.display = 'none';
   document.getElementById('bp-result-actions').style.display = 'none';
 
-  function bpProgress(step, total, label) {
-    var pct = Math.round((step - 1) / total * 100);
+  function bpProgress(done, total, note) {
+    var pct = Math.round(done / total * 100);
     resultEl.innerHTML = '<div style="text-align:center;padding:40px;color:#888">'
       + '<div style="font-size:28px;margin-bottom:10px">✨</div>'
       + '서식3 사업계획서를 장별로 작성 중입니다...'
-      + '<div style="margin-top:10px;font-weight:700;color:#1a3a6b;font-size:13px">' + step + ' / ' + total + ' 단계 — ' + label + '</div>'
+      + '<div style="margin-top:10px;font-weight:700;color:#1a3a6b;font-size:13px">' + done + ' / ' + total + ' 장 완료</div>'
       + '<div style="margin:12px auto 0;width:240px;height:6px;background:#eee;border-radius:3px;overflow:hidden">'
       + '<div style="width:' + pct + '%;height:100%;background:#F5A623;transition:width .4s"></div></div>'
-      + '<small style="font-size:11px;margin-top:8px;display:block">전체 약 2~4분 소요됩니다. 창을 닫지 마세요.</small></div>';
+      + '<small style="font-size:11px;margin-top:8px;display:block">' + (note || '전체 약 2~3분 소요됩니다. 창을 닫지 마세요.') + '</small></div>';
   }
 
   var apiKey = getApiKey();
@@ -19826,7 +19834,13 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
     });
     if (!res.ok) {
       var apiErr = await res.json().catch(function(){ return {}; });
-      throw new Error(anthropicErrorDetail(res.status, apiErr));
+      // 병렬 호출 중 속도제한·과부하는 한 번 쉬었다 재시도
+      if ((res.status === 429 || res.status === 529) && !batch.__retried) {
+        batch.__retried = true;
+        await new Promise(function(r){ setTimeout(r, 12000); });
+        return bpCallBatch(batch);
+      }
+      throw new Error(batch.label + ' — ' + anthropicErrorDetail(res.status, apiErr));
     }
     var data = await res.json();
     if (data.stop_reason === 'max_tokens') {
@@ -19838,12 +19852,22 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
   }
 
   try {
-    // 1) 장 묶음별 순차 생성
-    var parts = [];
-    for (var bi = 0; bi < BP_BATCHES.length; bi++) {
-      bpProgress(bi + 1, BP_BATCHES.length, BP_BATCHES[bi].label);
-      parts.push(await bpCallBatch(BP_BATCHES[bi]));
+    // 1) 장별 생성 — 동시에 BP_CONCURRENCY개씩 병렬 처리
+    var parts = new Array(BP_BATCHES.length);
+    var nextIdx = 0, doneCount = 0;
+    bpProgress(0, BP_BATCHES.length);
+    async function bpWorker() {
+      while (true) {
+        var i = nextIdx++;
+        if (i >= BP_BATCHES.length) return;
+        parts[i] = await bpCallBatch(BP_BATCHES[i]);
+        doneCount++;
+        bpProgress(doneCount, BP_BATCHES.length);
+      }
     }
+    var workers = [];
+    for (var w = 0; w < Math.min(BP_CONCURRENCY, BP_BATCHES.length); w++) workers.push(bpWorker());
+    await Promise.all(workers);
 
     // 2) 병합 — 각 장은 그 장을 담당한 배치의 결과에서만 가져온다(중복 방지)
     var secByCh = {};
