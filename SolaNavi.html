@@ -19570,12 +19570,22 @@ function validateBizplanHtml(html) {
     '4. 태양광 발전사업 추진 계획','5. 태양광 발전사업 사업관리 계획',
     '6. 햇빛소득마을 사업관리 계획','7. 태양광 설치 계획 참고자료'
   ].forEach(function(title){ if (text.indexOf(title) < 0) errors.push('필수 장 누락: '+title); });
+  // 수정공고(2026-879) 신규 항목이 문서에 반영됐는지 확인한다.
+  // 표기 흔들림과 '선택지 중 하나'인 항목을 고려해 동의어 묶음으로 검사한다.
+  // (예: 계통연계가 '가능'인 마을은 '출력제어조건부'라고 쓸 이유가 없다)
   var requiredAmendedFields = [
-    '주민등록 인구','마을규약 인구','개인 출자 비율','지역 상호금융',
-    '출력제어조건부','지역금융 출자','계통가능여부'
+    { label:'주민등록 인구', any:['주민등록 인구','주민등록인구'] },
+    { label:'마을규약 인구', any:['마을규약 인구','마을 규약 인구','마을규약인구'] },
+    { label:'개인 출자 비율', any:['개인 출자 비율','개인출자 비율','개인 최대 출자','1인 출자','1좌당 출자'] },
+    { label:'지역 상호금융', any:['지역 상호금융','지역상호금융','상호금융','새마을금고'] },
+    { label:'계통연계 상태(가능/출력제어조건부/불가 중 하나)',
+      any:['출력제어조건부','계통연계 가능','계통 연계 가능','계통연계 불가','계통 연계 불가'] },
+    { label:'지역금융 출자', any:['지역금융 출자','지역 금융 출자','지역상호금융 출자','상호금융 출자'] },
+    { label:'계통가능여부', any:['계통가능여부','계통 가능 여부','계통연계 가능여부','계통연계 가능 여부','계통연계 여부'] }
   ];
-  requiredAmendedFields.forEach(function(label){
-    if (text.indexOf(label) < 0) errors.push('수정공고 서식 필드 누락: '+label);
+  requiredAmendedFields.forEach(function(f){
+    var ok = f.any.some(function(s){ return text.indexOf(s) >= 0; });
+    if (!ok) errors.push('수정공고 서식 필드 누락: '+f.label);
   });
   var chapterSections = root ? root.querySelectorAll('section[data-bp-chapter]') : [];
   if (chapterSections.length !== 7) errors.push('장 단위 수정용 구획이 7개가 아닙니다. 현재 '+chapterSections.length+'개');
