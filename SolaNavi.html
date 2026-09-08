@@ -19692,9 +19692,14 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
 · 지역 상호금융 출자는 전체 출자금의 30% 이내이고, 개인 출자 비율은 전체 출자금의 10% 이내입니다. 대출과 출자를 구분하세요.
 · ESS 설치비 지원구조는 정부 40%·지방정부 30%·VPP 운영사 30%의 계획으로 안내되었으며 세부사업은 별도 공고 확인이 필요합니다. 확정 교부처럼 쓰지 마세요.`;
 
-  var userPrompt = `다음 정보로 2026년 행정안전부 햇빛소득마을 서식3 사업계획서를 HTML로 작성하세요.
+  // ── 공식 서식3 구성요소 ─────────────────────────────────────────
+  var BP_TITLE_HTML = `<div style="text-align:center;margin:10px 0 24px"><div style="font-size:16pt;font-weight:700">2026년 햇빛소득마을 사업계획서</div><div style="font-size:11pt;color:#555">(마을 공동체용) [서식 3]</div></div>`;
 
-■ 입력 정보
+  var BP_SIGN_HTML = `<table style="width:300px;margin:30px auto 0;border:1px solid #666;border-collapse:collapse"><tr><th style="background:#E8EEF7;border:1px solid #666;padding:8px">작성일</th><td style="border:1px solid #666;padding:8px">2026년   월   일</td></tr><tr><th style="background:#E8EEF7;border:1px solid #666;padding:8px">협동조합명</th><td style="border:1px solid #666;padding:8px">${g('bp-coop')||''}</td></tr><tr><th style="background:#E8EEF7;border:1px solid #666;padding:8px">이사장(회장)</th><td style="border:1px solid #666;padding:8px">${g('bp-chief')||''}　　　　　(인)</td></tr></table>
+<p style="text-align:center;font-size:10pt;color:#888;margin-top:8px">행정안전부장관(햇빛소득마을추진단장) 귀하</p>
+<p style="font-size:10pt;color:#999;margin-top:4px">※ 이 사업계획서는 컨설팅용 초안입니다. 제출 전 전문가 검토 및 지자체 확인이 필요합니다.</p>`;
+
+  var BP_INPUT_BLOCK = `■ 입력 정보
 적용 기준: 행정안전부 공고 제2026-879호(2026.7.23 수정공고) [서식3]
 마을명: ${g('bp-name')||'OO리'} / 협동조합명: ${g('bp-coop')||'OO마을 햇빛소득 협동조합'} / 이사장: ${g('bp-chief')||''}
 주민등록 인구(2026.3.31): ${g('bp-pop')||'[확인 필요]'}명 / 마을규약 인구: ${g('bp-charter-pop')||'[확인 필요]'}명
@@ -19705,31 +19710,29 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
 지역 상호금융 참여: ${g('bp-local-finance')||'[확인 필요]'} / 출자액: ${g('bp-local-finance-amount')||'[확인 필요]'}백만원 / 출자비율: ${g('bp-local-finance-ratio')||'[확인 필요]'}% (30% 이내 검증 필요)
 모듈: ${g('bp-module')||''} / 인버터: ${g('bp-inverter')||''}
 검토용 추정치(일평균 3.6시간·판매단가 13만원/MWh 가정): 연간예상발전량 약${annualPower}MWh / 연간예상수익 약${annualRevenue}만원
-수익활용: ${g('bp-use')||''} / 산업생태계: ${g('bp-industry')||''}
+수익활용: ${g('bp-use')||''} / 산업생태계: ${g('bp-industry')||''}`;
 
-■ 작성 통제
+  var BP_CONTROL_BLOCK = `■ 작성 통제
 1) 위 입력값과 마을정보에 없는 주소·인증번호·일정·업체명·계약단가·표결수·증빙 보유 여부를 만들어내지 마세요.
 2) 자동 계산된 설치비·자부담·융자·발전량·수익은 '검토용 추정치'로 표시하세요.
 3) 미입력 항목은 빈칸을 그럴듯한 내용으로 채우지 말고 [확인 필요 — 자료명]으로 표시하세요.
-4) 사실, 계산 추정, 권고, 최신 공고 확인 필요를 문장 안에서 명확히 구분하세요.
+4) 사실, 계산 추정, 권고, 최신 공고 확인 필요를 문장 안에서 명확히 구분하세요.`;
 
-■ 서식3 공식 구조 (행정안전부 2026 공고문 [서식 3] 7개 챕터 — 정확히 이 구조 그대로):
+  // 서식3 장별 공식 구조 (행정안전부 공고 제2026-879호 [서식 3])
+  var BP_CH_SPEC = {
+    1: `1. 협동조합 현황
+2열 표: 협동조합명(주관기관) / 이사장(회장) 성명 / 법인 주소 / 전화번호 / 설립인가번호 / 조합원 수 / 사업자등록번호 / 설립 인가일 / 협동조합 형태`,
 
-제목: <div style="text-align:center;margin:10px 0 24px"><div style="font-size:16pt;font-weight:700">2026년 햇빛소득마을 사업계획서</div><div style="font-size:11pt;color:#555">(마을 공동체용) [서식 3]</div></div>
-
-1. 협동조합 현황
-2열 표: 협동조합명(주관기관) / 이사장(회장) 성명 / 법인 주소 / 전화번호 / 설립인가번호 / 조합원 수 / 사업자등록번호 / 설립 인가일 / 협동조합 형태
-
-2. 마을 공동체 현황
+    2: `2. 마을 공동체 현황
 가. 마을 현황: 2열 표 — 마을명 / 소재지 / 행정 구역 / 인구 정보(주민등록 인구와 마을규약 인구를 구분)
-나. 주민 및 주민 동의 현황: 4열 표 — 주민등록 인구(2026.3.31) | 마을규약 인구 | 동의한 주민수 | 동의율(%). 동의율은 동의한 주민수 ÷ 마을규약 인구 × 100으로 코드 계산값을 사용
+나. 주민 및 주민 동의 현황: 4열 표 — 주민등록 인구(2026.3.31) | 마을규약 인구 | 동의한 주민수 | 동의율(%). 동의율은 동의한 주민수 ÷ 마을규약 인구 × 100으로 코드 계산값을 사용`,
 
-3. 협동조합 세부 현황
+    3: `3. 협동조합 세부 현황
 가. 협동조합의 의사결정 구조: 서술형 (총회·이사회·감사 구조, 의결정족수, 정관 조항 명시)
 나. 협동조합의 운영체계: 서술형 (조합원 가입·탈퇴 절차, 임원 임기·선출, 회계 처리·공시 방식)
-다. 출자, 수입의 적립, 배분 등 구조: 공식 3개 항목을 분리한 표 — ① 개인 출자 비율(전체 출자금의 10% 이내) ② 지역 상호금융 참여 여부·방식·출자액·출자 비율(전체 출자금의 30% 이내) ③ 그 밖의 출자·수입 적립·배분 구조(1좌당 출자금액·총출자금·마을공동기금 적립률·주민배분 방식·유지보수 적립률)
+다. 출자, 수입의 적립, 배분 등 구조: 공식 3개 항목을 분리한 표 — ① 개인 출자 비율(전체 출자금의 10% 이내) ② 지역 상호금융 참여 여부·방식·출자액·출자 비율(전체 출자금의 30% 이내) ③ 그 밖의 출자·수입 적립·배분 구조(1좌당 출자금액·총출자금·마을공동기금 적립률·주민배분 방식·유지보수 적립률)`,
 
-4. 태양광 발전사업 추진 계획
+    4: `4. 태양광 발전사업 추진 계획
 가. 태양광 발전사업 추진 계획 총괄표: 표 — 총 용량(kW) | 설치형태(지상/건물/수상별 용량) | 계통연계 가능여부(계통연계 가능/출력제어조건부/계통연계 불가·ESS 설치 등 중 하나) | 총 예상 설치비(백만원, 100%) | 예상 사업일정(발전사업허가/공사계획인가/상업운전개시)
 나. 세부 태양광 발전사업 추진 계획(부지): 표 — 번호 | 주소 | 설치형태(지상/건물/수상 중 택1) | 부지 소유자 | 부지 확보 여부(O/X) | 설치용량(kW), 합계 행 포함
 다. 세부 태양광 발전사업 추진 계획(부지 확보계획): 서술형 (미확보 부지 매입/임대/지자체 무상임대 방안, 확보 일정)
@@ -19737,32 +19740,51 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
 마. 세부 태양광 발전사업 추진 계획 예시(총 예상 태양광 설치비 산출 근거): 표 — 구분(직접비-모듈/인버터/기자재비/구조물/기타, 시공비-기계공사비/계전공사비/순공사비/토목공사비/건축공사비, 간접비-부대공사비/설계용역비/외자조작비/사업주 제경비/건설이자) | 수량 | 금액(백만원), 합계 행
 바. 세부 태양광 발전사업 추진 계획(태양광 설치비 확보계획): 수정공고 공식 표 — 구분(총액/조합원 출자금/지역금융 출자/마을기금/보조금 등) | 금액(백만원) | 증빙자료 | 확보 시기 | 비고. 지역금융 출자와 대출을 혼합하지 말고, 금액 합계가 총액과 일치하는지 표시
 사. 세부 태양광 발전사업 추진 계획(주요 설비 개요): 표 — 구분(모듈1/모듈2/인버터1/인버터2/접속함) | 모델명 | 인증번호(KS인증번호) | 수량 | 출력(Wp). ※ 탄소배출량 655kgCO₂/kW 이하 필수 명시
-아. 재생에너지 산업 생태계 기여 계획: 서술형 (국산 저탄소 모듈 여부, KS 인증, 지역 시공업체 활용, 지역 고용 창출 계획)
+아. 재생에너지 산업 생태계 기여 계획: 서술형 (국산 저탄소 모듈 여부, KS 인증, 지역 시공업체 활용, 지역 고용 창출 계획)`,
 
-5. 태양광 발전사업 사업관리 계획
+    5: `5. 태양광 발전사업 사업관리 계획
 가. 수입 확보계획: 표 — 수입확보 방안 [□ 고정가격계약 경쟁입찰 / □ PPA 전력거래계약] | 입찰 예상금액 SMP+1REC (원/MWh) + 연간 발전량·수익 추정. 선택 근거가 없으면 체크하지 말고 [선택 필요] 표시. 발전사업 허가 후 12개월 이내 경쟁입찰 선정 또는 PPA 계약 추진 요건은 최신 공고 확인 필요로 표시
 나. 설비 유지관리 등 운영 계획: 서술형 (REMS 실시간 모니터링, 정기점검 주기-태양광 4년/ESS 1~2년, 인버터 교체 주기, A/S 계약, 고장 대응 체계)
-다. 기타 사항: 서술형
+다. 기타 사항: 서술형`,
 
-6. 햇빛소득마을 사업관리 계획
+    6: `6. 햇빛소득마을 사업관리 계획
 가. 수익 활용 계획: 표 — 항목(마을공동기금/에너지취약계층 지원/유지보수 적립/일상관리비/기타) | 비율(%) | 연간 금액(만원) | 주요 활용 내용. 입력된 비율 합계가 100%인지 확인하고, 비율이 입력되지 않았으면 임의 배분하지 말고 [비율 결정 필요] 표시. 이 표의 수익 활용 비율을 주민동의율 70% 또는 REC 가중치 요건과 연결하지 말 것
 나. 회계관리 계획: 서술형 (전용 통장 운영, 정산·연간 결산, 매 회계연도 결산일로부터 4개월 이내 경영공시, 조합원 총회 공개. 외부감사는 의무로 단정하지 말고 적용 법령·정관 확인)
 다. 햇빛소득마을 관리자 채용 및 활용 계획: 표 — 채용 여부(O/X) | 담당 업무(회계·정산·태양광 기초 유지관리) | 인건비 조달 방법. ※ 채용 시 가점 2점
-라. 기타 사항: 서술형
+라. 기타 사항: 서술형`,
 
-7. 태양광 설치 계획 참고자료
-표 — 번호 | 설치 예정지(주소) | 전주번호(확인되지 않으면 [확인 필요]) | 계통가능여부(연계가능/출력제어/연계불가·ESS 필요) | 부지 현황(사진 첨부 안내) | 부지 소유자(개인/마을/지방정부/공공기관 중 택1) | 설치 형태(지상/건물/수상) | 확보 여부(O/X) | 설치계획 용량(kW) | 예상투자비(백만원), 합계 행 포함
+    7: `7. 태양광 설치 계획 참고자료
+표 — 번호 | 설치 예정지(주소) | 전주번호(확인되지 않으면 [확인 필요]) | 계통가능여부(연계가능/출력제어/연계불가·ESS 필요) | 부지 현황(사진 첨부 안내) | 부지 소유자(개인/마을/지방정부/공공기관 중 택1) | 설치 형태(지상/건물/수상) | 확보 여부(O/X) | 설치계획 용량(kW) | 예상투자비(백만원), 합계 행 포함`
+  };
 
-끝: <table style="width:300px;margin:30px auto 0;border:1px solid #666;border-collapse:collapse"><tr><th style="background:#E8EEF7;border:1px solid #666;padding:8px">작성일</th><td style="border:1px solid #666;padding:8px">2026년   월   일</td></tr><tr><th style="background:#E8EEF7;border:1px solid #666;padding:8px">협동조합명</th><td style="border:1px solid #666;padding:8px">${g('bp-coop')||''}</td></tr><tr><th style="background:#E8EEF7;border:1px solid #666;padding:8px">이사장(회장)</th><td style="border:1px solid #666;padding:8px">${g('bp-chief')||''}　　　　　(인)</td></tr></table>
-<p style="text-align:center;font-size:10pt;color:#888;margin-top:8px">행정안전부장관(햇빛소득마을추진단장) 귀하</p>
-<p style="font-size:10pt;color:#999;margin-top:4px">※ 이 사업계획서는 컨설팅용 초안입니다. 제출 전 전문가 검토 및 지자체 확인이 필요합니다.</p>`;
+  // 2026-09: 7장을 한 번에 요청하면 max_tokens(8192)에서 잘려 4장까지만 생성됐다.
+  //          (실측 stop_reason="max_tokens", output_tokens=8192)
+  //          장을 3회로 나눠 생성한 뒤 1~7장 순서로 병합한다.
+  var BP_BATCHES = [
+    { chs:[1,2,3], label:'1~3장 · 조합·마을 현황' },
+    { chs:[4],     label:'4장 · 발전사업 추진 계획' },
+    { chs:[5,6,7], label:'5~7장 · 사업관리·참고자료' }
+  ];
+
+  // 채팅 수정 이력에 남길 입력 요약
+  var userPrompt = BP_INPUT_BLOCK + '\n\n' + BP_CONTROL_BLOCK;
 
   var resultEl = document.getElementById('bp-result');
   var previewEl = document.getElementById('bp-preview');
-  resultEl.innerHTML = '<div style="text-align:center;padding:40px;color:#888"><div style="font-size:28px;margin-bottom:10px">✨</div>서식3 사업계획서를 작성 중입니다...<br><small style="font-size:11px;margin-top:6px;display:block">약 20-30초 소요</small></div>';
   resultEl.style.display = '';
   if (previewEl) previewEl.style.display = 'none';
   document.getElementById('bp-result-actions').style.display = 'none';
+
+  function bpProgress(step, total, label) {
+    var pct = Math.round((step - 1) / total * 100);
+    resultEl.innerHTML = '<div style="text-align:center;padding:40px;color:#888">'
+      + '<div style="font-size:28px;margin-bottom:10px">✨</div>'
+      + '서식3 사업계획서를 장별로 작성 중입니다...'
+      + '<div style="margin-top:10px;font-weight:700;color:#1a3a6b;font-size:13px">' + step + ' / ' + total + ' 단계 — ' + label + '</div>'
+      + '<div style="margin:12px auto 0;width:240px;height:6px;background:#eee;border-radius:3px;overflow:hidden">'
+      + '<div style="width:' + pct + '%;height:100%;background:#F5A623;transition:width .4s"></div></div>'
+      + '<small style="font-size:11px;margin-top:8px;display:block">전체 약 2~4분 소요됩니다. 창을 닫지 마세요.</small></div>';
+  }
 
   var apiKey = getApiKey();
   if (!apiKey) {
@@ -19771,22 +19793,69 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
     btn.disabled=false; btn.textContent='✨ 서식3 사업계획서 전체 생성'; return;
   }
 
-  try {
+  // 한 배치(장 묶음)를 생성한다. 지정한 장의 <section>만 반환된다.
+  async function bpCallBatch(batch) {
+    var chList = batch.chs.join('·');
+    var spec = batch.chs.map(function(n){ return BP_CH_SPEC[n]; }).join('\n\n');
+    var up = '다음 정보로 2026년 행정안전부 햇빛소득마을 서식3 사업계획서 중 ' + chList + '장만 HTML로 작성하세요.\n\n'
+      + BP_INPUT_BLOCK + '\n\n'
+      + BP_CONTROL_BLOCK + '\n\n'
+      + '■ 이번 요청 범위 (반드시 지킬 것)\n'
+      + '· ' + chList + '장만 출력하세요. 다른 장·문서 제목·작성일 서명표는 절대 출력하지 마세요.\n'
+      + '· 각 장은 <section data-bp-chapter="N">로 시작해 </section>로 끝내고, 응답 전체가 section 태그로만 구성되어야 합니다.\n'
+      + '· 설명 문장·마크다운·코드블록 없이 HTML만 출력하세요.\n\n'
+      + '■ 이번에 작성할 장의 공식 구조:\n\n' + spec;
+
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({model: getAIModel(),max_tokens:8192,
+      body: JSON.stringify({model: getAIModel(), max_tokens:8192,
         system: systemPrompt,
-        messages:[{role:'user',content:(villageCtx?'【마을정보】\n'+villageCtx+'\n\n':'')+userPrompt}]})
+        messages:[{role:'user',content:(villageCtx?'【마을정보】\n'+villageCtx+'\n\n':'')+up}]})
     });
     if (!res.ok) {
       var apiErr = await res.json().catch(function(){ return {}; });
       throw new Error(anthropicErrorDetail(res.status, apiErr));
     }
     var data = await res.json();
-    var html = data.content?.[0]?.text || '';
-    html = html.replace(/```html\n?/gi,'').replace(/```\n?/g,'').trim();
-    html = sanitizeGeneratedDocHtml(html);
+    if (data.stop_reason === 'max_tokens') {
+      throw new Error(batch.label + ' 생성이 토큰 한도에서 잘렸습니다. 입력값을 줄이고 다시 시도해주세요.');
+    }
+    var part = (data.content && data.content[0] && data.content[0].text) || '';
+    part = part.replace(/```html\n?/gi,'').replace(/```\n?/g,'').trim();
+    return sanitizeGeneratedDocHtml(part);
+  }
+
+  try {
+    // 1) 장 묶음별 순차 생성
+    var parts = [];
+    for (var bi = 0; bi < BP_BATCHES.length; bi++) {
+      bpProgress(bi + 1, BP_BATCHES.length, BP_BATCHES[bi].label);
+      parts.push(await bpCallBatch(BP_BATCHES[bi]));
+    }
+
+    // 2) 병합 — 각 장은 그 장을 담당한 배치의 결과에서만 가져온다(중복 방지)
+    var secByCh = {};
+    for (var bj = 0; bj < BP_BATCHES.length; bj++) {
+      var holder = document.createElement('div');
+      holder.innerHTML = parts[bj] || '';
+      BP_BATCHES[bj].chs.forEach(function(n) {
+        var s = holder.querySelector('section[data-bp-chapter="' + n + '"]');
+        if (s) secByCh[n] = s.outerHTML;
+      });
+    }
+    var missing = [];
+    var merged = BP_TITLE_HTML;
+    for (var n2 = 1; n2 <= 7; n2++) {
+      if (!secByCh[n2]) { missing.push(n2 + '장'); continue; }
+      merged += '\n' + secByCh[n2];
+    }
+    if (missing.length) {
+      throw new Error('생성되지 않은 장이 있습니다: ' + missing.join(', ') + ' — 다시 시도해주세요.');
+    }
+    merged += '\n' + BP_SIGN_HTML;
+
+    var html = sanitizeGeneratedDocHtml(merged);
     var validation = validateBizplanHtml(html);
     renderBpValidationSummary(validation);
     if (!validation.valid) {
@@ -19809,7 +19878,7 @@ th(레이블셀): background:#E8EEF7; font-weight:700; width:160px;
     if (chatArea) {
       var msgEl = document.createElement('div');
       msgEl.style.cssText = 'background:linear-gradient(135deg,#F0FFF4,#E6F9EE);border:1px solid #A8DDB8;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:12px;color:#1E6B3A;font-weight:600';
-      msgEl.textContent = '✅ 사업계획서가 완성됐습니다! 수정이 필요한 항목을 채팅으로 알려주세요.';
+      msgEl.textContent = '✅ 사업계획서 7개 장이 모두 완성됐습니다! 수정이 필요한 항목을 채팅으로 알려주세요.';
       chatArea.appendChild(msgEl);
       chatArea.scrollTop = chatArea.scrollHeight;
     }
