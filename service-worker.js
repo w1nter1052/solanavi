@@ -1,5 +1,5 @@
 // SolaNavi Service Worker - 기본 오프라인 캐시 + PWA 설치 프롬프트 활성화
-const CACHE_NAME = 'solanavi-v1.2.0';
+const CACHE_NAME = 'solanavi-v1.3.0';
 const CORE_FILES = [
   '/',
   '/index.html',
