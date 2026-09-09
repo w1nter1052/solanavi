@@ -20561,5 +20561,67 @@ h1>svg.ico,h2>svg.ico,h3>svg.ico{width:.95em;height:.95em;opacity:.85}
 })();
 </script>
 
+<style id="layout-pass-20260909">
+/* ── 레이아웃 패스(2026-09-09) ──
+   대시보드 히어로: #cv가 min-height:100dvh라 첫 화면이 워터마크 제목 하나로 비어 있었다.
+   높이를 내용에 맞추고, 워터마크 대신 선택 마을의 진행률·다음 할 일 패널(#cv-hero)을 렌더링한다. */
+#cv{min-height:auto!important;padding:26px 24px 10px!important}
+.cv-sun,.cv-title,.cv-sub{display:none!important}
+#cv-hero{width:100%;max-width:900px;margin:10px auto 22px;text-align:left;background:var(--sf,#fff);border:1px solid var(--bdr,#E8E4DC);border-radius:14px;padding:16px 18px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;box-shadow:0 2px 8px rgba(20,15,5,.05)}
+#cv-hero .hv-name{font-size:var(--fs-xl,18px);font-weight:800;color:#1A1A1A!important;word-break:keep-all}
+#cv-hero .hv-meta{font-size:var(--fs-sm,13px);color:var(--sft,#6A6A6A);margin-top:3px;word-break:keep-all}
+#cv-hero .hv-steps{display:flex;gap:4px;margin-top:10px}
+#cv-hero .hv-steps span{flex:1;height:8px;border-radius:4px;background:#E8E4DC}
+#cv-hero .hv-steps span.done{background:var(--nvy,#0F2B5B)}
+#cv-hero .hv-steps span.cur{background:var(--sun,#F5A623)}
+#cv-hero .hv-next{white-space:nowrap}
+html[data-theme="dark"] #cv-hero{background:#221E16;border-color:#3A3530;box-shadow:none}
+html[data-theme="dark"] #cv-hero .hv-name{color:#E8E4DC!important}
+html[data-theme="dark"] #cv-hero .hv-meta{color:#A8A49C!important}
+html[data-theme="dark"] #cv-hero .hv-steps span{background:#3A3530}
+/* 3열 카드 → 2열 (AGENTS.md 규칙). 안내 카드 트리오는 폭에 따라 2~3열. */
+.step-grid{grid-template-columns:repeat(2,1fr)!important;max-width:900px}
+.three{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))!important}
+/* 모바일 상단: 비필수 요소 숨기고 높이 축소, 플로팅 버튼 정렬 */
+@media(max-width:600px){
+  #cv-hero{grid-template-columns:1fr;padding:14px}
+  #cv-hero .hv-next{width:100%;justify-content:center}
+  #app-switcher{height:44px!important}
+  .sw-logo,.sw-div,#sw-badge{display:none!important}
+  .sw-btn{padding:6px 8px!important}
+  .memo-fab{bottom:88px!important;right:12px!important;width:44px!important;height:44px!important}
+}
+</style>
+<script id="layout-pass-js">
+(function(){
+  var LABELS=['첫 방문·설득','주민 조직·동의','협동조합 설립','발전소 준비','공모 신청','발전소 건설','협동조합 운영'];
+  var last='';
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function firstPage(n){var a=document.querySelector('[onclick*="manualGo(\'s'+n+'-"]');var m=a&&(a.getAttribute('onclick')||'').match(/manualGo\('([^']+)'\)/);return m?m[1]:null;}
+  function render(){
+    var cv=document.getElementById('cv'); if(!cv) return;
+    var v=null; try{ if(typeof selectedVid!=='undefined'&&selectedVid&&typeof villages!=='undefined') v=(villages||[]).find(function(x){return x&&x.id===selectedVid;})||null; }catch(e){}
+    var st=v?Math.max(0,Math.min(6,parseInt(v.stage||0,10)||0)):-1;
+    var sig=(v?v.id+'|'+v.name+'|'+st+'|'+(v.pop||'')+'|'+(v.kw||''):'none');
+    if(sig===last && document.getElementById('cv-hero')) return; last=sig;
+    var box=document.getElementById('cv-hero');
+    if(!box){box=document.createElement('div');box.id='cv-hero';var b=cv.querySelector('.cv-badge');cv.insertBefore(box,b?b.nextSibling:cv.firstChild);}
+    if(!v){
+      box.innerHTML='<div><div class="hv-name">컨설팅 마을을 선택하세요</div><div class="hv-meta">마을을 선택하면 진행 단계와 다음 할 일이 여기에 표시됩니다.</div></div>'
+        +'<button class="btn b-sun hv-next" onclick="try{openVillagePickerModal()}catch(e){}">마을 선택 →</button>';
+      return;
+    }
+    var bars=''; for(var i=0;i<7;i++) bars+='<span class="'+(i<st?'done':i===st?'cur':'')+'" title="STEP '+(i+1)+' '+LABELS[i]+'"></span>';
+    var pid=firstPage(st+1);
+    box.innerHTML='<div><div class="hv-name">'+esc(v.name)+'</div>'
+      +'<div class="hv-meta">STEP '+(st+1)+' · '+LABELS[st]+' 진행 중'+(v.pop?' · 주민 '+esc(v.pop)+'명':'')+' · '+esc(v.kw||500)+'kW</div>'
+      +'<div class="hv-steps">'+bars+'</div></div>'
+      +(pid?'<button class="btn b-sun hv-next" onclick="manualGo(\''+pid+'\')">STEP '+(st+1)+' 이어서 →</button>':'');
+  }
+  function start(){ try{render();}catch(e){} setInterval(function(){try{render();}catch(e){}},1500); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+})();
+</script>
+
 </body>
 </html>
