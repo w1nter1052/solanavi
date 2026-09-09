@@ -20483,5 +20483,83 @@ document.addEventListener('copy',function(e){
   </div>
 </div>
 
+<style id="icon-pass-20260909">
+/* ── 이모지 → 단색 아이콘(Lucide) 런타임 치환(2026-09-09) ──
+   버튼·칩·제목의 첫 토큰이 이모지일 때만 SVG로 바꾼다. 문서 미리보기·메모 등 사용자 콘텐츠는 제외.
+   CDN 로드 실패 시 이모지를 그대로 둔다. 되돌리려면 이 style+script 블록만 제거. */
+svg.ico{width:1em;height:1em;vertical-align:-0.16em;margin-right:.38em;flex-shrink:0;stroke-width:2.1;display:inline-block}
+.ico-only>svg.ico{margin-right:0}
+h1>svg.ico,h2>svg.ico,h3>svg.ico{width:.95em;height:.95em;opacity:.85}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0/dist/umd/lucide.min.js" defer></script>
+<script id="icon-pass-js">
+(function(){
+  // 이모지 → Lucide 이름 (앞이 우선, 없으면 뒤로 — 버전별 이름 변경 흡수)
+  var MAP = {
+    "📋":["clipboard-list"],"⚠":["triangle-alert","alert-triangle"],"✅":["circle-check","check-circle"],"⬇":["download"],
+    "💡":["lightbulb"],"←":["arrow-left"],"→":["arrow-right"],"➡":["arrow-right"],"↑":["arrow-up"],"⬆":["arrow-up"],"↶":["undo-2","undo"],
+    "📊":["chart-column","bar-chart-3","bar-chart"],"📈":["trending-up"],"📉":["trending-down"],"🖨":["printer"],"🇰🇷":["file-text"],
+    "☀":["sun"],"📝":["pen-line","pencil-line","edit-3"],"✍":["pen-line","pencil-line","edit-3"],"🏛":["landmark"],"🏦":["landmark"],
+    "💰":["coins"],"💸":["banknote"],"⚖":["scale"],"🔍":["search"],"🔎":["search"],"⚡":["zap"],"📌":["pin"],"📍":["map-pin"],
+    "💳":["credit-card"],"📄":["file"],"📑":["files","file-stack"],"📜":["scroll-text","scroll"],"🧾":["receipt"],
+    "⭐":["star"],"★":["star"],"🌟":["star"],"✦":["sparkle","sparkles"],"✨":["sparkles"],
+    "🏘":["building"],"🏢":["building-2"],"🏠":["house","home"],"🏡":["house","home"],"🏗":["construction"],"🏭":["factory"],
+    "🤝":["handshake"],"👥":["users"],"👤":["user"],"❌":["circle-x","x-circle"],"✕":["x"],"✓":["check"],
+    "📅":["calendar"],"📎":["paperclip"],"🌾":["wheat"],"🌱":["sprout"],"🌿":["leaf"],"🌳":["tree-pine","trees"],
+    "🗺":["map"],"🧭":["compass"],"⚙":["settings"],"🔧":["wrench"],"📁":["folder"],"📂":["folder-open"],
+    "❓":["circle-help","help-circle","circle-question-mark"],"📚":["library","book"],"📖":["book-open"],
+    "🔒":["lock"],"🔐":["lock-keyhole","lock"],"🔓":["lock-open","unlock"],"🔑":["key"],"💬":["message-circle"],"💭":["message-square"],
+    "🪄":["wand-sparkles","wand-2"],"🗑":["trash-2"],"🔄":["refresh-cw"],"🌐":["globe"],"📢":["megaphone"],"📣":["megaphone"],
+    "👆":["pointer"],"📱":["smartphone"],"📲":["smartphone"],"💻":["laptop"],"📏":["ruler"],"📐":["ruler"],"🎙":["mic"],"🎤":["mic"],
+    "🔋":["battery"],"🔌":["plug"],"🎲":["dice-5"],"🎯":["target"],"🚀":["rocket"],"👁":["eye"],"✉":["mail"],"📮":["mail"],"📩":["mail-open","mail"],
+    "📤":["upload"],"📥":["download"],"🔔":["bell"],"💾":["save"],"📞":["phone"],"☎":["phone"],"👍":["thumbs-up"],"🔗":["link"],
+    "➕":["plus"],"💎":["gem"],"🤖":["bot"],"🚨":["siren"],"🚫":["ban"],"🛡":["shield"],"🌙":["moon"],"🖼":["image"],"📸":["camera"],
+    "🌡":["thermometer"],"🎓":["graduation-cap"],"🌍":["globe"],"⛵":["sailboat"],"🚧":["construction"],"🧪":["flask-conical"],
+    "🎉":["party-popper"],"🔥":["flame"],"🎵":["music"],"🎫":["ticket"],"🆓":["gift"],"🔴":["circle"],"🟡":["circle"]
+  };
+  var LABEL = {"🎤":"음성 입력","🎙":"음성 입력","✕":"닫기","🗑":"삭제","⬇":"다운로드","🖨":"인쇄","📋":"복사","📝":"메모","🔔":"알림","👁":"보기","🔍":"검색","➕":"추가","🔄":"새로고침"};
+  var LEAD = /^(?:[\u{1F1E6}-\u{1F1FF}]{2}|[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}\u{2700}-\u{27BF}\u{2460}-\u{24FF}\u{2776}-\u{2793}]\u{FE0F}?(?:\u200D[\u{1F300}-\u{1FAFF}]\u{FE0F}?)*)/u;
+  var EXCLUDE = '#bp-preview,[id^="wd-preview-"],#memo-list,.memo-list,textarea,pre,code,[contenteditable],select,option,#doc-result,.doc-paper,[id^="wd-edit-"],[id^="wd-result-"],.watermark';
+  var TARGET = 'button,a,h1,h2,h3,h4,label,span,strong,b,div,li,td,th,p';
+  function pascal(k){ return k.split('-').map(function(s){return s.charAt(0).toUpperCase()+s.slice(1);}).join(''); }
+  function pick(names){
+    var L = window.lucide; if(!L) return null;
+    var icons = L.icons || {};
+    for (var i=0;i<names.length;i++){ if(!L.icons || icons[pascal(names[i])] || icons[names[i]]) return names[i]; }
+    return null;
+  }
+  var pending=false;
+  function run(root){
+    if(!window.lucide || !window.lucide.createIcons) return;
+    var els = (root.querySelectorAll ? root.querySelectorAll(TARGET) : []);
+    var changed=false;
+    for (var i=0;i<els.length;i++){
+      var el=els[i];
+      if(el.__ico) continue;
+      var t=el.firstChild;
+      if(!t || t.nodeType!==3) continue;
+      var m=t.nodeValue.match(LEAD); if(!m) continue;
+      if(el.closest && el.closest(EXCLUDE)) { el.__ico=1; continue; }
+      var key=m[0].replace(/\uFE0F/g,''); var names=MAP[key]; if(!names){ el.__ico=1; continue; }
+      var name=pick(names); if(!name){ el.__ico=1; continue; }
+      var rest=t.nodeValue.slice(m[0].length).replace(/^\s+/,'');
+      var ico=document.createElement('i'); ico.setAttribute('data-lucide',name); ico.className='ico';
+      t.nodeValue=rest; el.insertBefore(ico,t);
+      var textLeft=(el.textContent||'').trim();
+      if(!textLeft){ el.classList.add('ico-only'); if(LABEL[key] && !el.getAttribute('aria-label')) { el.setAttribute('aria-label',LABEL[key]); if(!el.title) el.title=LABEL[key]; } }
+      el.__ico=1; changed=true;
+    }
+    if(changed){ try{ window.lucide.createIcons({attrs:{class:'ico','aria-hidden':'true'}}); }catch(e){} }
+  }
+  function schedule(){ if(pending) return; pending=true; setTimeout(function(){ pending=false; try{ run(document.body); }catch(e){} }, 80); }
+  function start(){
+    if(!window.lucide){ setTimeout(start, 200); return; }   // defer 로드 대기 (CDN 실패 시 계속 대기만 하고 아무것도 안 바꿈)
+    try{ run(document.body); }catch(e){}
+    new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+
 </body>
 </html>
